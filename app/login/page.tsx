@@ -7,7 +7,6 @@ import { z } from "zod";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import Link from "next/link";
 import { LoginCredentials } from "@/types";
 import { authApi } from "@/services/api";
 
@@ -52,15 +51,16 @@ export default function LoginPage() {
         // In case API returns success: false
         toast.error("Login failed. Please check your credentials.");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login failed:", error);
       // Handle different error scenarios
-      if (error.response) {
+      if (error && typeof error === 'object' && 'response' in error) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        const errorMessage = error.response.data.message || "Invalid credentials";
+        const errorResponse = error as { response?: { data?: { message?: string } } };
+        const errorMessage = errorResponse.response?.data?.message || "Invalid credentials";
         toast.error(errorMessage);
-      } else if (error.request) {
+      } else if (error && typeof error === 'object' && 'request' in error) {
         // The request was made but no response was received
         toast.error("No response from server. Please try again later.");
       } else {

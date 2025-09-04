@@ -29,7 +29,7 @@ export default function UnauthorizedPage() {
           Access Denied
         </h1>
         <p className="mb-6 text-center text-gray-600">
-          You don't have permission to access this page. This area is restricted
+          You don&apos;t have permission to access this page. This area is restricted
           to administrators only.
         </p>
         <div className="flex justify-center space-x-4">

@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { getApiEndpoint } from '@/utils/api';
 import Cookies from 'js-cookie';
-import { AuthResponse, LoginCredentials } from '@/types';
+import { AuthResponse, LoginCredentials, EventParticipantsResponse } from '@/types';
 
 // Create an axios instance with default config
 const apiClient = axios.create({
@@ -89,8 +89,44 @@ export const membersApi = {
   },
 };
 
+// Events API services
+export const eventsApi = {
+  getAllEvents: (config?: AxiosRequestConfig) => {
+    return apiClient.get(getApiEndpoint('/events'), config);
+  },
+  
+  getEventById: (id: string) => {
+    return apiClient.get(getApiEndpoint(`/events/${id}`));
+  },
+  
+  createEvent: (formData: FormData) => {
+    return apiClient.post(getApiEndpoint('/events'), formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  
+  updateEvent: (id: string, formData: FormData) => {
+    return apiClient.put(getApiEndpoint(`/events/${id}`), formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+  
+  deleteEvent: (id: string) => {
+    return apiClient.delete(getApiEndpoint(`/events/${id}`));
+  },
+  
+  getEventParticipants: (eventId: string) => {
+    return apiClient.get<EventParticipantsResponse>(getApiEndpoint(`/event-participant/sheet/${eventId}`));
+  },
+};
+
 export default {
   auth: authApi,
   users: usersApi,
   members: membersApi,
+  events: eventsApi,
 };

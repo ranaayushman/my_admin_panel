@@ -92,3 +92,64 @@ export type NewMemberFormData = {
   linkedin_url: string;
   profile_image?: File;
 };
+
+// Event type definition
+export type Event = {
+  _id: string;
+  name: string;
+  description: string;
+  eventDate: string;
+  eventTime: string;
+  venue: string;
+  category: string;
+  registrationFee: string;
+  upiID: string;
+  details: string;
+  is_upcoming: boolean;
+  registration_open: boolean;
+  eventBanner?: {
+    public_id: string;
+    url: string;
+  };
+  poster?: {
+    public_id: string;
+    url: string;
+  };
+  contactInfo: Array<{
+    _id?: string;
+    name: string;
+    mobile: string;
+    year: string;
+  }>;
+  gallery: Array<{
+    _id?: string;
+    public_id: string;
+    url: string;
+  }>;
+  faq: any[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+
+// Events response type
+export type EventsResponse = {
+  success: boolean;
+  events: Event[];
+};
+
+// Event participants response type
+export type EventParticipantsResponse = {
+  success: boolean;
+  participants: Array<{
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+    year: string;
+    department: string;
+    event: string;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+};

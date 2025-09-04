@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
@@ -13,7 +13,6 @@ export default function AdminLayout({
 }>) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     // Check if user is authenticated and is an admin

@@ -144,11 +144,12 @@ export default function AddMemberPage() {
       } else {
         toast.error(response.data.message || "Failed to add member");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error adding member:", err);
-      toast.error(
-        err.response?.data?.message || "An error occurred while adding the member"
-      );
+      const errorMessage = err instanceof Error && 'response' in err 
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message 
+        : "An error occurred while adding the member";
+      toast.error(errorMessage || "An error occurred while adding the member");
     } finally {
       setIsLoading(false);
     }
@@ -179,10 +180,13 @@ export default function AddMemberPage() {
                 <div className="mt-2 flex items-center space-x-6">
                   <div className="h-24 w-24 overflow-hidden rounded-full border-2 border-gray-200">
                     {previewImage ? (
-                      <img
+                      <Image
                         src={previewImage}
                         alt="Profile Preview"
+                        width={96}
+                        height={96}
                         className="h-full w-full object-cover"
+                        unoptimized={true}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-400">

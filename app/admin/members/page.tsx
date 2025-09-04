@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { membersApi } from "@/services/api";
-import { Member, MembersResponse } from "@/types";
+import { Member } from "@/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -75,12 +75,12 @@ export default function MembersPage() {
         } else {
           setError("Failed to fetch members data");
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching members:", err);
-        setError(
-          err.response?.data?.message ||
-            "An error occurred while fetching members"
-        );
+        const errorMessage = err instanceof Error && 'response' in err 
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message 
+          : "An error occurred while fetching members";
+        setError(errorMessage || "An error occurred while fetching members");
         toast.error("Failed to load members");
       } finally {
         setIsLoading(false);
@@ -110,15 +110,6 @@ export default function MembersPage() {
     return matchesSearch && matchesCategory;
   });
 
-  // Function to format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
   const handleDelete = async (id: string) => {
     try {
       const response = await membersApi.deleteMember(id);
@@ -129,9 +120,12 @@ export default function MembersPage() {
       } else {
         toast.error("Failed to delete member");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error deleting member:", err);
-      toast.error(err.response?.data?.message || "Failed to delete member");
+      const errorMessage = err instanceof Error && 'response' in err 
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message 
+        : "Failed to delete member";
+      toast.error(errorMessage || "Failed to delete member");
     }
   };
 
