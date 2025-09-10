@@ -141,15 +141,18 @@ export type EventsResponse = {
 // Event participants response type
 export type EventParticipantsResponse = {
   success: boolean;
+  totalParticipants: number;
   participants: Array<{
     _id: string;
-    name: string;
-    email: string;
-    phone: string;
-    year: string;
-    department: string;
+    user: string;
     event: string;
+    name: string;
+    classRollNo: string;
+    department: string;
+    phoneNumber: string;
+    email: string;
     createdAt: string;
     updatedAt: string;
+    __v: number;
   }>;
 };

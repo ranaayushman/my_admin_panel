@@ -167,7 +167,7 @@ export default function AddMemberPage() {
         </button>
       </div>
       
-      <div className="rounded-lg border bg-white p-6 shadow-sm">
+      <div className="rounded-lg border bg-white p-6 shadow-sm form-container">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* Left Column */}
@@ -250,7 +250,7 @@ export default function AddMemberPage() {
               </div>
               
               {/* Department */}
-              <div>
+              <div className="custom-select">
                 <label htmlFor="department" className="block text-sm font-medium text-gray-700">
                   Department <span className="text-red-500">*</span>
                 </label>
@@ -260,9 +260,10 @@ export default function AddMemberPage() {
                   render={({ field }) => (
                     <select
                       {...field}
-                      className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
+                      className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
                         errors.department ? "border-red-300" : "border-gray-300"
                       }`}
+                      style={{ zIndex: 1000, position: 'relative' }}
                     >
                       <option value="">Select Department</option>
                       {departments.map((dept) => (
@@ -279,7 +280,7 @@ export default function AddMemberPage() {
               </div>
               
               {/* Batch */}
-              <div>
+              <div className="custom-select">
                 <label htmlFor="batch" className="block text-sm font-medium text-gray-700">
                   Batch <span className="text-red-500">*</span>
                 </label>
@@ -289,9 +290,10 @@ export default function AddMemberPage() {
                   render={({ field }) => (
                     <select
                       {...field}
-                      className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
+                      className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
                         errors.batch ? "border-red-300" : "border-gray-300"
                       }`}
+                      style={{ zIndex: 1000, position: 'relative' }}
                     >
                       <option value="">Select Batch Year</option>
                       {batches.map((batch) => (
@@ -311,7 +313,7 @@ export default function AddMemberPage() {
             {/* Right Column */}
             <div className="space-y-6">
               {/* Designation */}
-              <div>
+              <div className="custom-select">
                 <label htmlFor="designation" className="block text-sm font-medium text-gray-700">
                   Designation <span className="text-red-500">*</span>
                 </label>
@@ -321,9 +323,10 @@ export default function AddMemberPage() {
                   render={({ field }) => (
                     <select
                       {...field}
-                      className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
+                      className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 ${
                         errors.designation ? "border-red-300" : "border-gray-300"
                       }`}
+                      style={{ zIndex: 1000, position: 'relative' }}
                     >
                       <option value="">Select Designation</option>
                       {designations.map((designation) => (

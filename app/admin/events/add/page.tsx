@@ -123,7 +123,7 @@ export default function AddEventPage() {
         </div>
       </div>
 
-      <div className="rounded-lg bg-white p-6 shadow">
+      <div className="rounded-lg bg-white p-6 shadow form-container">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -140,14 +140,15 @@ export default function AddEventPage() {
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
             </div>
 
-            <div>
+            <div className="custom-select">
               <label htmlFor="category" className="block text-sm font-medium text-gray-700">
                 Category *
               </label>
               <select
                 id="category"
                 {...register("category")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                style={{ zIndex: 1000, position: 'relative' }}
               >
                 <option value="">Select Category</option>
                 <option value="workshop">Workshop</option>

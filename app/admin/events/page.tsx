@@ -257,214 +257,277 @@ export default function EventsPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+      <div className="space-y-6">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-indigo-600"></div>
+            <span className="ml-3 text-lg">Loading events...</span>
+          </div>
+        ) : error ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <svg
+                className="mx-auto h-12 w-12 text-red-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                Event
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 14c-.77.833.192 2.5 1.732 2.5z"
+                />
+              </svg>
+              <h3 className="mt-2 text-lg font-medium text-gray-900">Error loading events</h3>
+              <p className="mt-1 text-sm text-red-500">{error}</p>
+              <button
+                onClick={refreshEvents}
+                className="mt-4 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
               >
-                Date & Time
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                Try Again
+              </button>
+            </div>
+          </div>
+        ) : filteredEvents.length === 0 ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <svg
+                className="mx-auto h-12 w-12 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                Venue
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"
+                />
+              </svg>
+              <h3 className="mt-2 text-lg font-medium text-gray-900">No events found</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                {searchQuery || activeFilter !== "all"
+                  ? "Try adjusting your search or filters"
+                  : "Get started by creating a new event"}
+              </p>
+              <button
+                onClick={() => router.push('/admin/events/add')}
+                className="mt-4 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
               >
-                Category
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-              >
-                Status
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-              >
-                Participants
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {isLoading ? (
-              <tr>
-                <td colSpan={7} className="px-6 py-4 text-center">
-                  <div className="flex items-center justify-center">
-                    <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-t-2 border-indigo-600"></div>
-                    <span className="ml-2">Loading...</span>
-                  </div>
-                </td>
-              </tr>
-            ) : error ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  className="px-6 py-4 text-center text-sm text-red-500"
+                <svg
+                  className="mr-2 h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                  {error}
-                </td>
-              </tr>
-            ) : filteredEvents.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  className="px-6 py-4 text-center text-sm text-gray-500"
-                >
-                  No events found
-                </td>
-              </tr>
-            ) : (
-              filteredEvents.map((event) => (
-                <tr key={event._id}>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <div className="h-12 w-12 flex-shrink-0">
-                        {event.eventBanner?.url ? (
-                          <Image
-                            className="h-12 w-12 rounded-lg object-cover"
-                            src={event.eventBanner.url}
-                            alt={event.name}
-                            width={48}
-                            height={48}
-                            unoptimized={true}
-                          />
-                        ) : (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-200 text-gray-500">
-                            <svg
-                              className="h-6 w-6"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                              />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {event.name}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {event.description.length > 60
-                            ? `${event.description.substring(0, 60)}...`
-                            : event.description}
-                        </div>
-                      </div>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Create Event
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {filteredEvents.map((event) => (
+              <div
+                key={event._id}
+                className="group relative overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+              >
+                {/* Event Banner */}
+                <div className="relative h-48 w-full overflow-hidden">
+                  {event.eventBanner?.url ? (
+                    <Image
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      src={event.eventBanner.url}
+                      alt={event.name}
+                      width={400}
+                      height={192}
+                      unoptimized={true}
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100">
+                      <svg
+                        className="h-16 w-16 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"
+                        />
+                      </svg>
                     </div>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    <div>{formatDate(event.eventDate)}</div>
-                    <div className="text-xs text-gray-400">
-                      {formatTime(event.eventTime)}
-                    </div>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {event.venue}
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4">
-                    <span className="inline-flex rounded-full bg-purple-100 px-2 text-xs font-semibold leading-5 text-purple-800">
-                      {event.category}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4">
+                  )}
+                  
+                  {/* Status badges overlay */}
+                  <div className="absolute top-3 left-3 flex flex-wrap gap-2">
                     <span
-                      className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${getStatusBadgeColor(
+                      className={`rounded-full px-2 py-1 text-xs font-semibold shadow-sm ${getStatusBadgeColor(
                         event
                       )}`}
                     >
                       {event.is_upcoming ? 'Upcoming' : 'Past'}
                     </span>
                     {event.registration_open && (
-                      <span className="ml-1 inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800">
+                      <span className="rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-800 shadow-sm">
                         Registration Open
                       </span>
                     )}
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      {loadingParticipants[event._id] ? (
-                        <div className="flex items-center">
-                          <div className="h-4 w-4 animate-spin rounded-full border-b-2 border-t-2 border-indigo-600"></div>
-                          <span className="ml-2 text-xs">Loading...</span>
-                        </div>
-                      ) : (
-                        <div>
-                          <div className="font-medium text-gray-900">
-                            {participantCounts[event._id] !== undefined ? participantCounts[event._id] : 0} participants
+                  </div>
+
+                  {/* Category badge */}
+                  <div className="absolute top-3 right-3">
+                    <span className="rounded-full bg-purple-100 px-2 py-1 text-xs font-semibold text-purple-800 shadow-sm">
+                      {event.category}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Card Content */}
+                <div className="p-6">
+                  {/* Event Title */}
+                  <h3 className="mb-2 text-xl font-bold text-gray-900 line-clamp-2">
+                    {event.name}
+                  </h3>
+
+                  {/* Event Description */}
+                  <p className="mb-4 text-sm text-gray-600 line-clamp-2">
+                    {event.description}
+                  </p>
+
+                  {/* Event Details */}
+                  <div className="space-y-3">
+                    {/* Date and Time */}
+                    <div className="flex items-center text-sm text-gray-600">
+                      <svg
+                        className="mr-2 h-4 w-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <div>
+                        <div className="font-medium">{formatDate(event.eventDate)}</div>
+                        <div className="text-xs text-gray-500">{formatTime(event.eventTime)}</div>
+                      </div>
+                    </div>
+
+                    {/* Venue */}
+                    <div className="flex items-center text-sm text-gray-600">
+                      <svg
+                        className="mr-2 h-4 w-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      <span className="truncate">{event.venue}</span>
+                    </div>
+
+                    {/* Participants */}
+                    <div className="flex items-center text-sm text-gray-600">
+                      <svg
+                        className="mr-2 h-4 w-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                        />
+                      </svg>
+                      <div>
+                        {loadingParticipants[event._id] ? (
+                          <div className="flex items-center">
+                            <div className="h-3 w-3 animate-spin rounded-full border-b border-t border-indigo-600"></div>
+                            <span className="ml-2 text-xs">Loading...</span>
                           </div>
-                          <div className="text-xs text-gray-500">
-                            {event.registration_open && (
-                              <span className="text-green-600">Registration Open</span>
-                            )}
+                        ) : (
+                          <div>
+                            <span className="font-medium">
+                              {participantCounts[event._id] !== undefined ? participantCounts[event._id] : 0} participants
+                            </span>
                             {event.registrationFee && (
-                              <span className="text-gray-500"> • Fee: ₹{event.registrationFee}</span>
+                              <span className="ml-2 text-xs text-green-600">Fee: ₹{event.registrationFee}</span>
                             )}
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => router.push(`/admin/events/${event._id}`)}
-                        className="text-indigo-600 hover:text-indigo-900"
-                      >
-                        View
-                      </button>
-                      <button
-                        onClick={() => fetchParticipantCount(event._id)}
-                        className="text-green-600 hover:text-green-900"
-                        disabled={loadingParticipants[event._id]}
-                        title="Refresh participant count"
-                      >
-                        Participants
-                      </button>
-                      <button
-                        onClick={() => router.push(`/admin/events/edit/${event._id}`)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(event._id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="mt-6 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => router.push(`/admin/events/${event._id}`)}
+                      className="flex-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                      View Participants
+                    </button>
+                    <button
+                      onClick={() => fetchParticipantCount(event._id)}
+                      className="rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                      disabled={loadingParticipants[event._id]}
+                      title="Refresh participant count"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => router.push(`/admin/events/edit/${event._id}`)}
+                      className="rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      title="Edit event"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => handleDelete(event._id)}
+                      className="rounded-md bg-red-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                      title="Delete event"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
