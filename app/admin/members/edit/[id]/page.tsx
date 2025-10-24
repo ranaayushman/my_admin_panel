@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -40,14 +40,10 @@ const memberSchema = z.object({
 
 type MemberFormData = z.infer<typeof memberSchema>;
 
-interface EditMemberPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function EditMemberPage({ params }: EditMemberPageProps) {
+export default function EditMemberPage() {
   const router = useRouter();
+  const routeParams = useParams<{ id: string }>();
+  const memberId = (routeParams?.id as string) || "";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [profileImage, setProfileImage] = useState<File | null>(null);
@@ -69,7 +65,7 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await membersApi.getMemberById(params.id);
+  const response = await membersApi.getMemberById(memberId);
         console.log("Fetched member response:", response.data);
         
         if (response.data && response.data.success) {
@@ -104,10 +100,10 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
       }
     };
 
-    if (params.id) {
+    if (memberId) {
       fetchMember();
     }
-  }, [params.id, reset]);
+  }, [memberId, reset]);
 
   const onSubmit: SubmitHandler<MemberFormData> = async (data: MemberFormData) => {
     setIsSubmitting(true);
@@ -152,14 +148,14 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
       }
 
       console.log("Sending update request with data:", {
-        memberId: params.id,
+        memberId: memberId,
         data: {
           ...updateData,
           profile_image: base64Image ? `base64 string (length: ${base64Image.length})` : "no image"
         }
       });
 
-      const response = await membersApi.updateMember(params.id, updateData);
+      const response = await membersApi.updateMember(memberId, updateData);
       
       console.log("Update response:", response.data);
       
@@ -305,7 +301,7 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
                 type="text"
                 id="name"
                 {...register("name")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
             </div>
@@ -318,7 +314,7 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
                 type="email"
                 id="email_id"
                 {...register("email_id")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
               {errors.email_id && <p className="mt-1 text-sm text-red-600">{errors.email_id.message}</p>}
             </div>
@@ -330,7 +326,7 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
               <select
                 id="department"
                 {...register("department")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
                 style={{ zIndex: 1000, position: 'relative' }}
               >
                 <option value="">Select Department</option>
@@ -381,7 +377,7 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
                 id="batch"
                 placeholder="e.g., 2024"
                 {...register("batch")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
               {errors.batch && <p className="mt-1 text-sm text-red-600">{errors.batch.message}</p>}
             </div>
@@ -395,7 +391,7 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
                 id="github_url"
                 placeholder="https://github.com/username"
                 {...register("github_url")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
               {errors.github_url && <p className="mt-1 text-sm text-red-600">{errors.github_url.message}</p>}
             </div>
@@ -409,7 +405,7 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
                 id="linkedin_url"
                 placeholder="https://linkedin.com/in/username"
                 {...register("linkedin_url")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
               {errors.linkedin_url && <p className="mt-1 text-sm text-red-600">{errors.linkedin_url.message}</p>}
             </div>
@@ -424,7 +420,7 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
               id="bio"
               rows={4}
               {...register("bio")}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+              className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               placeholder="Tell us about yourself..."
             />
             {errors.bio && <p className="mt-1 text-sm text-red-600">{errors.bio.message}</p>}

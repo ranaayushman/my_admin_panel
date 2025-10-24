@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -32,14 +32,10 @@ const eventSchema = z.object({
 
 type EventFormData = z.infer<typeof eventSchema>;
 
-interface EditEventPageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default function EditEventPage({ params }: EditEventPageProps) {
+export default function EditEventPage() {
   const router = useRouter();
+  const routeParams = useParams<{ id: string }>();
+  const eventId = (routeParams?.id as string) || "";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [eventBanner, setEventBanner] = useState<File | null>(null);
@@ -73,7 +69,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await eventsApi.getEventById(params.id);
+  const response = await eventsApi.getEventById(eventId);
         if (response.data && response.data.success) {
           const event = response.data.event;
           setCurrentEvent(event);
@@ -111,10 +107,10 @@ export default function EditEventPage({ params }: EditEventPageProps) {
       }
     };
 
-    if (params.id) {
+    if (eventId) {
       fetchEvent();
     }
-  }, [params.id, reset]);
+  }, [eventId, reset]);
 
   const onSubmit: SubmitHandler<EventFormData> = async (data: EventFormData) => {
     setIsSubmitting(true);
@@ -140,7 +136,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
         formData.append("poster", poster);
       }
 
-      const response = await eventsApi.updateEvent(params.id, formData);
+  const response = await eventsApi.updateEvent(eventId, formData);
       
       if (response.data && response.data.success) {
         toast.success("Event updated successfully");
