@@ -76,6 +76,12 @@ export const membersApi = {
     return apiClient.patch(getApiEndpoint(`/members/${id}/verify`));
   },
   
+  // Toggle the active status of a member
+  toggleActive: (id: string, isActive: boolean) => {
+    // Assuming backend supports PATCH /members/:id with partial body
+    return apiClient.patch(getApiEndpoint(`/members/toggle-status/${id}`), { isActive });
+  },
+  
   deleteMember: (id: string) => {
     return apiClient.delete(getApiEndpoint(`/members/hard-delete/${id}`));
   },

@@ -16,7 +16,10 @@ export default function MembersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all");
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
 
   // Fetch members data
   useEffect(() => {
@@ -36,9 +39,11 @@ export default function MembersPage() {
         }
       } catch (err: unknown) {
         console.error("Error fetching members:", err);
-        const errorMessage = err instanceof Error && 'response' in err 
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message 
-          : "An error occurred while fetching members";
+        const errorMessage =
+          err instanceof Error && "response" in err
+            ? (err as { response?: { data?: { message?: string } } }).response
+                ?.data?.message
+            : "An error occurred while fetching members";
         setError(errorMessage || "An error occurred while fetching members");
         toast.error("Failed to load members");
       } finally {
@@ -88,10 +93,66 @@ export default function MembersPage() {
       }
     } catch (err: unknown) {
       console.error("Error deleting member:", err);
-      const errorMessage = err instanceof Error && 'response' in err 
-        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message 
-        : "Failed to delete member";
+      const errorMessage =
+        err instanceof Error && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : "Failed to delete member";
       toast.error(errorMessage || "Failed to delete member");
+    }
+  };
+
+  const handleToggleActive = async (memberId: string) => {
+    const member = allMembers.find((m) => m._id === memberId);
+    if (!member) return;
+    const nextActive = member.isActive === false ? true : false;
+
+    // Optimistic update
+    setTogglingIds((prev) => new Set(prev).add(memberId));
+    setAllMembers((prev) =>
+      prev.map((m) => (m._id === memberId ? { ...m, isActive: nextActive } : m))
+    );
+    // Update counters
+    if (nextActive) {
+      setActiveMembers((a) => a + 1);
+      setInactiveMembers((i) => Math.max(0, i - 1));
+    } else {
+      setInactiveMembers((i) => i + 1);
+      setActiveMembers((a) => Math.max(0, a - 1));
+    }
+
+    try {
+      const res = await membersApi.toggleActive(memberId, nextActive);
+      if (!(res.data && res.data.success)) {
+        throw new Error(res.data?.message || "Failed to toggle status");
+      }
+      toast.success(`Member ${nextActive ? "activated" : "deactivated"}`);
+    } catch (err: unknown) {
+      console.error("Toggle isActive failed:", err);
+      // Rollback
+      setAllMembers((prev) =>
+        prev.map((m) =>
+          m._id === memberId ? { ...m, isActive: !nextActive } : m
+        )
+      );
+      if (nextActive) {
+        setActiveMembers((a) => Math.max(0, a - 1));
+        setInactiveMembers((i) => i + 1);
+      } else {
+        setInactiveMembers((i) => Math.max(0, i - 1));
+        setActiveMembers((a) => a + 1);
+      }
+      const errorMessage =
+        err instanceof Error && "message" in err
+          ? err.message
+          : "Failed to toggle status";
+      toast.error(errorMessage);
+    } finally {
+      setTogglingIds((prev) => {
+        const s = new Set(prev);
+        s.delete(memberId);
+        return s;
+      });
     }
   };
 
@@ -147,12 +208,27 @@ export default function MembersPage() {
               Refresh
             </button>
             <div className="ml-4 flex items-center space-x-3 text-sm text-gray-600">
-              <span>Total: <span className="font-medium text-gray-800">{totalMembers}</span></span>
-              <span>Active: <span className="font-medium text-green-700">{activeMembers}</span></span>
-              <span>Inactive: <span className="font-medium text-red-700">{inactiveMembers}</span></span>
+              <span>
+                Total:{" "}
+                <span className="font-medium text-gray-800">
+                  {totalMembers}
+                </span>
+              </span>
+              <span>
+                Active:{" "}
+                <span className="font-medium text-green-700">
+                  {activeMembers}
+                </span>
+              </span>
+              <span>
+                Inactive:{" "}
+                <span className="font-medium text-red-700">
+                  {inactiveMembers}
+                </span>
+              </span>
             </div>
             <button
-              onClick={() => router.push('/admin/members/add')}
+              onClick={() => router.push("/admin/members/add")}
               className="ml-4 flex items-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm text-white shadow-sm hover:bg-indigo-700"
             >
               <svg
@@ -184,11 +260,13 @@ export default function MembersPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {([
-            { key: "all", label: "All" },
-            { key: "active", label: "Active" },
-            { key: "inactive", label: "Inactive" },
-          ] as Array<{ key: "all" | "active" | "inactive"; label: string }>).map((opt) => (
+          {(
+            [
+              { key: "all", label: "All" },
+              { key: "active", label: "Active" },
+              { key: "inactive", label: "Inactive" },
+            ] as Array<{ key: "all" | "active" | "inactive"; label: string }>
+          ).map((opt) => (
             <button
               key={opt.key}
               onClick={() => setStatusFilter(opt.key)}
@@ -328,15 +406,39 @@ export default function MembersPage() {
                     {member.department} ({member.batch})
                   </td>
                   <td className="whitespace-nowrap px-6 py-4">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 text-xs font-semibold leading-5 ${
-                        member.isActive !== false
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-200 text-gray-700"
-                      }`}
-                    >
-                      {member.isActive !== false ? "Active" : "Inactive"}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 text-xs font-semibold leading-5 ${
+                          member.isActive !== false
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        {member.isActive !== false ? "Active" : "Inactive"}
+                      </span>
+                      <button
+                        onClick={() => handleToggleActive(member._id)}
+                        disabled={togglingIds.has(member._id)}
+                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          togglingIds.has(member._id)
+                            ? "opacity-50"
+                            : member.isActive !== false
+                            ? "bg-green-600 hover:bg-green-700"
+                            : "bg-gray-300 hover:bg-gray-400"
+                        }`}
+                        aria-pressed={member.isActive !== false}
+                        aria-label="Toggle active status"
+                        type="button"
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                            member.isActive !== false
+                              ? "translate-x-5"
+                              : "translate-x-0"
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                     <div className="flex flex-col space-y-1">
@@ -362,7 +464,9 @@ export default function MembersPage() {
                       </div>
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => router.push(`/admin/members/edit/${member._id}`)}
+                          onClick={() =>
+                            router.push(`/admin/members/edit/${member._id}`)
+                          }
                           className="text-indigo-600 hover:text-indigo-900"
                         >
                           Edit
