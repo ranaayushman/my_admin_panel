@@ -13,7 +13,7 @@ const apiClient = axios.create({
 // Add a request interceptor to attach the auth token to requests
 apiClient.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('accessToken');
+    const token = Cookies.get('access_token'); 
     if (token && config.headers) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
@@ -79,13 +79,16 @@ export const membersApi = {
     return apiClient.delete(getApiEndpoint(`/members/${id}`));
   },
   
-  createMember: (formData: FormData) => {
-    // Use FormData for file uploads
-    return apiClient.post(getApiEndpoint('/members'), formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data', // Override content type for file upload
-      },
-    });
+  createMember: (memberData: any) => {
+    return apiClient.post(getApiEndpoint('/members'), memberData);
+  },
+  
+  getMemberById: (id: string) => {
+    return apiClient.get(getApiEndpoint(`/members/${id}`));
+  },
+  
+  updateMember: (id: string, memberData: any) => {
+    return apiClient.put(getApiEndpoint(`/members/${id}`), memberData);
   },
 };
 

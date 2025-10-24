@@ -73,6 +73,12 @@ export type MembersResponse = {
   };
 };
 
+// Single member response type
+export type MemberResponse = {
+  success: boolean;
+  member: Member;
+};
+
 // API response wrapper type
 export type ApiResponse<T> = {
   success: boolean;

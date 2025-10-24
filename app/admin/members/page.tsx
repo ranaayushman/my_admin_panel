@@ -392,31 +392,41 @@ export default function MembersPage() {
                     {member.department} ({member.batch})
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <a
-                        href={member.linkedin_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        LinkedIn
-                      </a>
-                      {member.github_url && member.github_url !== "NA" && (
+                    <div className="flex flex-col space-y-1">
+                      <div className="flex space-x-2">
                         <a
-                          href={member.github_url}
+                          href={member.linkedin_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-gray-600 hover:text-gray-900"
+                          className="text-blue-600 hover:text-blue-900"
                         >
-                          GitHub
+                          LinkedIn
                         </a>
-                      )}
-                      <button
-                        onClick={() => handleDelete(member._id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
+                        {member.github_url && member.github_url !== "NA" && (
+                          <a
+                            href={member.github_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-gray-600 hover:text-gray-900"
+                          >
+                            GitHub
+                          </a>
+                        )}
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => router.push(`/admin/members/edit/${member._id}`)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(member._id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </td>
                 </tr>

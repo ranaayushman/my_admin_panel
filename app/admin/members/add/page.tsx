@@ -95,6 +95,23 @@ export default function AddMemberPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size (limit to 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > maxSize) {
+        toast.error("Image size must be less than 5MB");
+        e.target.value = ""; // Clear the input
+        setPreviewImage(null);
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast.error("Please select a valid image file");
+        e.target.value = "";
+        setPreviewImage(null);
+        return;
+      }
+
       // Create a preview URL for the selected image
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -118,19 +135,22 @@ export default function AddMemberPage() {
     setIsLoading(true);
     
     try {
-      // Create FormData to handle file upload
-      const formData = new FormData();
-      
-      // Append all form fields
-      Object.entries(data).forEach(([key, value]) => {
-        formData.append(key, value);
+      // Convert image to base64
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (error) => reject(error);
       });
       
-      // Append the file
-      formData.append("profile_image", file);
+      // Prepare the request body as JSON
+      const memberData = {
+        ...data,
+        profile_image: base64Image,
+      };
       
       // Send the API request
-      const response = await membersApi.createMember(formData);
+      const response = await membersApi.createMember(memberData);
       
       if (response.data.success) {
         toast.success("Member added successfully!");

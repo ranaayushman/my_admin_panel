@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }: Props) => {
 
   useEffect(() => {
     // Check if user is logged in on component mount
-    const token = Cookies.get("accessToken");
+    const token = Cookies.get("access_token"); // Changed from 'accessToken' to 'access_token'
     const storedUser = Cookies.get("user");
     
     if (token && storedUser) {
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: Props) => {
         setUser(JSON.parse(storedUser));
       } catch (error) {
         console.error("Failed to parse user data:", error);
-        Cookies.remove("accessToken");
+        Cookies.remove("access_token"); // Changed from 'accessToken' to 'access_token'
         Cookies.remove("user");
       }
     }
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }: Props) => {
 
   const login = (token: string, userData: User) => {
     // Set cookies
-    Cookies.set("accessToken", token, { expires: 1 }); // Expires in 1 day
+    Cookies.set("access_token", token, { expires: 1 }); // Changed from 'accessToken' to 'access_token'
     Cookies.set("user", JSON.stringify(userData), { expires: 1 });
     
     setUser(userData);
@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }: Props) => {
       // Continue with local logout even if API call fails
     } finally {
       // Always clean up local state and cookies
-      Cookies.remove("accessToken");
+      Cookies.remove("access_token"); // Changed from 'accessToken' to 'access_token'
       Cookies.remove("user");
       setUser(null);
       router.push("/login");

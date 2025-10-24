@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { eventsApi } from "@/services/api";
-import Image from "next/image";
 
 // Define the participant type based on the API response
 type Participant = {
