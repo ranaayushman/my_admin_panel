@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,6 +10,7 @@ import { membersApi } from "@/services/api";
 import { Member } from "@/types";
 import type { SubmitHandler } from "react-hook-form";
 import Image from "next/image";
+import { ArrowLeft, Upload, X, ImageIcon } from "lucide-react";
 
 const memberSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -47,8 +48,10 @@ export default function EditMemberPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [newPreview, setNewPreview] = useState<string | null>(null);
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
 
   const {
     register,
@@ -104,6 +107,57 @@ export default function EditMemberPage() {
       fetchMember();
     }
   }, [memberId, reset]);
+
+  // New image selection and drag/drop handlers
+  const handleFileSelected = (file: File | null | undefined) => {
+    if (!file) {
+      setProfileImage(null);
+      setNewPreview(null);
+      return;
+    }
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select a valid image file");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => setNewPreview(reader.result as string);
+    reader.readAsDataURL(file);
+    setProfileImage(file);
+  };
+
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleFileSelected(e.target.files?.[0] || null);
+  };
+
+  const handleRemoveNewImage = useCallback(() => {
+    const input = document.getElementById("profile_image") as HTMLInputElement | null;
+    if (input) input.value = "";
+    setProfileImage(null);
+    setNewPreview(null);
+  }, []);
+
+  const onDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+  const onDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+  const onDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const file = e.dataTransfer.files?.[0];
+    handleFileSelected(file || null);
+  };
 
   const onSubmit: SubmitHandler<MemberFormData> = async (data: MemberFormData) => {
     setIsSubmitting(true);
@@ -249,22 +303,16 @@ export default function EditMemberPage() {
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-gray-800">Edit Member</h1>
-          <button
-            onClick={() => router.push("/admin/members")}
-            className="flex items-center rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-200"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="mr-1 h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => router.push("/admin/members")}
+              className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-            Back to Members
-          </button>
+              <ArrowLeft className="mr-1.5 h-4 w-4" /> Back
+            </button>
+            <h1 className="text-2xl font-semibold text-gray-900">Edit Member</h1>
+          </div>
         </div>
         <p className="mt-2 text-sm text-gray-600">
           Editing: <span className="font-medium">{currentMember.name}</span>
@@ -272,23 +320,48 @@ export default function EditMemberPage() {
       </div>
 
       <div className="rounded-lg bg-white p-6 shadow form-container">
-        {/* Current Profile Image Preview */}
-        {currentMember.profile_image?.url && (
-          <div className="mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Current Profile Image</h3>
-            <div className="flex justify-center">
-              <div className="relative h-40 w-40 overflow-hidden rounded-full border-4 border-gray-200">
-                <Image
-                  src={currentMember.profile_image.url}
-                  alt={currentMember.name}
-                  fill
-                  className="object-cover"
-                  unoptimized={true}
-                />
+        {/* Profile Image Section */}
+        <div className="mb-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-3">Profile Image</h3>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:items-start">
+            <div className="order-2 md:order-1">
+              <div className="h-28 w-28 overflow-hidden rounded-full border-2 border-gray-200">
+                {newPreview ? (
+                  <Image src={newPreview} alt="New Profile" width={112} height={112} className="h-full w-full object-cover" unoptimized={true} />
+                ) : currentMember.profile_image?.url ? (
+                  <Image src={currentMember.profile_image.url} alt={currentMember.name} width={112} height={112} className="h-full w-full object-cover" unoptimized={true} />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-gray-50 text-gray-400">
+                    <ImageIcon className="h-8 w-8" />
+                  </div>
+                )}
               </div>
+              {newPreview && (
+                <button
+                  type="button"
+                  onClick={handleRemoveNewImage}
+                  className="mt-2 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-100"
+                >
+                  <X className="mr-1 h-3 w-3" /> Remove
+                </button>
+              )}
+            </div>
+            <div className="order-1 md:order-2 md:col-span-2">
+              <label
+                htmlFor="profile_image"
+                onDragOver={onDragOver}
+                onDragLeave={onDragLeave}
+                onDrop={onDrop}
+                className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${dragActive ? 'border-indigo-400 bg-indigo-50' : 'border-gray-300 hover:bg-gray-50'}`}
+              >
+                <Upload className="mb-2 h-6 w-6 text-gray-500" />
+                <span className="text-sm text-gray-700">{newPreview ? 'Change profile image' : 'Click to upload or drag & drop'}</span>
+                <span className="mt-1 text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</span>
+                <input id="profile_image" type="file" accept="image/*" onChange={onInputChange} className="hidden" />
+              </label>
             </div>
           </div>
-        )}
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information */}
@@ -302,6 +375,7 @@ export default function EditMemberPage() {
                 id="name"
                 {...register("name")}
                 className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                placeholder="e.g., Ayushman Rana"
               />
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
             </div>
@@ -315,6 +389,7 @@ export default function EditMemberPage() {
                 id="email_id"
                 {...register("email_id")}
                 className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                placeholder="name@example.com"
               />
               {errors.email_id && <p className="mt-1 text-sm text-red-600">{errors.email_id.message}</p>}
             </div>
@@ -348,7 +423,7 @@ export default function EditMemberPage() {
               <select
                 id="designation"
                 {...register("designation")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
                 style={{ zIndex: 1000, position: 'relative' }}
               >
                 <option value="">Select Designation</option>
@@ -426,22 +501,7 @@ export default function EditMemberPage() {
             {errors.bio && <p className="mt-1 text-sm text-red-600">{errors.bio.message}</p>}
           </div>
 
-          {/* Profile Image Upload */}
-          <div>
-            <label htmlFor="profile_image" className="block text-sm font-medium text-gray-700">
-              New Profile Image (optional)
-            </label>
-            <input
-              type="file"
-              id="profile_image"
-              accept="image/*"
-              onChange={(e) => setProfileImage(e.target.files?.[0] || null)}
-              className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100"
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Leave empty to keep current profile image. Recommended: Square image (1:1 ratio)
-            </p>
-          </div>
+          {/* Profile Image Upload handled above */}
 
           {/* Submit Button */}
           <div className="flex justify-end space-x-3">
@@ -455,9 +515,15 @@ export default function EditMemberPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50"
+              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50"
             >
-              {isSubmitting ? "Updating..." : "Update Member"}
+              {isSubmitting ? (
+                "Updating..."
+              ) : (
+                <>
+                  <Upload className="mr-2 h-4 w-4" /> Update Member
+                </>
+              )}
             </button>
           </div>
         </form>
