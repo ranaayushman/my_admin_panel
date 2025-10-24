@@ -6,7 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { membersApi } from "@/services/api";
-import { NewMemberFormData } from "@/types";
+// Note: We'll infer form types from the Zod schema to keep them in sync
 import toast from "react-hot-toast";
 import Image from "next/image";
 import { ArrowLeft, Upload, X, ImageIcon } from "lucide-react";
@@ -25,7 +25,9 @@ const departments = [
   "BCA",
   "MCA",
   "Other",
-];
+  // Keep legacy variant to safely handle existing records if any
+  "OTHER",
+] as const;
 
 const designations = [
   // Core Team
@@ -59,7 +61,7 @@ const batches = ["2021", "2022", "2023", "2024", "2025", "2026", "2027"];
 const newMemberSchema = z.object({
   name: z.string().min(2, "Name should be at least 2 characters"),
   email_id: z.string().email("Invalid email address"),
-  department: z.string().min(1, "Department is required"),
+  department: z.enum(departments, "Department is required"),
   designation: z.string().min(1, "Designation is required"),
   batch: z.string().min(1, "Batch is required"),
   bio: z.string().min(10, "Bio should be at least 10 characters"),
@@ -80,12 +82,14 @@ export default function AddMemberPage() {
     control,
     formState: { errors },
     reset,
-  } = useForm<NewMemberFormData>({
+  } = useForm<z.infer<typeof newMemberSchema>>({
     resolver: zodResolver(newMemberSchema),
     defaultValues: {
       name: "",
       email_id: "",
-      department: "",
+      // Leave enum-backed fields undefined by default to avoid type mismatch
+      // and let the select placeholder enforce a choice
+      // department: undefined,
       designation: "",
       batch: "",
       bio: "",
@@ -166,7 +170,7 @@ export default function AddMemberPage() {
     }
   };
   
-  const onSubmit = async (data: NewMemberFormData) => {
+  const onSubmit = async (data: z.infer<typeof newMemberSchema>) => {
     const fileInput = document.getElementById('profile_image') as HTMLInputElement;
     const file = fileInput.files?.[0];
     

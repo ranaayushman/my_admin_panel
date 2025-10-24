@@ -12,10 +12,28 @@ import type { SubmitHandler } from "react-hook-form";
 import Image from "next/image";
 import { ArrowLeft, Upload, X, ImageIcon } from "lucide-react";
 
+// Departments aligned with backend values (include EE instead of EEE)
+const departments = [
+  "CSE",
+  "CSE-DS",
+  "CSE-AI/ML",
+  "IT",
+  "ECE",
+  "EE",
+  "ME",
+  "CE",
+  "CHE",
+  "BCA",
+  "MCA",
+  // Include both variants to safely handle legacy data and new entries
+  "Other",
+  "OTHER",
+] as const;
+
 const memberSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email_id: z.string().email("Valid email is required"),
-  department: z.string().min(1, "Department is required"),
+  department: z.enum(departments, "Department is required"),
   designation: z.string().min(1, "Designation is required"),
   batch: z.string().min(1, "Batch is required"),
   bio: z.string().min(1, "Bio is required"),
@@ -405,13 +423,11 @@ export default function EditMemberPage() {
                 style={{ zIndex: 1000, position: 'relative' }}
               >
                 <option value="">Select Department</option>
-                <option value="CSE">Computer Science and Engineering</option>
-                <option value="ECE">Electronics and Communication Engineering</option>
-                <option value="EEE">Electrical and Electronics Engineering</option>
-                <option value="ME">Mechanical Engineering</option>
-                <option value="CE">Civil Engineering</option>
-                <option value="IT">Information Technology</option>
-                <option value="OTHER">Other</option>
+                {departments.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
               </select>
               {errors.department && <p className="mt-1 text-sm text-red-600">{errors.department.message}</p>}
             </div>
