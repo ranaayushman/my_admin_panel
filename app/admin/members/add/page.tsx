@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +9,7 @@ import { membersApi } from "@/services/api";
 import { NewMemberFormData } from "@/types";
 import toast from "react-hot-toast";
 import Image from "next/image";
+import { ArrowLeft, Upload, X, ImageIcon } from "lucide-react";
 
 // Define departments and designations for dropdown options
 const departments = [
@@ -71,6 +72,7 @@ export default function AddMemberPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
   
   const {
     register,
@@ -120,6 +122,47 @@ export default function AddMemberPage() {
       reader.readAsDataURL(file);
     } else {
       setPreviewImage(null);
+    }
+  };
+
+  const handleRemoveImage = useCallback(() => {
+    const fileInput = document.getElementById('profile_image') as HTMLInputElement | null;
+    if (fileInput) fileInput.value = '';
+    setPreviewImage(null);
+  }, []);
+
+  const onDragOver = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const onDragLeave = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const onDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    const fileInput = document.getElementById('profile_image') as HTMLInputElement | null;
+    const file = e.dataTransfer.files?.[0];
+    if (fileInput && file) {
+      // programmatically set input files is not supported directly; prompt user instead
+      // fallback: process file via same validation and preview flow
+      if (!file.type.startsWith('image/')) {
+        toast.error('Please drop a valid image file');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size must be less than 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewImage(reader.result as string);
+      reader.readAsDataURL(file);
     }
   };
   
@@ -178,13 +221,17 @@ export default function AddMemberPage() {
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-gray-800">Add New Member</h1>
-        <button
-          onClick={() => router.push('/admin/members')}
-          className="flex items-center rounded-md bg-gray-100 px-4 py-2 text-sm text-gray-600 hover:bg-gray-200"
-        >
-          Back to Members List
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => router.push('/admin/members')}
+            className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+          >
+            <ArrowLeft className="mr-1.5 h-4 w-4" /> Back
+          </button>
+          <h1 className="text-2xl font-semibold text-gray-900">Add New Member</h1>
+          <span className="ml-2 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">Required fields are marked *</span>
+        </div>
       </div>
       
       <div className="rounded-lg border bg-white p-6 shadow-sm form-container">
@@ -197,38 +244,57 @@ export default function AddMemberPage() {
                 <label className="block text-sm font-medium text-gray-700">
                   Profile Image <span className="text-red-500">*</span>
                 </label>
-                <div className="mt-2 flex items-center space-x-6">
-                  <div className="h-24 w-24 overflow-hidden rounded-full border-2 border-gray-200">
-                    {previewImage ? (
-                      <Image
-                        src={previewImage}
-                        alt="Profile Preview"
-                        width={96}
-                        height={96}
-                        className="h-full w-full object-cover"
-                        unoptimized={true}
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-gray-100 text-gray-400">
-                        No Image
-                      </div>
+                <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-3 md:items-start">
+                  <div className="order-2 md:order-1">
+                    <div className="h-28 w-28 overflow-hidden rounded-full border-2 border-gray-200">
+                      {previewImage ? (
+                        <Image
+                          src={previewImage}
+                          alt="Profile Preview"
+                          width={112}
+                          height={112}
+                          className="h-full w-full object-cover"
+                          unoptimized={true}
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gray-50 text-gray-400">
+                          <ImageIcon className="h-8 w-8" />
+                        </div>
+                      )}
+                    </div>
+                    {previewImage && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="mt-2 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-100"
+                      >
+                        <X className="mr-1 h-3 w-3" /> Remove
+                      </button>
                     )}
                   </div>
-                  <div className="flex-grow">
-                    <input
-                      id="profile_image"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="block w-full cursor-pointer rounded-lg border border-gray-300 text-sm
-                        file:mr-4 file:cursor-pointer file:border-0
-                        file:bg-indigo-50 file:py-2 file:px-4
-                        file:text-sm file:font-medium file:text-indigo-700
-                        hover:file:bg-indigo-100"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      PNG, JPG or JPEG (recommended size: 400x400px)
-                    </p>
+                  <div className="order-1 md:order-2 md:col-span-2">
+                    <label
+                      htmlFor="profile_image"
+                      onDragOver={onDragOver}
+                      onDragLeave={onDragLeave}
+                      onDrop={onDrop}
+                      className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${
+                        dragActive ? 'border-indigo-400 bg-indigo-50' : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Upload className="mb-2 h-6 w-6 text-gray-500" />
+                      <span className="text-sm text-gray-700">
+                        {previewImage ? 'Change profile image' : 'Click to upload or drag & drop'}
+                      </span>
+                      <span className="mt-1 text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</span>
+                      <input
+                        id="profile_image"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
                   </div>
                 </div>
               </div>
@@ -242,9 +308,10 @@ export default function AddMemberPage() {
                   id="name"
                   type="text"
                   {...register("name")}
-                  className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
+                  className={`mt-1 block w-full rounded-md border text-black px-3 py-2 shadow-sm ${
                     errors.name ? "border-red-300" : "border-gray-300"
                   }`}
+                  placeholder="e.g., Ayushman Rana"
                 />
                 {errors.name && (
                   <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
@@ -260,9 +327,10 @@ export default function AddMemberPage() {
                   id="email_id"
                   type="email"
                   {...register("email_id")}
-                  className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
+                  className={`mt-1 block w-full text-black rounded-md border px-3 py-2 shadow-sm ${
                     errors.email_id ? "border-red-300" : "border-gray-300"
                   }`}
+                  placeholder="name@example.com"
                 />
                 {errors.email_id && (
                   <p className="mt-1 text-sm text-red-600">{errors.email_id.message}</p>
@@ -371,7 +439,7 @@ export default function AddMemberPage() {
                   id="bio"
                   rows={4}
                   {...register("bio")}
-                  className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
+                  className={`mt-1 block w-full text-black rounded-md border px-3 py-2 shadow-sm ${
                     errors.bio ? "border-red-300" : "border-gray-300"
                   }`}
                   placeholder="A brief description about the member..."
@@ -391,7 +459,7 @@ export default function AddMemberPage() {
                   type="text"
                   {...register("github_url")}
                   placeholder="https://github.com/username or NA"
-                  className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
+                  className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm text-black ${
                     errors.github_url ? "border-red-300" : "border-gray-300"
                   }`}
                 />
@@ -410,7 +478,7 @@ export default function AddMemberPage() {
                   type="text"
                   {...register("linkedin_url")}
                   placeholder="https://www.linkedin.com/in/username"
-                  className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm ${
+                  className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm text-black ${
                     errors.linkedin_url ? "border-red-300" : "border-gray-300"
                   }`}
                 />
@@ -422,11 +490,18 @@ export default function AddMemberPage() {
           </div>
           
           {/* Submit Button */}
-          <div className="flex justify-end">
+          <div className="flex items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => router.push('/admin/members')}
+              className="inline-flex items-center rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isLoading ? (
                 <>
@@ -452,7 +527,9 @@ export default function AddMemberPage() {
                   Processing...
                 </>
               ) : (
-                "Add Member"
+                <>
+                  <Upload className="mr-2 h-4 w-4" /> Add Member
+                </>
               )}
             </button>
           </div>
