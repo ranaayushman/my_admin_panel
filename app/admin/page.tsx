@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Activity
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface DashboardStats {
   totalUsers: number;
@@ -30,7 +31,8 @@ export default function DashboardPage() {
     upcomingEvents: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  type RecentActivityItem = { type: 'user' | 'member'; title: string; time: string };
+  const [recentActivity, setRecentActivity] = useState<RecentActivityItem[]>([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -47,28 +49,34 @@ export default function DashboardPage() {
       ]);
 
       // Calculate stats
-      const users = usersResponse.data?.users || [];
-      const members = membersResponse.data?.members || [];
-      const events = eventsResponse.data?.events || [];
+      type SimpleUser = { name: string; createdAt: string };
+      type SimpleMember = { name: string; createdAt: string };
+      type SimpleEvent = { is_upcoming: boolean };
+      const users = (usersResponse.data?.users as SimpleUser[]) || [];
+      const members = (membersResponse.data?.members as SimpleMember[] | { members: SimpleMember[] }) || [] as unknown as SimpleMember[];
+      const membersArray: SimpleMember[] = Array.isArray(members)
+        ? members
+        : ((members as { members: SimpleMember[] })?.members || []);
+      const events = (eventsResponse.data?.events as SimpleEvent[]) || [];
 
       // Count upcoming events
-      const upcomingCount = events.filter((event: any) => event.is_upcoming).length;
+  const upcomingCount = events.filter((event) => event.is_upcoming).length;
 
       setStats({
         totalUsers: users.length,
-        totalMembers: members.length,
+        totalMembers: membersArray.length,
         totalEvents: events.length,
         upcomingEvents: upcomingCount,
       });
 
       // Set recent activity (last 5 items)
-      const recentItems = [
-        ...users.slice(-3).map((u: any) => ({
+      const recentItems: RecentActivityItem[] = [
+        ...users.slice(-3).map((u): RecentActivityItem => ({
           type: 'user',
           title: `New user: ${u.name}`,
           time: new Date(u.createdAt).toLocaleDateString(),
         })),
-        ...members.slice(-2).map((m: any) => ({
+        ...membersArray.slice(-2).map((m): RecentActivityItem => ({
           type: 'member',
           title: `New member: ${m.name}`,
           time: new Date(m.createdAt).toLocaleDateString(),
@@ -94,7 +102,7 @@ export default function DashboardPage() {
   }: { 
     title: string; 
     value: number; 
-    icon: any; 
+    icon: LucideIcon; 
     color: string; 
     bgColor: string;
     onClick?: () => void;
@@ -123,7 +131,7 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-2 text-gray-600">Welcome back! Here's what's happening today.</p>
+          <p className="mt-2 text-gray-600">Welcome back! Here&apos;s what&apos;s happening today.</p>
         </div>
 
         {/* Stats Cards */}

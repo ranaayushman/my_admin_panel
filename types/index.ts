@@ -35,6 +35,7 @@ export type Member = {
   bio: string;
   github_url: string;
   linkedin_url: string;
+  isActive?: boolean;
   profile_image: {
     public_id: string;
     url: string;
@@ -71,6 +72,15 @@ export type MembersResponse = {
     mediaTeam: MediaTeam;
     prTeam: Member[];
   };
+};
+
+// Admin all members (flat) response with counts
+export type MembersAdminAllResponse = {
+  success: boolean;
+  members: Member[];
+  totalMembers: number;
+  activeMembers: number;
+  inactiveMembers: number;
 };
 
 // Single member response type

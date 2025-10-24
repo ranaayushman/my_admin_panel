@@ -124,7 +124,18 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
       }
 
       // Prepare the request body as JSON - send all fields
-      const updateData: any = {
+      type UpdateMemberPayload = {
+        name: string;
+        email_id: string;
+        department: string;
+        designation: string;
+        batch: string;
+        bio: string;
+        github_url: string;
+        linkedin_url: string;
+        profile_image?: string;
+      };
+      const updateData: UpdateMemberPayload = {
         name: data.name,
         email_id: data.email_id,
         department: data.department,
@@ -163,7 +174,8 @@ export default function EditMemberPage({ params }: EditMemberPageProps) {
       
       // Enhanced error logging
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as { response?: { data?: any; status?: number; statusText?: string } };
+        type AxiosErrorLike = { response?: { data?: { message?: string }; status?: number; statusText?: string } };
+        const axiosError = err as AxiosErrorLike;
         console.error("Response status:", axiosError.response?.status);
         console.error("Response statusText:", axiosError.response?.statusText);
         console.error("Response data:", axiosError.response?.data);

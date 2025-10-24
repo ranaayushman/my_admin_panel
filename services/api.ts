@@ -8,6 +8,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, 
 });
 
 // Add a request interceptor to attach the auth token to requests
@@ -68,7 +69,7 @@ export const usersApi = {
 // Members API services
 export const membersApi = {
   getAllMembers: (config?: AxiosRequestConfig) => {
-    return apiClient.get(getApiEndpoint('/members'), config);
+    return apiClient.get(getApiEndpoint('/members/admin/all'), config);
   },
   
   verifyMember: (id: string) => {
@@ -76,7 +77,7 @@ export const membersApi = {
   },
   
   deleteMember: (id: string) => {
-    return apiClient.delete(getApiEndpoint(`/members/${id}`));
+    return apiClient.delete(getApiEndpoint(`/members/hard-delete/${id}`));
   },
   
   createMember: (memberData: any) => {

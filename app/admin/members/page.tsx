@@ -3,17 +3,20 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { membersApi } from "@/services/api";
-import { Member } from "@/types";
+import { Member, MembersAdminAllResponse } from "@/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function MembersPage() {
   const router = useRouter();
   const [allMembers, setAllMembers] = useState<Member[]>([]);
+  const [totalMembers, setTotalMembers] = useState<number>(0);
+  const [activeMembers, setActiveMembers] = useState<number>(0);
+  const [inactiveMembers, setInactiveMembers] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
 
   // Fetch members data
   useEffect(() => {
@@ -23,55 +26,11 @@ export default function MembersPage() {
       try {
         const response = await membersApi.getAllMembers();
         if (response.data && response.data.success) {
-          // Combine all members into a single array for easier management
-          const membersData = response.data.members;
-          const coreTeam = membersData.coreTeam || [];
-          const prTeam = membersData.prTeam || [];
-
-          // Extract members from techTeam
-          const techTeam = membersData.techTeam || {};
-          const webDevelopers = techTeam.webDeveloper || [];
-          const appDevelopers = techTeam.appDeveloper || [];
-          const mlDevelopers = techTeam.machineLearning || [];
-          const techMembers = techTeam.techMember || [];
-
-          // Extract members from mediaTeam
-          const mediaTeam = membersData.mediaTeam || {};
-          const videoEditors = mediaTeam.videoEditor || [];
-          const graphicDesigners = mediaTeam.graphicDesigner || [];
-          const contentWriters = mediaTeam.contentWriter || [];
-          const photographers = mediaTeam.photographer || [];
-
-          // Create a Map to deduplicate members by ID
-          const uniqueMembersMap = new Map();
-
-          // Helper function to add members to the Map with their category
-          const addMembersToMap = (members: Member[], category: string) => {
-            members.forEach((member) => {
-              uniqueMembersMap.set(member._id, {
-                ...member,
-                // Keep the original designation but add a unique key for rendering
-                uniqueKey: `${member._id}-${category}`,
-              });
-            });
-          };
-
-          // Add all member groups with their categories
-          addMembersToMap(coreTeam, "core");
-          addMembersToMap(webDevelopers, "web");
-          addMembersToMap(appDevelopers, "app");
-          addMembersToMap(mlDevelopers, "ml");
-          addMembersToMap(techMembers, "tech");
-          addMembersToMap(videoEditors, "video");
-          addMembersToMap(graphicDesigners, "graphic");
-          addMembersToMap(contentWriters, "content");
-          addMembersToMap(photographers, "photo");
-          addMembersToMap(prTeam, "pr");
-
-          // Convert Map values to array
-          const allMembersArray = Array.from(uniqueMembersMap.values());
-
-          setAllMembers(allMembersArray);
+          const data = response.data as MembersAdminAllResponse;
+          setAllMembers(data.members || []);
+          setTotalMembers(data.totalMembers || data.members?.length || 0);
+          setActiveMembers(data.activeMembers || 0);
+          setInactiveMembers(data.inactiveMembers || 0);
         } else {
           setError("Failed to fetch members data");
         }
@@ -90,7 +49,7 @@ export default function MembersPage() {
     fetchMembers();
   }, []);
 
-  // Filter members based on search query and active category
+  // Filter members based on search query and active/inactive status
   const filteredMembers = allMembers.filter((member) => {
     const matchesSearch =
       member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -98,24 +57,31 @@ export default function MembersPage() {
       member.designation.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.department.toLowerCase().includes(searchQuery.toLowerCase());
 
-    // If active category is 'all', return all members that match the search
-    if (activeCategory === "all") {
-      return matchesSearch;
+    // Filter by status
+    if (statusFilter === "active") {
+      return matchesSearch && member.isActive !== false;
     }
-
-    // Otherwise, filter by category too
-    const matchesCategory = member.designation
-      .toLowerCase()
-      .includes(activeCategory.toLowerCase());
-    return matchesSearch && matchesCategory;
+    if (statusFilter === "inactive") {
+      return matchesSearch && member.isActive === false;
+    }
+    return matchesSearch;
   });
 
   const handleDelete = async (id: string) => {
     try {
       const response = await membersApi.deleteMember(id);
       if (response.data && response.data.success) {
-        // Use the _id to filter out the deleted member
-        setAllMembers(allMembers.filter((member) => member._id !== id));
+        // Remove from list and update counters
+        setAllMembers((prev) => prev.filter((m) => m._id !== id));
+        const removed = allMembers.find((m) => m._id === id);
+        setTotalMembers((t) => Math.max(0, t - 1));
+        if (removed) {
+          if (removed.isActive !== false) {
+            setActiveMembers((a) => Math.max(0, a - 1));
+          } else {
+            setInactiveMembers((i) => Math.max(0, i - 1));
+          }
+        }
         toast.success("Member deleted successfully");
       } else {
         toast.error("Failed to delete member");
@@ -129,18 +95,6 @@ export default function MembersPage() {
     }
   };
 
-  // Get unique member categories for filtering
-  const categories = [
-    "all",
-    ...new Set(
-      allMembers.map((member) =>
-        member.designation.toLowerCase().includes("lead")
-          ? "Lead"
-          : member.designation
-      )
-    ),
-  ];
-
   // Function to refresh members
   const refreshMembers = () => {
     setIsLoading(true);
@@ -148,41 +102,11 @@ export default function MembersPage() {
       .getAllMembers()
       .then((response) => {
         if (response.data && response.data.success) {
-          const membersData = response.data.members;
-
-          // Create a Map to deduplicate members by ID
-          const uniqueMembersMap = new Map();
-
-          // Helper function to add members to the Map with their category
-          const addMembersToMap = (
-            members: Member[] = [],
-            category: string
-          ) => {
-            members.forEach((member) => {
-              uniqueMembersMap.set(member._id, {
-                ...member,
-                // Keep the original designation but add a unique key for rendering
-                uniqueKey: `${member._id}-${category}`,
-              });
-            });
-          };
-
-          // Add all member groups with their categories
-          addMembersToMap(membersData.coreTeam, "core");
-          addMembersToMap(membersData.techTeam?.webDeveloper, "web");
-          addMembersToMap(membersData.techTeam?.appDeveloper, "app");
-          addMembersToMap(membersData.techTeam?.machineLearning, "ml");
-          addMembersToMap(membersData.techTeam?.techMember, "tech");
-          addMembersToMap(membersData.mediaTeam?.videoEditor, "video");
-          addMembersToMap(membersData.mediaTeam?.graphicDesigner, "graphic");
-          addMembersToMap(membersData.mediaTeam?.contentWriter, "content");
-          addMembersToMap(membersData.mediaTeam?.photographer, "photo");
-          addMembersToMap(membersData.prTeam, "pr");
-
-          // Convert Map values to array
-          const allMembersArray = Array.from(uniqueMembersMap.values());
-
-          setAllMembers(allMembersArray);
+          const data = response.data as MembersAdminAllResponse;
+          setAllMembers(data.members || []);
+          setTotalMembers(data.totalMembers || data.members?.length || 0);
+          setActiveMembers(data.activeMembers || 0);
+          setInactiveMembers(data.inactiveMembers || 0);
           toast.success("Members refreshed successfully");
         } else {
           toast.error("Failed to refresh members");
@@ -222,9 +146,11 @@ export default function MembersPage() {
               </svg>
               Refresh
             </button>
-            <span className="ml-4 text-sm text-gray-500">
-              Total: {filteredMembers.length} members
-            </span>
+            <div className="ml-4 flex items-center space-x-3 text-sm text-gray-600">
+              <span>Total: <span className="font-medium text-gray-800">{totalMembers}</span></span>
+              <span>Active: <span className="font-medium text-green-700">{activeMembers}</span></span>
+              <span>Inactive: <span className="font-medium text-red-700">{inactiveMembers}</span></span>
+            </div>
             <button
               onClick={() => router.push('/admin/members/add')}
               className="ml-4 flex items-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm text-white shadow-sm hover:bg-indigo-700"
@@ -258,17 +184,21 @@ export default function MembersPage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          {categories.map((category) => (
+          {([
+            { key: "all", label: "All" },
+            { key: "active", label: "Active" },
+            { key: "inactive", label: "Inactive" },
+          ] as Array<{ key: "all" | "active" | "inactive"; label: string }>).map((opt) => (
             <button
-              key={category}
-              onClick={() => setActiveCategory(category.toLowerCase())}
+              key={opt.key}
+              onClick={() => setStatusFilter(opt.key)}
               className={`rounded-full px-3 py-1 text-sm ${
-                activeCategory === category.toLowerCase()
+                statusFilter === opt.key
                   ? "bg-indigo-100 text-indigo-800 font-medium"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              {category === "all" ? "All Members" : category}
+              {opt.label}
             </button>
           ))}
         </div>
@@ -312,6 +242,12 @@ export default function MembersPage() {
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
               >
+                Status
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+              >
                 Actions
               </th>
             </tr>
@@ -319,7 +255,7 @@ export default function MembersPage() {
           <tbody className="divide-y divide-gray-200 bg-white">
             {isLoading ? (
               <tr>
-                <td colSpan={6} className="px-6 py-4 text-center">
+                <td colSpan={7} className="px-6 py-4 text-center">
                   <div className="flex items-center justify-center">
                     <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-t-2 border-indigo-600"></div>
                     <span className="ml-2">Loading...</span>
@@ -329,7 +265,7 @@ export default function MembersPage() {
             ) : error ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-6 py-4 text-center text-sm text-red-500"
                 >
                   {error}
@@ -338,7 +274,7 @@ export default function MembersPage() {
             ) : filteredMembers.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-6 py-4 text-center text-sm text-gray-500"
                 >
                   No members found
@@ -390,6 +326,17 @@ export default function MembersPage() {
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
                     {member.department} ({member.batch})
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4">
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 text-xs font-semibold leading-5 ${
+                        member.isActive !== false
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      {member.isActive !== false ? "Active" : "Inactive"}
+                    </span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
                     <div className="flex flex-col space-y-1">
