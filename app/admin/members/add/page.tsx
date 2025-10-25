@@ -24,7 +24,7 @@ const departments = [
   "CHE",
   "BCA",
   "MCA",
-  "Other",
+  "BT",
   // Keep legacy variant to safely handle existing records if any
   "OTHER",
 ] as const;
