@@ -34,7 +34,38 @@ const memberSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email_id: z.string().email("Valid email is required"),
   department: z.enum(departments, "Department is required"),
-  designation: z.string().min(1, "Designation is required"),
+  // Designations aligned to categorization; keep legacy accepted
+  designation: z.enum([
+    // Core Team
+    "Organizer",
+    "PR and Mangement Lead",
+    "Web Development Lead",
+    "App Development Lead",
+    "Machine Learning Lead",
+    "Content Writer Lead",
+    "Video Editor Lead",
+    "Graphic Designer Lead",
+    
+    // Tech Team
+    "Web Developer",
+    "App Developer",
+    "Machine Learning",
+    "Technical Member",
+    
+    // Media Team
+    "Video Editor",
+    "Graphic Designer",
+    "Content Writer",
+    "Photographer",
+    
+    // PR Team
+    "PR",
+
+    // Legacy
+    "PR and Management Lead",
+    "Machine Learning Engineer",
+    "Tech Member",
+  ] as const, "Designation is required"),
   batch: z.string().min(1, "Batch is required"),
   bio: z.string().min(1, "Bio is required"),
   github_url: z.string().optional().refine((val) => {
@@ -443,18 +474,50 @@ export default function EditMemberPage() {
                 style={{ zIndex: 1000, position: 'relative' }}
               >
                 <option value="">Select Designation</option>
-                <option value="Lead">Lead</option>
-                <option value="Co-Lead">Co-Lead</option>
-                <option value="Web Developer">Web Developer</option>
-                <option value="App Developer">App Developer</option>
-                <option value="Machine Learning">Machine Learning</option>
-                <option value="Tech Member">Tech Member</option>
-                <option value="Video Editor">Video Editor</option>
-                <option value="Graphic Designer">Graphic Designer</option>
-                <option value="Content Writer">Content Writer</option>
-                <option value="Photographer">Photographer</option>
-                <option value="PR Team">PR Team</option>
-                <option value="Core Team">Core Team</option>
+                {/* If current designation isn't in the new set, show it as a legacy option */}
+                {currentMember && ![
+                  "Organizer",
+                  "PR and Mangement Lead",
+                  "Web Development Lead",
+                  "App Development Lead",
+                  "Machine Learning Lead",
+                  "Content Writer Lead",
+                  "Video Editor Lead",
+                  "Graphic Designer Lead",
+                  "Web Developer",
+                  "App Developer",
+                  "Machine Learning",
+                  "Technical Member",
+                  "Video Editor",
+                  "Graphic Designer",
+                  "Content Writer",
+                  "Photographer",
+                  "PR",
+                ].includes(currentMember.designation) && (
+                  <option value={currentMember.designation}>{currentMember.designation} (legacy)</option>
+                )}
+                {[
+                  // New designations only for selection
+                  "Organizer",
+                  "PR and Mangement Lead",
+                  "Web Development Lead",
+                  "App Development Lead",
+                  "Machine Learning Lead",
+                  "Content Writer Lead",
+                  "Video Editor Lead",
+                  "Graphic Designer Lead",
+                  "Web Developer",
+                  "App Developer",
+                  "Machine Learning",
+                  "Technical Member",
+                  "Video Editor",
+                  "Graphic Designer",
+                  "Content Writer",
+                  "Photographer",
+                  "PR",
+                ].map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
               </select>
               {errors.designation && <p className="mt-1 text-sm text-red-600">{errors.designation.message}</p>}
             </div>

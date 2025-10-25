@@ -135,7 +135,7 @@ export default function AddEventPage() {
                 type="text"
                 id="name"
                 {...register("name")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
             </div>
@@ -171,7 +171,7 @@ export default function AddEventPage() {
                 id="eventDate"
                 placeholder="e.g., 15th January 2024"
                 {...register("eventDate")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
               {errors.eventDate && <p className="mt-1 text-sm text-red-600">{errors.eventDate.message}</p>}
             </div>
@@ -185,7 +185,7 @@ export default function AddEventPage() {
                 id="eventTime"
                 placeholder="e.g., 10:00 AM to 4:00 PM"
                 {...register("eventTime")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
               {errors.eventTime && <p className="mt-1 text-sm text-red-600">{errors.eventTime.message}</p>}
             </div>
@@ -198,7 +198,7 @@ export default function AddEventPage() {
                 type="text"
                 id="venue"
                 {...register("venue")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
               {errors.venue && <p className="mt-1 text-sm text-red-600">{errors.venue.message}</p>}
             </div>
@@ -212,7 +212,7 @@ export default function AddEventPage() {
                 id="registrationFee"
                 placeholder="e.g., 100"
                 {...register("registrationFee")}
-                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
               />
             </div>
 
@@ -266,7 +266,7 @@ export default function AddEventPage() {
               id="description"
               rows={3}
               {...register("description")}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+              className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
             />
             {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
           </div>
@@ -280,7 +280,7 @@ export default function AddEventPage() {
               id="details"
               rows={5}
               {...register("details")}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+              className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
             />
             {errors.details && <p className="mt-1 text-sm text-red-600">{errors.details.message}</p>}
           </div>
@@ -335,7 +335,7 @@ export default function AddEventPage() {
                       type="text"
                       placeholder="Name"
                       {...register(`contactInfo.${index}.name`)}
-                      className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                      className="block w-full rounded-md border text-black border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
                     />
                     {errors.contactInfo?.[index]?.name && (
                       <p className="mt-1 text-xs text-red-600">{errors.contactInfo[index]?.name?.message}</p>
@@ -346,7 +346,7 @@ export default function AddEventPage() {
                       type="tel"
                       placeholder="Mobile"
                       {...register(`contactInfo.${index}.mobile`)}
-                      className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                      className="block w-full rounded-md border text-black border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
                     />
                     {errors.contactInfo?.[index]?.mobile && (
                       <p className="mt-1 text-xs text-red-600">{errors.contactInfo[index]?.mobile?.message}</p>
@@ -357,7 +357,7 @@ export default function AddEventPage() {
                       type="text"
                       placeholder="Year"
                       {...register(`contactInfo.${index}.year`)}
-                      className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                      className="block w-full rounded-md border text-black border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
                     />
                     {errors.contactInfo?.[index]?.year && (
                       <p className="mt-1 text-xs text-red-600">{errors.contactInfo[index]?.year?.message}</p>

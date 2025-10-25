@@ -29,31 +29,42 @@ const departments = [
   "OTHER",
 ] as const;
 
-const designations = [
+// Designations aligned to your categorization
+const newDesignations = [
   // Core Team
   "Organizer",
-  "PR and Management Lead",
+  "PR and Mangement Lead", // note: keeping provided spelling
   "Web Development Lead",
   "App Development Lead",
+  "Machine Learning Lead",
   "Content Writer Lead",
   "Video Editor Lead",
   "Graphic Designer Lead",
-  
+
   // Tech Team
   "Web Developer",
   "App Developer",
-  "Machine Learning Engineer",
-  "Tech Member",
-  
+  "Machine Learning",
+  "Technical Member",
+
   // Media Team
   "Video Editor",
   "Graphic Designer",
   "Content Writer",
   "Photographer",
-  
+
   // PR Team
   "PR",
-];
+] as const;
+
+// Legacy aliases kept for compatibility with existing records only
+const legacyDesignations = [
+  "PR and Management Lead",
+  "Machine Learning Engineer",
+  "Tech Member",
+] as const;
+
+const designationEnum = [...newDesignations, ...legacyDesignations] as const;
 
 const batches = ["2021", "2022", "2023", "2024", "2025", "2026", "2027"];
 
@@ -62,11 +73,11 @@ const newMemberSchema = z.object({
   name: z.string().min(2, "Name should be at least 2 characters"),
   email_id: z.string().email("Invalid email address"),
   department: z.enum(departments, "Department is required"),
-  designation: z.string().min(1, "Designation is required"),
+  designation: z.enum(designationEnum, "Designation is required"),
   batch: z.string().min(1, "Batch is required"),
   bio: z.string().min(10, "Bio should be at least 10 characters"),
   github_url: z.string().url("Invalid URL").or(z.literal("NA")),
-  linkedin_url: z.string().url("Invalid URL"),
+  linkedin_url: z.string().url("Invalid URL").or(z.literal("NA")),
   // Profile image is optional in the form but will be validated separately
 });
 
@@ -90,7 +101,7 @@ export default function AddMemberPage() {
       // Leave enum-backed fields undefined by default to avoid type mismatch
       // and let the select placeholder enforce a choice
       // department: undefined,
-      designation: "",
+      // designation: undefined,
       batch: "",
       bio: "",
       github_url: "",
@@ -421,7 +432,7 @@ export default function AddMemberPage() {
                       style={{ zIndex: 1000, position: 'relative' }}
                     >
                       <option value="">Select Designation</option>
-                      {designations.map((designation) => (
+                      {newDesignations.map((designation) => (
                         <option key={designation} value={designation}>
                           {designation}
                         </option>
