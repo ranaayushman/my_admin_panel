@@ -16,6 +16,7 @@ const departments = [
   "CSE",
   "CSE-DS",
   "CSE-AI/ML",
+  "CSE-CS",
   "IT",
   "ECE",
   "EE",
