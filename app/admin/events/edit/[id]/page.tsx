@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import { eventsApi } from "@/services/api";
+import { fileToBase64, validateImageFile } from '@/utils/file';
 import { Event } from "@/types";
 import type { SubmitHandler } from "react-hook-form";
 import Image from "next/image";
@@ -115,39 +116,37 @@ export default function EditEventPage() {
   const onSubmit: SubmitHandler<EventFormData> = async (data: EventFormData) => {
     setIsSubmitting(true);
     try {
-      const formData = new FormData();
-      
-      // Append form fields
-      Object.entries(data).forEach(([key, value]) => {
-        if (key === "contactInfo") {
-          formData.append(key, JSON.stringify(value));
-        } else if (typeof value === "boolean") {
-          formData.append(key, value.toString());
-        } else if (value !== undefined && value !== null) {
-          formData.append(key, value.toString());
-        }
-      });
+      const payload: any = { ...data };
 
-      // Append files if present
+      payload.is_upcoming = Boolean(data.is_upcoming);
+      payload.registration_open = Boolean(data.registration_open);
+
+      // Convert images to base64 if provided
       if (eventBanner) {
-        formData.append("eventBanner", eventBanner);
+        const imgErr = validateImageFile(eventBanner);
+        if (imgErr) throw new Error(imgErr);
+        payload.eventBanner = await fileToBase64(eventBanner);
       }
       if (poster) {
-        formData.append("poster", poster);
+        const imgErr = validateImageFile(poster);
+        if (imgErr) throw new Error(imgErr);
+        payload.poster = await fileToBase64(poster);
       }
 
-  const response = await eventsApi.updateEvent(eventId, formData);
-      
+      const response = await eventsApi.updateEvent(eventId, payload);
+
       if (response.data && response.data.success) {
         toast.success("Event updated successfully");
         router.push("/admin/events");
       } else {
-        toast.error("Failed to update event");
+        toast.error(response.data?.message || "Failed to update event");
       }
     } catch (err: unknown) {
       console.error("Error updating event:", err);
-      const errorMessage = err instanceof Error && 'response' in err 
-        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message 
+      const errorMessage = err instanceof Error && 'message' in err
+        ? (err as Error).message
+        : err && typeof err === 'object' && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
         : "Failed to update event";
       toast.error(errorMessage || "Failed to update event");
     } finally {

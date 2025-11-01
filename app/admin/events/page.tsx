@@ -130,6 +130,38 @@ export default function EventsPage() {
     }
   };
 
+  const [togglingRegIds, setTogglingRegIds] = useState<Record<string, boolean>>({});
+
+  const handleToggleRegistration = async (eventId: string) => {
+    const ev = events.find((e) => e._id === eventId);
+    if (!ev) return;
+    const next = !ev.registration_open;
+
+    // Optimistic update
+    setTogglingRegIds((p) => ({ ...p, [eventId]: true }));
+    setEvents((prev) => prev.map((e) => (e._id === eventId ? { ...e, registration_open: next } : e)));
+
+    try {
+      const res = await eventsApi.updateEvent(eventId, { registration_open: next });
+      if (!(res.data && res.data.success)) {
+        throw new Error(res.data?.message || 'Failed to toggle registration');
+      }
+      toast.success(`Registration ${next ? 'opened' : 'closed'}`);
+    } catch (err: unknown) {
+      console.error('Toggle registration failed:', err);
+      // rollback
+      setEvents((prev) => prev.map((e) => (e._id === eventId ? { ...e, registration_open: !next } : e)));
+      const msg = err instanceof Error && 'message' in err ? err.message : 'Failed to toggle registration';
+      toast.error(msg);
+    } finally {
+      setTogglingRegIds((p) => {
+        const c = { ...p };
+        delete c[eventId];
+        return c;
+      });
+    }
+  };
+
   // Get status badge color
   const getStatusBadgeColor = (event: Event) => {
     if (event.is_upcoming) {
@@ -512,6 +544,14 @@ export default function EventsPage() {
                       <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
+                    </button>
+                    <button
+                      onClick={() => handleToggleRegistration(event._id)}
+                      className="rounded-md bg-yellow-500 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
+                      disabled={!!togglingRegIds[event._id]}
+                      title="Toggle registration"
+                    >
+                      {event.registration_open ? 'Close Reg' : 'Open Reg'}
                     </button>
                     <button
                       onClick={() => handleDelete(event._id)}

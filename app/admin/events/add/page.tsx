@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import { eventsApi } from "@/services/api";
+import { fileToBase64, validateImageFile } from '@/utils/file';
 import type { SubmitHandler } from "react-hook-form";
 
 
@@ -58,47 +59,50 @@ export default function AddEventPage() {
 
 
   const onSubmit: SubmitHandler<EventFormData> = async (data: EventFormData) => {
-      setIsSubmitting(true);
-      try {
-        const formData = new FormData();
-        
-        // Append form fields
-        Object.entries(data).forEach(([key, value]) => {
-          if (key === "contactInfo") {
-            formData.append(key, JSON.stringify(value));
-          } else if (typeof value === "boolean") {
-            formData.append(key, value.toString());
-          } else if (value !== undefined && value !== null) {
-            formData.append(key, value.toString());
-          }
-        });
-  
-        // Append files if present
-        if (eventBanner) {
-          formData.append("eventBanner", eventBanner);
-        }
-        if (poster) {
-          formData.append("poster", poster);
-        }
-  
-        const response = await eventsApi.createEvent(formData);
-        
-        if (response.data && response.data.success) {
-          toast.success("Event created successfully");
-          router.push("/admin/events");
-        } else {
-          toast.error("Failed to create event");
-        }
-      } catch (err: unknown) {
-        console.error("Error creating event:", err);
-        const errorMessage = err instanceof Error && 'response' in err 
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message 
-          : "Failed to create event";
-        toast.error(errorMessage || "Failed to create event");
-      } finally {
-        setIsSubmitting(false);
+    setIsSubmitting(true);
+    try {
+      // Build JSON payload. Convert images to base64 if provided.
+  const payload: unknown = { ...data };
+  const payloadObj = payload as Record<string, unknown>;
+
+  // Convert booleans to actual booleans (react-hook-form may give strings)
+  payloadObj.is_upcoming = Boolean(data.is_upcoming);
+  payloadObj.registration_open = Boolean(data.registration_open);
+
+      // Contact info is already an array
+
+      // Validate & convert images
+      if (eventBanner) {
+        const imgErr = validateImageFile(eventBanner);
+        if (imgErr) throw new Error(imgErr);
+  payloadObj.eventBanner = await fileToBase64(eventBanner);
       }
-    };
+      if (poster) {
+        const imgErr = validateImageFile(poster);
+        if (imgErr) throw new Error(imgErr);
+        payloadObj.poster = await fileToBase64(poster);
+      }
+
+      const response = await eventsApi.createEventJson(payloadObj);
+
+      if (response.data && response.data.success) {
+        toast.success("Event created successfully");
+        router.push("/admin/events");
+      } else {
+        toast.error(response.data?.message || "Failed to create event");
+      }
+    } catch (err: unknown) {
+      console.error("Error creating event:", err);
+      const errorMessage = err instanceof Error && 'message' in err
+        ? (err as Error).message
+        : err && typeof err === 'object' && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : "Failed to create event";
+      toast.error(errorMessage || "Failed to create event");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-6">

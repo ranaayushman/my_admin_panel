@@ -110,6 +110,7 @@ export const eventsApi = {
   },
   
   createEvent: (formData: FormData) => {
+    // kept for backward compatibility (multipart)
     return apiClient.post(getApiEndpoint('/events'), formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -117,16 +118,32 @@ export const eventsApi = {
     });
   },
   
-  updateEvent: (id: string, formData: FormData) => {
-    return apiClient.put(getApiEndpoint(`/events/${id}`), formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  // JSON-based create/update (preferred): send base64 image strings in JSON
+  createEventJson: (payload: any) => {
+    return apiClient.post(getApiEndpoint('/events'), payload);
+  },
+
+  updateEvent: (id: string, formDataOrJson: any) => {
+    // if it's FormData, send multipart, otherwise send JSON
+    if (formDataOrJson instanceof FormData) {
+      return apiClient.put(getApiEndpoint(`/events/${id}`), formDataOrJson, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    }
+    return apiClient.put(getApiEndpoint(`/events/${id}`), formDataOrJson);
   },
   
   deleteEvent: (id: string) => {
     return apiClient.delete(getApiEndpoint(`/events/${id}`));
+  },
+  
+  // Contact info endpoints
+  getContact: (eventId: string) => {
+    return apiClient.get(getApiEndpoint(`/events/${eventId}/contact`));
+  },
+
+  updateContact: (eventId: string, contactInfo: Array<any>) => {
+    return apiClient.put(getApiEndpoint(`/events/${eventId}/contact`), { contactInfo });
   },
   
   getEventParticipants: (eventId: string) => {
