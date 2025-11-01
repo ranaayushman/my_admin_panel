@@ -116,7 +116,8 @@ export default function EditEventPage() {
   const onSubmit: SubmitHandler<EventFormData> = async (data: EventFormData) => {
     setIsSubmitting(true);
     try {
-      const payload: any = { ...data };
+      // Use a safe partial payload type instead of `any` to satisfy eslint
+      const payload: Partial<EventFormData> & { [key: string]: unknown } = { ...data };
 
       payload.is_upcoming = Boolean(data.is_upcoming);
       payload.registration_open = Boolean(data.registration_open);
