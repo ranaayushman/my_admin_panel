@@ -32,6 +32,8 @@ const departments = [
 
 // Designations aligned to your categorization
 const newDesignations = [
+  //Founders
+  "Founder",
   // Core Team
   "Organizer",
   "PR and Mangement Lead", // note: keeping provided spelling
