@@ -3,157 +3,226 @@ import { getApiEndpoint } from '@/utils/api';
 import Cookies from 'js-cookie';
 import { AuthResponse, LoginCredentials, EventParticipantsResponse } from '@/types';
 
-// Create an axios instance with default config
+// -------------------------------------------------------------------
+// Axios instance
+// -------------------------------------------------------------------
 const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true, 
+  withCredentials: true,
 });
 
-// Add a request interceptor to attach the auth token to requests
+// Attach auth token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = Cookies.get('access_token'); 
+    const token = Cookies.get('access_token');
     if (token && config.headers) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Auth API services
+// -------------------------------------------------------------------
+// AUTH API
+// -------------------------------------------------------------------
 export const authApi = {
   login: (credentials: LoginCredentials) => {
     return apiClient.post<AuthResponse>(
-      getApiEndpoint('/login'), 
+      getApiEndpoint('/login'),
       credentials
     );
   },
-  
+
   logout: () => {
     return apiClient.post(getApiEndpoint('/logout'));
   },
-  
-  // Add more auth-related API calls here
 };
 
-// Users API services (for admin operations)
+// -------------------------------------------------------------------
+// USERS API (ADMIN)
+// -------------------------------------------------------------------
 export const usersApi = {
   getAllUsers: (config?: AxiosRequestConfig) => {
-    return apiClient.get(getApiEndpoint('users'), config);
+    return apiClient.get(getApiEndpoint('/users'), config);
   },
-  
+
   getUserById: (id: string) => {
-    return apiClient.get(getApiEndpoint(`users/${id}`));
+    return apiClient.get(getApiEndpoint(`/users/${id}`));
   },
-  
+
   createUser: (userData: any) => {
-    return apiClient.post(getApiEndpoint('users'), userData);
+    return apiClient.post(getApiEndpoint('/users'), userData);
   },
-  
+
   updateUser: (id: string, userData: any) => {
-    return apiClient.put(getApiEndpoint(`users/${id}`), userData);
+    return apiClient.put(getApiEndpoint(`/users/${id}`), userData);
   },
-  
+
   deleteUser: (id: string) => {
-    return apiClient.delete(getApiEndpoint(`users/${id}`));
+    return apiClient.delete(getApiEndpoint(`/users/${id}`));
   },
-  
-  // Add more user-related API calls here
 };
 
-// Members API services
+// -------------------------------------------------------------------
+// MEMBERS API
+// -------------------------------------------------------------------
 export const membersApi = {
   getAllMembers: (config?: AxiosRequestConfig) => {
     return apiClient.get(getApiEndpoint('/members/admin/all'), config);
   },
-  
+
   verifyMember: (id: string) => {
     return apiClient.patch(getApiEndpoint(`/members/${id}/verify`));
   },
-  
-  // Toggle the active status of a member
+
   toggleActive: (id: string, isActive: boolean) => {
-    // Assuming backend supports PATCH /members/:id with partial body
-    return apiClient.patch(getApiEndpoint(`/members/toggle-status/${id}`), { isActive });
+    return apiClient.patch(
+      getApiEndpoint(`/members/toggle-status/${id}`),
+      { isActive }
+    );
   },
-  
+
   deleteMember: (id: string) => {
     return apiClient.delete(getApiEndpoint(`/members/hard-delete/${id}`));
   },
-  
+
   createMember: (memberData: any) => {
     return apiClient.post(getApiEndpoint('/members'), memberData);
   },
-  
+
   getMemberById: (id: string) => {
     return apiClient.get(getApiEndpoint(`/members/${id}`));
   },
-  
+
   updateMember: (id: string, memberData: any) => {
     return apiClient.put(getApiEndpoint(`/members/${id}`), memberData);
   },
 };
 
-// Events API services
+// -------------------------------------------------------------------
+// EVENTS API
+// -------------------------------------------------------------------
 export const eventsApi = {
   getAllEvents: (config?: AxiosRequestConfig) => {
     return apiClient.get(getApiEndpoint('/events'), config);
   },
-  
+
   getEventById: (id: string) => {
     return apiClient.get(getApiEndpoint(`/events/${id}`));
   },
-  
+
   createEvent: (formData: FormData) => {
-    // kept for backward compatibility (multipart)
     return apiClient.post(getApiEndpoint('/events'), formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  
-  // JSON-based create/update (preferred): send base64 image strings in JSON
+
   createEventJson: (payload: any) => {
     return apiClient.post(getApiEndpoint('/events'), payload);
   },
 
-  updateEvent: (id: string, formDataOrJson: any) => {
-    // if it's FormData, send multipart, otherwise send JSON
-    if (formDataOrJson instanceof FormData) {
-      return apiClient.put(getApiEndpoint(`/events/${id}`), formDataOrJson, {
+  updateEvent: (id: string, data: any) => {
+    if (data instanceof FormData) {
+      return apiClient.put(getApiEndpoint(`/events/${id}`), data, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
     }
-    return apiClient.put(getApiEndpoint(`/events/${id}`), formDataOrJson);
+    return apiClient.put(getApiEndpoint(`/events/${id}`), data);
   },
-  
+
   deleteEvent: (id: string) => {
     return apiClient.delete(getApiEndpoint(`/events/${id}`));
   },
-  
-  // Contact info endpoints
+
   getContact: (eventId: string) => {
     return apiClient.get(getApiEndpoint(`/events/${eventId}/contact`));
   },
 
-  updateContact: (eventId: string, contactInfo: Array<any>) => {
-    return apiClient.put(getApiEndpoint(`/events/${eventId}/contact`), { contactInfo });
+  updateContact: (eventId: string, contactInfo: any[]) => {
+    return apiClient.put(
+      getApiEndpoint(`/events/${eventId}/contact`),
+      { contactInfo }
+    );
   },
-  
+
   getEventParticipants: (eventId: string) => {
-    return apiClient.get<EventParticipantsResponse>(getApiEndpoint(`/event-participant/sheet/${eventId}`));
+    return apiClient.get<EventParticipantsResponse>(
+      getApiEndpoint(`/event-participant/sheet/${eventId}`)
+    );
   },
 };
 
+// -------------------------------------------------------------------
+// ✅ RECRUITMENT API (FIXED PATHS)
+// -------------------------------------------------------------------
+const recruitmentBase = '/recruitment';
+
+export const recruitmentApi = {
+  createForm: (data: any) => {
+    return apiClient.post(getApiEndpoint(`${recruitmentBase}/forms`), data);
+  },
+
+  getAllForms: () => {
+    return apiClient.get(getApiEndpoint(`${recruitmentBase}/forms`));
+  },
+
+  updateForm: (id: string, data: any) => {
+    return apiClient.put(
+      getApiEndpoint(`${recruitmentBase}/forms/${id}`),
+      data
+    );
+  },
+
+  deleteForm: (id: string) => {
+    return apiClient.delete(
+      getApiEndpoint(`${recruitmentBase}/forms/${id}`)
+    );
+  },
+
+  getActiveForm: () => {
+    return apiClient.get(
+      getApiEndpoint(`${recruitmentBase}/active-form`)
+    );
+  },
+
+  getStats: () => {
+    return apiClient.get(
+      getApiEndpoint(`${recruitmentBase}/stats`)
+    );
+  },
+
+  getAllApplications: (params?: any) => {
+    return apiClient.get(
+      getApiEndpoint(`${recruitmentBase}/applications`),
+      { params }
+    );
+  },
+
+  updateApplicationStatus: (id: string, status: string) => {
+    return apiClient.put(
+      getApiEndpoint(`${recruitmentBase}/applications/${id}`),
+      { status }
+    );
+  },
+
+  getRecruitmentData: (params?: any) => {
+    return apiClient.get(
+      getApiEndpoint(`${recruitmentBase}/getAllRecruitmentData`),
+      { params }
+    );
+  },
+};
+
+// -------------------------------------------------------------------
+// EXPORT CONSOLIDATED API
+// -------------------------------------------------------------------
 export default {
   auth: authApi,
   users: usersApi,
   members: membersApi,
   events: eventsApi,
+  recruitment: recruitmentApi,
 };

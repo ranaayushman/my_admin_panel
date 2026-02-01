@@ -6,6 +6,26 @@ import { useAuth } from "@/context/AuthContext";
 
 // Navigation items for the sidebar
 const navItems = [
+   {
+    name: "Dashboard",
+    href: "/admin/dashboard",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="h-5 w-5"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
+        />
+      </svg>
+    ),
+  },
   {
     name: "Members",
     href: "/admin/members",
@@ -47,8 +67,8 @@ const navItems = [
     ),
   },
   {
-    name: "Dashboard",
-    href: "/admin/dashboard",
+    name: "Recruitment",
+    href: "/admin/recruitment",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -61,11 +81,12 @@ const navItems = [
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"
+          d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 5.472m0 0a9.09 9.09 0 00-3.279 3.298m.944-5.483A.049.049 0 016 15.75c0 .327.025.65.074.968.049.317.132.622.247.91l-.22.285m6-10.49c-1.657 0-3-.895-3-2s1.343-2 3-2 3 .895 3 2-1.343 2-3 2z"
         />
       </svg>
     ),
   },
+ 
   {
     name: "Settings",
     href: "/admin/settings",
@@ -91,6 +112,7 @@ const navItems = [
       </svg>
     ),
   },
+  
 ];
 
 export default function Sidebar() {
@@ -98,7 +120,7 @@ export default function Sidebar() {
   const { logout } = useAuth();
 
   return (
-    <aside className="w-64 bg-gray-800 text-white">
+    <aside className="w-56 bg-gray-800 text-white">
       <div className="p-4">
         <h1 className="text-xl font-bold">GDG Admin Panel</h1>
       </div>
@@ -108,11 +130,10 @@ export default function Sidebar() {
             <li key={item.name}>
               <Link
                 href={item.href}
-                className={`flex items-center rounded-lg px-4 py-2 text-sm ${
-                  pathname === item.href
+                className={`flex items-center rounded-lg px-4 py-2 text-sm ${pathname === item.href
                     ? "bg-indigo-700 text-white"
                     : "text-gray-300 hover:bg-gray-700"
-                }`}
+                  }`}
               >
                 <span className="mr-3">{item.icon}</span>
                 {item.name}
