@@ -6,7 +6,7 @@ import { recruitmentApi } from "@/services/api";
 import { DEFAULT_ROLES_DATA } from "@/constants/recruitmentDefaults";
 import BasicDetails from "@/components/admin/recruitment/create/BasicDetails";
 import DefaultRolesSelector from "@/components/admin/recruitment/create/DefaultRolesSelector";
-import RolesList from "@/components/admin/recruitment/create/RolesList";
+import RolesList, { Role } from "@/components/admin/recruitment/create/RolesList";
 import FormActions from "@/components/admin/recruitment/create/FormActions";
 
 export default function CreateRecruitmentForm() {
@@ -19,7 +19,7 @@ export default function CreateRecruitmentForm() {
         isActive: false,
     });
 
-    const [roles, setRoles] = useState<any[]>([]);
+    const [roles, setRoles] = useState<Role[]>([]);
 
     // --- Helpers ---
 
@@ -49,7 +49,8 @@ export default function CreateRecruitmentForm() {
 
     const updateRole = (index: number, key: string, value: string) => {
         const copy = [...roles];
-        copy[index][key] = value;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (copy[index] as any)[key] = value;
         setRoles(copy);
     };
 
@@ -75,13 +76,14 @@ export default function CreateRecruitmentForm() {
         roleIndex: number,
         fieldIndex: number,
         key: string,
-        value: any
+        value: string | boolean | string[]
     ) => {
         const copy = [...roles];
-        copy[roleIndex].fields[fieldIndex][key] = value;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (copy[roleIndex].fields[fieldIndex] as any)[key] = value;
 
         if (key === "label") {
-            copy[roleIndex].fields[fieldIndex].name = value
+            copy[roleIndex].fields[fieldIndex].name = (value as string)
                 .toLowerCase()
                 .trim()
                 .replace(/[^a-z0-9]+/g, "_")

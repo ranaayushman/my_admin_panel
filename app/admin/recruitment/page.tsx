@@ -6,9 +6,26 @@ import { recruitmentApi } from "@/services/api";
 import StatsOverview from "@/components/admin/recruitment/StatsOverview";
 import FormsTable from "@/components/admin/recruitment/FormsTable";
 
+interface RecruitmentStats {
+    totalApplications?: number;
+    activeForms?: number;
+    inactiveForms?: number;
+    lastUpdated?: string;
+    [key: string]: unknown; // Allow other props
+}
+
+interface RecruitmentForm {
+    _id: string;
+    title: string;
+    isActive: boolean;
+    updatedAt?: string;
+    createdAt: string;
+    [key: string]: unknown;
+}
+
 export default function RecruitmentDashboard() {
-    const [stats, setStats] = useState<any>(null);
-    const [forms, setForms] = useState<any[]>([]);
+    const [stats, setStats] = useState<RecruitmentStats | null>(null);
+    const [forms, setForms] = useState<RecruitmentForm[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -73,10 +90,10 @@ export default function RecruitmentDashboard() {
             {/* ---------- Stats ---------- */}
             <StatsOverview stats={{
                 ...stats,
-                activeForms: forms.filter((f: any) => f.isActive).length,
-                inactiveForms: forms.filter((f: any) => !f.isActive).length,
+                activeForms: forms.filter((f) => f.isActive).length,
+                inactiveForms: forms.filter((f) => !f.isActive).length,
                 lastUpdated: forms.length > 0
-                    ? new Date(Math.max(...forms.map((f: any) => new Date(f.updatedAt || f.createdAt).getTime()))).toLocaleDateString()
+                    ? new Date(Math.max(...forms.map((f) => new Date(f.updatedAt || f.createdAt).getTime()))).toLocaleDateString()
                     : "—"
             }} />
 

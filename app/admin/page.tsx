@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { membersApi, eventsApi, usersApi } from "@/services/api";
-import { 
-  Users, 
-  UserCheck, 
-  Calendar, 
+import {
+  Users,
+  UserCheck,
+  Calendar,
   FileText,
   Plus,
   TrendingUp,
@@ -34,11 +34,7 @@ export default function DashboardPage() {
   type RecentActivityItem = { type: 'user' | 'member'; title: string; time: string };
   const [recentActivity, setRecentActivity] = useState<RecentActivityItem[]>([]);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
     try {
       // Fetch all data in parallel
@@ -60,7 +56,7 @@ export default function DashboardPage() {
       const events = (eventsResponse.data?.events as SimpleEvent[]) || [];
 
       // Count upcoming events
-  const upcomingCount = events.filter((event) => event.is_upcoming).length;
+      const upcomingCount = events.filter((event) => event.is_upcoming).length;
 
       setStats({
         totalUsers: users.length,
@@ -90,24 +86,28 @@ export default function DashboardPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const StatCard = ({ 
-    title, 
-    value, 
-    icon: Icon, 
-    color, 
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    color,
     bgColor,
-    onClick 
-  }: { 
-    title: string; 
-    value: number; 
-    icon: LucideIcon; 
-    color: string; 
+    onClick
+  }: {
+    title: string;
+    value: number;
+    icon: LucideIcon;
+    color: string;
     bgColor: string;
     onClick?: () => void;
   }) => (
-    <div 
+    <div
       onClick={onClick}
       className={`rounded-lg bg-white p-6 shadow-sm border-l-4 ${color} ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
     >
@@ -272,13 +272,11 @@ export default function DashboardPage() {
               <div className="space-y-4">
                 {recentActivity.map((activity, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <div className={`rounded-full p-2 ${
-                      activity.type === 'user' ? 'bg-blue-100' : 'bg-green-100'
-                    }`}>
+                    <div className={`rounded-full p-2 ${activity.type === 'user' ? 'bg-blue-100' : 'bg-green-100'
+                      }`}>
                       {activity.type === 'user' ? (
-                        <Users className={`h-4 w-4 ${
-                          activity.type === 'user' ? 'text-blue-600' : 'text-green-600'
-                        }`} />
+                        <Users className={`h-4 w-4 ${activity.type === 'user' ? 'text-blue-600' : 'text-green-600'
+                          }`} />
                       ) : (
                         <UserCheck className="h-4 w-4 text-green-600" />
                       )}

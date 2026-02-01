@@ -6,7 +6,11 @@ interface BasicDetailsProps {
         generalInstructions: string;
         isActive: boolean;
     };
-    setFormData: (data: any) => void;
+    setFormData: React.Dispatch<React.SetStateAction<{
+        title: string;
+        generalInstructions: string;
+        isActive: boolean;
+    }>>;
 }
 
 function ToggleSwitch({

@@ -6,7 +6,8 @@ import { recruitmentApi } from "@/services/api";
 import { DEFAULT_ROLES_DATA } from "@/constants/recruitmentDefaults";
 import BasicDetails from "@/components/admin/recruitment/create/BasicDetails";
 import DefaultRolesSelector from "@/components/admin/recruitment/create/DefaultRolesSelector";
-import RolesList from "@/components/admin/recruitment/create/RolesList";
+import RolesList, { Role } from "@/components/admin/recruitment/create/RolesList";
+import { useCallback } from "react";
 
 export default function EditRecruitmentForm() {
     const router = useRouter();
@@ -20,7 +21,7 @@ export default function EditRecruitmentForm() {
         isActive: false,
     });
 
-    const [roles, setRoles] = useState<any[]>([]);
+    const [roles, setRoles] = useState<Role[]>([]);
 
     useEffect(() => {
         if (id) {
@@ -28,10 +29,11 @@ export default function EditRecruitmentForm() {
         }
     }, [id]);
 
-    const fetchFormData = async () => {
+    const fetchFormData = useCallback(async () => {
         try {
             // Fetch all forms and find current (no single get endpoint yet)
             const res = await recruitmentApi.getAllForms();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const form = res.data.forms.find((f: any) => f._id === id);
 
             if (form) {
@@ -50,7 +52,7 @@ export default function EditRecruitmentForm() {
         } finally {
             setDataLoading(false);
         }
-    };
+    }, [id, router]);
 
     // --- Helpers (Same as Create) ---
     const isDefaultRoleSelected = (roleName: string) => {
@@ -79,7 +81,8 @@ export default function EditRecruitmentForm() {
 
     const updateRole = (index: number, key: string, value: string) => {
         const copy = [...roles];
-        copy[index][key] = value;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (copy[index] as any)[key] = value;
         setRoles(copy);
     };
 
@@ -105,13 +108,14 @@ export default function EditRecruitmentForm() {
         roleIndex: number,
         fieldIndex: number,
         key: string,
-        value: any
+        value: string | boolean | string[]
     ) => {
         const copy = [...roles];
-        copy[roleIndex].fields[fieldIndex][key] = value;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (copy[roleIndex].fields[fieldIndex] as any)[key] = value;
 
         if (key === "label") {
-            copy[roleIndex].fields[fieldIndex].name = value
+            copy[roleIndex].fields[fieldIndex].name = (value as string)
                 .toLowerCase()
                 .trim()
                 .replace(/[^a-z0-9]+/g, "_")

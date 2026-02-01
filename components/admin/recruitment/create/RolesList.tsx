@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 
-interface Role {
+export interface Role {
     roleName: string;
     description: string;
     fields: Field[];
 }
 
-interface Field {
+export interface Field {
     name: string;
     label: string;
     type: string;
@@ -21,7 +21,7 @@ interface RolesListProps {
     removeRole: (index: number) => void;
     addField: (roleIndex: number) => void;
     removeField: (roleIndex: number, fieldIndex: number) => void;
-    updateField: (roleIndex: number, fieldIndex: number, key: string, value: any) => void;
+    updateField: (roleIndex: number, fieldIndex: number, key: string, value: string | boolean | string[]) => void;
 }
 
 function RoleCard({
@@ -39,7 +39,7 @@ function RoleCard({
     removeRole: (index: number) => void;
     addField: (roleIndex: number) => void;
     removeField: (roleIndex: number, fieldIndex: number) => void;
-    updateField: (roleIndex: number, fieldIndex: number, key: string, value: any) => void;
+    updateField: (roleIndex: number, fieldIndex: number, key: string, value: string | boolean | string[]) => void;
 }) {
     const [isExpanded, setIsExpanded] = useState(false);
 
