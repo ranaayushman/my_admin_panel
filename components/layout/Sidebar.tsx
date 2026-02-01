@@ -6,9 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 
 // Navigation items for the sidebar
 const navItems = [
-   {
+  {
     name: "Dashboard",
-    href: "/admin/dashboard",
+    href: "/admin",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +86,7 @@ const navItems = [
       </svg>
     ),
   },
- 
+
   {
     name: "Settings",
     href: "/admin/settings",
@@ -112,7 +112,7 @@ const navItems = [
       </svg>
     ),
   },
-  
+
 ];
 
 export default function Sidebar() {
@@ -131,8 +131,8 @@ export default function Sidebar() {
               <Link
                 href={item.href}
                 className={`flex items-center rounded-lg px-4 py-2 text-sm ${pathname === item.href
-                    ? "bg-indigo-700 text-white"
-                    : "text-gray-300 hover:bg-gray-700"
+                  ? "bg-indigo-700 text-white"
+                  : "text-gray-300 hover:bg-gray-700"
                   }`}
               >
                 <span className="mr-3">{item.icon}</span>

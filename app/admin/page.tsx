@@ -19,7 +19,7 @@ interface DashboardStats {
   totalUsers: number;
   totalMembers: number;
   totalEvents: number;
-  upcomingEvents: number;
+  activeRecruitmentForms: number;
 }
 
 export default function DashboardPage() {
@@ -28,7 +28,7 @@ export default function DashboardPage() {
     totalUsers: 0,
     totalMembers: 0,
     totalEvents: 0,
-    upcomingEvents: 0,
+    activeRecruitmentForms: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
   type RecentActivityItem = { type: 'user' | 'member'; title: string; time: string };
@@ -48,6 +48,7 @@ export default function DashboardPage() {
       type SimpleUser = { name: string; createdAt: string };
       type SimpleMember = { name: string; createdAt: string };
       type SimpleEvent = { is_upcoming: boolean };
+
       const users = (usersResponse.data?.users as SimpleUser[]) || [];
       const members = (membersResponse.data?.members as SimpleMember[] | { members: SimpleMember[] }) || [] as unknown as SimpleMember[];
       const membersArray: SimpleMember[] = Array.isArray(members)
@@ -55,14 +56,13 @@ export default function DashboardPage() {
         : ((members as { members: SimpleMember[] })?.members || []);
       const events = (eventsResponse.data?.events as SimpleEvent[]) || [];
 
-      // Count upcoming events
-      const upcomingCount = events.filter((event) => event.is_upcoming).length;
+      // Count stats
 
       setStats({
         totalUsers: users.length,
         totalMembers: membersArray.length,
         totalEvents: events.length,
-        upcomingEvents: upcomingCount,
+        activeRecruitmentForms: 0,
       });
 
       // Set recent activity (last 5 items)
@@ -98,6 +98,7 @@ export default function DashboardPage() {
     icon: Icon,
     color,
     bgColor,
+    iconColor,
     onClick
   }: {
     title: string;
@@ -105,6 +106,7 @@ export default function DashboardPage() {
     icon: LucideIcon;
     color: string;
     bgColor: string;
+    iconColor: string;
     onClick?: () => void;
   }) => (
     <div
@@ -119,7 +121,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className={`rounded-full ${bgColor} p-3`}>
-          <Icon className={`h-8 w-8 ${color.replace('border-l', 'text')}`} />
+          <Icon className={`h-8 w-8 ${iconColor}`} />
         </div>
       </div>
     </div>
@@ -142,6 +144,7 @@ export default function DashboardPage() {
             icon={Users}
             color="border-l-blue-500"
             bgColor="bg-blue-50"
+            iconColor="text-blue-500"
             onClick={() => router.push("/admin/users")}
           />
           <StatCard
@@ -150,6 +153,7 @@ export default function DashboardPage() {
             icon={UserCheck}
             color="border-l-green-500"
             bgColor="bg-green-50"
+            iconColor="text-green-500"
             onClick={() => router.push("/admin/members")}
           />
           <StatCard
@@ -158,14 +162,17 @@ export default function DashboardPage() {
             icon={Calendar}
             color="border-l-purple-500"
             bgColor="bg-purple-50"
+            iconColor="text-purple-500"
             onClick={() => router.push("/admin/events")}
           />
           <StatCard
-            title="Upcoming Events"
-            value={stats.upcomingEvents}
-            icon={TrendingUp}
-            color="border-l-orange-500"
-            bgColor="bg-orange-50"
+            title="Active R-Forms"
+            value={stats.activeRecruitmentForms}
+            icon={FileText}
+            color="border-l-pink-500"
+            bgColor="bg-pink-50"
+            iconColor="text-pink-500"
+            onClick={() => router.push("/admin/recruitment/create")}
           />
         </div>
 

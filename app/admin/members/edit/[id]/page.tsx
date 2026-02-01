@@ -36,6 +36,8 @@ const memberSchema = z.object({
   department: z.enum(departments, "Department is required"),
   // Designations aligned to categorization; keep legacy accepted
   designation: z.enum([
+    // Founders
+    "Founder",
     // Core Team
     "Organizer",
     "PR and Mangement Lead",
@@ -45,19 +47,19 @@ const memberSchema = z.object({
     "Content Writer Lead",
     "Video Editor Lead",
     "Graphic Designer Lead",
-    
+
     // Tech Team
     "Web Developer",
     "App Developer",
     "Machine Learning",
     "Technical Member",
-    
+
     // Media Team
     "Video Editor",
     "Graphic Designer",
     "Content Writer",
     "Photographer",
-    
+
     // PR Team
     "PR",
 
@@ -117,14 +119,14 @@ export default function EditMemberPage() {
       setIsLoading(true);
       setError(null);
       try {
-  const response = await membersApi.getMemberById(memberId);
+        const response = await membersApi.getMemberByIdAdmin(memberId);
         console.log("Fetched member response:", response.data);
-        
+
         if (response.data && response.data.success) {
           const member = response.data.member;
           console.log("Member data:", member);
           setCurrentMember(member);
-          
+
           // Reset form with fetched data
           reset({
             name: member.name || "",
@@ -142,8 +144,8 @@ export default function EditMemberPage() {
         }
       } catch (err: unknown) {
         console.error("Error fetching member:", err);
-        const errorMessage = err instanceof Error && 'response' in err 
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message 
+        const errorMessage = err instanceof Error && 'response' in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
           : "Failed to fetch member data";
         setError(errorMessage || "Failed to fetch member data");
         toast.error("Failed to load member data");
@@ -259,9 +261,9 @@ export default function EditMemberPage() {
       });
 
       const response = await membersApi.updateMember(memberId, updateData);
-      
+
       console.log("Update response:", response.data);
-      
+
       if (response.data && response.data.success) {
         toast.success("Member updated successfully");
         router.push("/admin/members");
@@ -270,7 +272,7 @@ export default function EditMemberPage() {
       }
     } catch (err: unknown) {
       console.error("Error updating member:", err);
-      
+
       // Enhanced error logging
       if (err && typeof err === 'object' && 'response' in err) {
         type AxiosErrorLike = { response?: { data?: { message?: string }; status?: number; statusText?: string } };
@@ -278,7 +280,7 @@ export default function EditMemberPage() {
         console.error("Response status:", axiosError.response?.status);
         console.error("Response statusText:", axiosError.response?.statusText);
         console.error("Response data:", axiosError.response?.data);
-        
+
         // Check if it's an authentication error
         if (axiosError.response?.status === 400 || axiosError.response?.status === 401) {
           const errorMsg = axiosError.response?.data?.message || "";
@@ -291,10 +293,10 @@ export default function EditMemberPage() {
             return;
           }
         }
-        
-        const errorMessage = axiosError.response?.data?.message || 
-                           axiosError.response?.statusText || 
-                           "Failed to update member";
+
+        const errorMessage = axiosError.response?.data?.message ||
+          axiosError.response?.statusText ||
+          "Failed to update member";
         toast.error(errorMessage);
       } else {
         const errorMessage = err instanceof Error ? err.message : "Failed to update member";
@@ -476,6 +478,7 @@ export default function EditMemberPage() {
                 <option value="">Select Designation</option>
                 {/* If current designation isn't in the new set, show it as a legacy option */}
                 {currentMember && ![
+                  "Founder",
                   "Organizer",
                   "PR and Mangement Lead",
                   "Web Development Lead",
@@ -494,10 +497,11 @@ export default function EditMemberPage() {
                   "Photographer",
                   "PR",
                 ].includes(currentMember.designation) && (
-                  <option value={currentMember.designation}>{currentMember.designation} (legacy)</option>
-                )}
+                    <option value={currentMember.designation}>{currentMember.designation} (legacy)</option>
+                  )}
                 {[
                   // New designations only for selection
+                  "Founder",
                   "Organizer",
                   "PR and Mangement Lead",
                   "Web Development Lead",
