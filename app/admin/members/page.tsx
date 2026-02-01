@@ -459,7 +459,7 @@ export default function MembersPage() {
                           className="text-blue-400 hover:underline"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <img src="/linkedin.svg" className="w-5 h-5" alt="" />
+                          <Image src="/linkedin.svg" width={20} height={20} className="w-5 h-5" alt="LinkedIn" />
                         </a>
                         {member.github_url && member.github_url !== "NA" && (
                           <a
@@ -469,7 +469,7 @@ export default function MembersPage() {
                             className="text-white hover:underline"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            <img src="/github.svg" className="w-4 h-4 invert" alt="" />
+                            <Image src="/github.svg" width={16} height={16} className="w-4 h-4 invert" alt="GitHub" />
                           </a>
                         )}
                       </div>

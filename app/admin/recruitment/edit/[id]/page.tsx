@@ -23,12 +23,6 @@ export default function EditRecruitmentForm() {
 
     const [roles, setRoles] = useState<Role[]>([]);
 
-    useEffect(() => {
-        if (id) {
-            fetchFormData();
-        }
-    }, [id]);
-
     const fetchFormData = useCallback(async () => {
         try {
             // Fetch all forms and find current (no single get endpoint yet)
@@ -53,6 +47,12 @@ export default function EditRecruitmentForm() {
             setDataLoading(false);
         }
     }, [id, router]);
+
+    useEffect(() => {
+        if (id) {
+            fetchFormData();
+        }
+    }, [id, fetchFormData]);
 
     // --- Helpers (Same as Create) ---
     const isDefaultRoleSelected = (roleName: string) => {

@@ -10,14 +10,13 @@ import { eventsApi } from "@/services/api";
 import { fileToBase64, validateImageFile } from '@/utils/file';
 import { Event } from "@/types";
 import type { SubmitHandler } from "react-hook-form";
+import Image from "next/image";
 import {
   Upload,
   X,
   Image as ImageIcon,
   Calendar,
   Clock,
-  MapPin,
-  Link as LinkIcon,
   User,
   Type,
   ArrowLeft
@@ -306,11 +305,12 @@ export default function EditEventPage() {
               <label className="block text-sm font-medium text-white">Event Banner</label>
               {bannerPreview ? (
                 <div className="group relative h-48 w-full overflow-hidden rounded-lg border border-zinc-800">
-                  <img
+                  <Image
                     src={bannerPreview}
                     alt="Banner Preview"
-                    className="h-full w-full object-cover"
-                  // Handle Next.js Image optimization if it's an external URL
+                    fill
+                    className="object-cover"
+                    unoptimized
                   />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                     <button
@@ -347,10 +347,12 @@ export default function EditEventPage() {
               <label className="block text-sm font-medium text-white">Event Poster</label>
               {posterPreview ? (
                 <div className="group relative h-48 w-full overflow-hidden rounded-lg border border-zinc-800">
-                  <img
+                  <Image
                     src={posterPreview}
                     alt="Poster Preview"
-                    className="h-full w-full object-contain bg-zinc-900"
+                    fill
+                    className="object-contain bg-zinc-900"
+                    unoptimized
                   />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                     <button

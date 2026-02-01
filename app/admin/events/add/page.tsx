@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { eventsApi } from "@/services/api";
 import { fileToBase64, validateImageFile } from '@/utils/file';
 import type { SubmitHandler } from "react-hook-form";
+import Image from "next/image";
 import {
   Upload,
   X,
@@ -204,7 +205,7 @@ export default function AddEventPage() {
               <label className="block text-sm font-medium text-gray-300">Event Banner</label>
               {bannerPreview ? (
                 <div className="group relative h-48 w-full overflow-hidden rounded-lg border border-gray-700">
-                  <img src={bannerPreview} alt="Banner Preview" className="h-full w-full object-cover" />
+                  <Image src={bannerPreview} alt="Banner Preview" fill className="object-cover" unoptimized />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
                     <button
                       type="button"
@@ -239,7 +240,7 @@ export default function AddEventPage() {
               <label className="block text-sm font-medium text-gray-300">Event Poster</label>
               {posterPreview ? (
                 <div className="group relative h-48 w-full overflow-hidden rounded-lg border border-gray-700">
-                  <img src={posterPreview} alt="Poster Preview" className="h-full w-full object-contain bg-[#1a1a1c]" />
+                  <Image src={posterPreview} alt="Poster Preview" fill className="object-contain bg-[#1a1a1c]" unoptimized />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
                     <button
                       type="button"
