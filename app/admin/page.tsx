@@ -10,7 +10,6 @@ import {
   Calendar,
   FileText,
   Plus,
-  TrendingUp,
   Activity
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -37,14 +36,12 @@ export default function DashboardPage() {
   const fetchDashboardData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Fetch all data in parallel
       const [usersResponse, membersResponse, eventsResponse] = await Promise.all([
         usersApi.getAllUsers().catch(() => ({ data: { users: [] } })),
         membersApi.getAllMembers().catch(() => ({ data: { members: [] } })),
         eventsApi.getAllEvents().catch(() => ({ data: { events: [] } })),
       ]);
 
-      // Calculate stats
       type SimpleUser = { name: string; createdAt: string };
       type SimpleMember = { name: string; createdAt: string };
       type SimpleEvent = { is_upcoming: boolean };
@@ -56,8 +53,6 @@ export default function DashboardPage() {
         : ((members as { members: SimpleMember[] })?.members || []);
       const events = (eventsResponse.data?.events as SimpleEvent[]) || [];
 
-      // Count stats
-
       setStats({
         totalUsers: users.length,
         totalMembers: membersArray.length,
@@ -65,7 +60,6 @@ export default function DashboardPage() {
         activeRecruitmentForms: 0,
       });
 
-      // Set recent activity (last 5 items)
       const recentItems: RecentActivityItem[] = [
         ...users.slice(-3).map((u): RecentActivityItem => ({
           type: 'user',
@@ -111,12 +105,12 @@ export default function DashboardPage() {
   }) => (
     <div
       onClick={onClick}
-      className={`rounded-lg bg-white p-6 shadow-sm border-l-4 ${color} ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+      className={`rounded-lg bg-[#18181B] border border-zinc-900 p-6 shadow-sm border-l-4 ${color} ${onClick ? 'cursor-pointer hover:shadow-md hover:border-zinc-700 transition-shadow' : ''}`}
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="mt-2 text-3xl font-bold text-gray-900">
+          <p className="text-sm font-medium text-zinc-400">{title}</p>
+          <p className="mt-2 text-3xl font-bold text-white">
             {isLoading ? "..." : value}
           </p>
         </div>
@@ -128,12 +122,12 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-2 text-gray-600">Welcome back! Here&apos;s what&apos;s happening today.</p>
+          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+          <p className="mt-2 text-zinc-400">Welcome back! Here&apos;s what&apos;s happening today.</p>
         </div>
 
         {/* Stats Cards */}
@@ -143,8 +137,8 @@ export default function DashboardPage() {
             value={stats.totalUsers}
             icon={Users}
             color="border-l-blue-500"
-            bgColor="bg-blue-50"
-            iconColor="text-blue-500"
+            bgColor="bg-blue-500/20"
+            iconColor="text-blue-400"
             onClick={() => router.push("/admin/users")}
           />
           <StatCard
@@ -152,8 +146,8 @@ export default function DashboardPage() {
             value={stats.totalMembers}
             icon={UserCheck}
             color="border-l-green-500"
-            bgColor="bg-green-50"
-            iconColor="text-green-500"
+            bgColor="bg-green-500/20"
+            iconColor="text-green-400"
             onClick={() => router.push("/admin/members")}
           />
           <StatCard
@@ -161,8 +155,8 @@ export default function DashboardPage() {
             value={stats.totalEvents}
             icon={Calendar}
             color="border-l-purple-500"
-            bgColor="bg-purple-50"
-            iconColor="text-purple-500"
+            bgColor="bg-purple-500/20"
+            iconColor="text-purple-400"
             onClick={() => router.push("/admin/events")}
           />
           <StatCard
@@ -170,35 +164,35 @@ export default function DashboardPage() {
             value={stats.activeRecruitmentForms}
             icon={FileText}
             color="border-l-pink-500"
-            bgColor="bg-pink-50"
-            iconColor="text-pink-500"
+            bgColor="bg-pink-500/20"
+            iconColor="text-pink-400"
             onClick={() => router.push("/admin/recruitment/create")}
           />
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Quick Actions */}
-          <div className="rounded-lg bg-white p-6 shadow-sm">
+          <div className="rounded-lg bg-[#18181B] border border-zinc-900 p-6 shadow-sm">
             <div className="flex items-center mb-4">
-              <Activity className="h-5 w-5 text-indigo-600 mr-2" />
-              <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
+              <Activity className="h-5 w-5 text-blue-500 mr-2" />
+              <h2 className="text-lg font-semibold text-white">Quick Actions</h2>
             </div>
             <div className="space-y-3">
               <button
                 onClick={() => router.push("/admin/events/add")}
-                className="w-full flex items-center justify-between rounded-lg border border-gray-200 p-4 hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-between rounded-lg border border-zinc-800 p-4 hover:bg-[#141417] transition-colors"
               >
                 <div className="flex items-center">
-                  <div className="rounded-full bg-indigo-100 p-2 mr-3">
-                    <Plus className="h-5 w-5 text-indigo-600" />
+                  <div className="rounded-full bg-blue-500/20 p-2 mr-3">
+                    <Plus className="h-5 w-5 text-blue-400" />
                   </div>
                   <div className="text-left">
-                    <p className="font-medium text-gray-900">Create New Event</p>
-                    <p className="text-sm text-gray-500">Add a new event to the system</p>
+                    <p className="font-medium text-white">Create New Event</p>
+                    <p className="text-sm text-zinc-500">Add a new event to the system</p>
                   </div>
                 </div>
                 <svg
-                  className="h-5 w-5 text-gray-400"
+                  className="h-5 w-5 text-zinc-500"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -209,19 +203,19 @@ export default function DashboardPage() {
 
               <button
                 onClick={() => router.push("/admin/members/add")}
-                className="w-full flex items-center justify-between rounded-lg border border-gray-200 p-4 hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-between rounded-lg border border-zinc-800 p-4 hover:bg-[#141417] transition-colors"
               >
                 <div className="flex items-center">
-                  <div className="rounded-full bg-green-100 p-2 mr-3">
-                    <Plus className="h-5 w-5 text-green-600" />
+                  <div className="rounded-full bg-green-500/20 p-2 mr-3">
+                    <Plus className="h-5 w-5 text-green-400" />
                   </div>
                   <div className="text-left">
-                    <p className="font-medium text-gray-900">Add New Member</p>
-                    <p className="text-sm text-gray-500">Add a team member</p>
+                    <p className="font-medium text-white">Add New Member</p>
+                    <p className="text-sm text-zinc-500">Add a team member</p>
                   </div>
                 </div>
                 <svg
-                  className="h-5 w-5 text-gray-400"
+                  className="h-5 w-5 text-zinc-500"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -232,19 +226,19 @@ export default function DashboardPage() {
 
               <button
                 onClick={() => router.push("/admin/events")}
-                className="w-full flex items-center justify-between rounded-lg border border-gray-200 p-4 hover:bg-gray-50 transition-colors"
+                className="w-full flex items-center justify-between rounded-lg border border-zinc-800 p-4 hover:bg-[#141417] transition-colors"
               >
                 <div className="flex items-center">
-                  <div className="rounded-full bg-purple-100 p-2 mr-3">
-                    <FileText className="h-5 w-5 text-purple-600" />
+                  <div className="rounded-full bg-purple-500/20 p-2 mr-3">
+                    <FileText className="h-5 w-5 text-purple-400" />
                   </div>
                   <div className="text-left">
-                    <p className="font-medium text-gray-900">View All Events</p>
-                    <p className="text-sm text-gray-500">Manage event registrations</p>
+                    <p className="font-medium text-white">View All Events</p>
+                    <p className="text-sm text-zinc-500">Manage event registrations</p>
                   </div>
                 </div>
                 <svg
-                  className="h-5 w-5 text-gray-400"
+                  className="h-5 w-5 text-zinc-500"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -256,43 +250,43 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Activity */}
-          <div className="rounded-lg bg-white p-6 shadow-sm">
+          <div className="rounded-lg bg-[#18181B] border border-zinc-900 p-6 shadow-sm">
             <div className="flex items-center mb-4">
-              <Activity className="h-5 w-5 text-indigo-600 mr-2" />
-              <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+              <Activity className="h-5 w-5 text-blue-500 mr-2" />
+              <h2 className="text-lg font-semibold text-white">Recent Activity</h2>
             </div>
             {isLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="animate-pulse flex items-center space-x-3">
-                    <div className="rounded-full bg-gray-200 h-10 w-10"></div>
+                    <div className="rounded-full bg-zinc-800 h-10 w-10"></div>
                     <div className="flex-1 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 bg-zinc-800 rounded w-3/4"></div>
+                      <div className="h-3 bg-zinc-800 rounded w-1/2"></div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : recentActivity.length === 0 ? (
-              <p className="text-sm text-gray-500 text-center py-8">No recent activity</p>
+              <p className="text-sm text-zinc-500 text-center py-8">No recent activity</p>
             ) : (
               <div className="space-y-4">
                 {recentActivity.map((activity, index) => (
                   <div key={index} className="flex items-start space-x-3">
-                    <div className={`rounded-full p-2 ${activity.type === 'user' ? 'bg-blue-100' : 'bg-green-100'
+                    <div className={`rounded-full p-2 ${activity.type === 'user' ? 'bg-blue-500/20' : 'bg-green-500/20'
                       }`}>
                       {activity.type === 'user' ? (
-                        <Users className={`h-4 w-4 ${activity.type === 'user' ? 'text-blue-600' : 'text-green-600'
+                        <Users className={`h-4 w-4 ${activity.type === 'user' ? 'text-blue-400' : 'text-green-400'
                           }`} />
                       ) : (
-                        <UserCheck className="h-4 w-4 text-green-600" />
+                        <UserCheck className="h-4 w-4 text-green-400" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-white truncate">
                         {activity.title}
                       </p>
-                      <p className="text-xs text-gray-500">{activity.time}</p>
+                      <p className="text-xs text-zinc-500">{activity.time}</p>
                     </div>
                   </div>
                 ))}
@@ -302,11 +296,11 @@ export default function DashboardPage() {
         </div>
 
         {/* System Status */}
-        <div className="mt-6 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white shadow-lg">
+        <div className="mt-6 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg font-semibold">System Status: All systems operational</h3>
-              <p className="mt-1 text-sm text-indigo-100">
+              <p className="mt-1 text-sm text-blue-100">
                 Last updated: {new Date().toLocaleString()}
               </p>
             </div>

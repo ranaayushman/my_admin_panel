@@ -12,11 +12,12 @@ import type { SubmitHandler } from "react-hook-form";
 import Image from "next/image";
 import { ArrowLeft, Upload, X, ImageIcon } from "lucide-react";
 
-// Departments aligned with backend values (include EE instead of EEE)
+// Departments aligned with backend values
 const departments = [
   "CSE",
   "CSE-DS",
   "CSE-AI/ML",
+  "CSE-CS",
   "IT",
   "ECE",
   "EE",
@@ -25,69 +26,52 @@ const departments = [
   "CHE",
   "BCA",
   "MCA",
-  // Include both variants to safely handle legacy data and new entries
+  "BT",
   "Other",
   "OTHER",
+] as const;
+
+// Designations
+const designationEnum = [
+  // Founders
+  "Founder",
+  // Core Team
+  "Organizer",
+  "PR and Mangement Lead",
+  "Web Development Lead",
+  "App Development Lead",
+  "Machine Learning Lead",
+  "Content Writer Lead",
+  "Video Editor Lead",
+  "Graphic Designer Lead",
+  // Tech Team
+  "Web Developer",
+  "App Developer",
+  "Machine Learning",
+  "Technical Member",
+  // Media Team
+  "Video Editor",
+  "Graphic Designer",
+  "Content Writer",
+  "Photographer",
+  // PR Team
+  "PR",
+  // Legacy
+  "PR and Management Lead",
+  "Machine Learning Engineer",
+  "Tech Member",
 ] as const;
 
 const memberSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email_id: z.string().email("Valid email is required"),
-  department: z.enum(departments, "Department is required"),
-  // Designations aligned to categorization; keep legacy accepted
-  designation: z.enum([
-    // Founders
-    "Founder",
-    // Core Team
-    "Organizer",
-    "PR and Mangement Lead",
-    "Web Development Lead",
-    "App Development Lead",
-    "Machine Learning Lead",
-    "Content Writer Lead",
-    "Video Editor Lead",
-    "Graphic Designer Lead",
-
-    // Tech Team
-    "Web Developer",
-    "App Developer",
-    "Machine Learning",
-    "Technical Member",
-
-    // Media Team
-    "Video Editor",
-    "Graphic Designer",
-    "Content Writer",
-    "Photographer",
-
-    // PR Team
-    "PR",
-
-    // Legacy
-    "PR and Management Lead",
-    "Machine Learning Engineer",
-    "Tech Member",
-  ] as const, "Designation is required"),
+  mobile_number: z.string().optional(),
+  department: z.string().min(1, "Department is required"),
+  designation: z.string().min(1, "Designation is required"),
   batch: z.string().min(1, "Batch is required"),
   bio: z.string().min(1, "Bio is required"),
-  github_url: z.string().optional().refine((val) => {
-    if (!val || val.trim() === "") return true;
-    try {
-      new URL(val);
-      return true;
-    } catch {
-      return false;
-    }
-  }, "Valid GitHub URL is required"),
-  linkedin_url: z.string().optional().refine((val) => {
-    if (!val || val.trim() === "") return true;
-    try {
-      new URL(val);
-      return true;
-    } catch {
-      return false;
-    }
-  }, "Valid LinkedIn URL is required"),
+  github_url: z.string().optional().or(z.literal("")),
+  linkedin_url: z.string().optional().or(z.literal("")),
 });
 
 type MemberFormData = z.infer<typeof memberSchema>;
@@ -120,17 +104,16 @@ export default function EditMemberPage() {
       setError(null);
       try {
         const response = await membersApi.getMemberByIdAdmin(memberId);
-        console.log("Fetched member response:", response.data);
 
         if (response.data && response.data.success) {
           const member = response.data.member;
-          console.log("Member data:", member);
           setCurrentMember(member);
 
           // Reset form with fetched data
           reset({
             name: member.name || "",
             email_id: member.email_id || "",
+            mobile_number: member.mobile_number || "",
             department: member.department || "",
             designation: member.designation || "",
             batch: member.batch || "",
@@ -228,6 +211,7 @@ export default function EditMemberPage() {
       type UpdateMemberPayload = {
         name: string;
         email_id: string;
+        mobile_number?: string;
         department: string;
         designation: string;
         batch: string;
@@ -236,9 +220,11 @@ export default function EditMemberPage() {
         linkedin_url: string;
         profile_image?: string;
       };
+
       const updateData: UpdateMemberPayload = {
         name: data.name,
         email_id: data.email_id,
+        mobile_number: data.mobile_number,
         department: data.department,
         designation: data.designation,
         batch: data.batch,
@@ -252,17 +238,7 @@ export default function EditMemberPage() {
         updateData.profile_image = base64Image;
       }
 
-      console.log("Sending update request with data:", {
-        memberId: memberId,
-        data: {
-          ...updateData,
-          profile_image: base64Image ? `base64 string (length: ${base64Image.length})` : "no image"
-        }
-      });
-
       const response = await membersApi.updateMember(memberId, updateData);
-
-      console.log("Update response:", response.data);
 
       if (response.data && response.data.success) {
         toast.success("Member updated successfully");
@@ -272,36 +248,10 @@ export default function EditMemberPage() {
       }
     } catch (err: unknown) {
       console.error("Error updating member:", err);
-
-      // Enhanced error logging
-      if (err && typeof err === 'object' && 'response' in err) {
-        type AxiosErrorLike = { response?: { data?: { message?: string }; status?: number; statusText?: string } };
-        const axiosError = err as AxiosErrorLike;
-        console.error("Response status:", axiosError.response?.status);
-        console.error("Response statusText:", axiosError.response?.statusText);
-        console.error("Response data:", axiosError.response?.data);
-
-        // Check if it's an authentication error
-        if (axiosError.response?.status === 400 || axiosError.response?.status === 401) {
-          const errorMsg = axiosError.response?.data?.message || "";
-          if (errorMsg.toLowerCase().includes("login") || errorMsg.toLowerCase().includes("auth")) {
-            toast.error("Session expired. Please login again.");
-            // Redirect to login page after 2 seconds
-            setTimeout(() => {
-              router.push("/login");
-            }, 2000);
-            return;
-          }
-        }
-
-        const errorMessage = axiosError.response?.data?.message ||
-          axiosError.response?.statusText ||
-          "Failed to update member";
-        toast.error(errorMessage);
-      } else {
-        const errorMessage = err instanceof Error ? err.message : "Failed to update member";
-        toast.error(errorMessage);
-      }
+      const errorMessage = err instanceof Error && 'response' in err
+        ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+        : "Failed to update member";
+      toast.error(errorMessage || "Failed to update member");
     } finally {
       setIsSubmitting(false);
     }
@@ -311,8 +261,8 @@ export default function EditMemberPage() {
     return (
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-indigo-600"></div>
-          <span className="ml-3 text-lg">Loading member data...</span>
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+          <span className="ml-3 text-lg text-white">Loading member data...</span>
         </div>
       </div>
     );
@@ -324,7 +274,7 @@ export default function EditMemberPage() {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <svg
-              className="mx-auto h-12 w-12 text-red-400"
+              className="mx-auto h-12 w-12 text-red-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -336,11 +286,11 @@ export default function EditMemberPage() {
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 14c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
-            <h3 className="mt-2 text-lg font-medium text-gray-900">Error loading member</h3>
-            <p className="mt-1 text-sm text-red-500">{error || "Member not found"}</p>
+            <h3 className="mt-2 text-lg font-medium text-white">Error loading member</h3>
+            <p className="mt-1 text-sm text-red-400">{error || "Member not found"}</p>
             <button
               onClick={() => router.push("/admin/members")}
-              className="mt-4 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
+              className="mt-4 inline-flex items-center rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-600"
             >
               Back to Members
             </button>
@@ -358,31 +308,31 @@ export default function EditMemberPage() {
             <button
               type="button"
               onClick={() => router.push("/admin/members")}
-              className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
+              className="inline-flex items-center rounded-md border border-zinc-900 bg-[#18181B] px-3 py-1.5 text-sm text-white hover:bg-[#141417]"
             >
               <ArrowLeft className="mr-1.5 h-4 w-4" /> Back
             </button>
-            <h1 className="text-2xl font-semibold text-gray-900">Edit Member</h1>
+            <h1 className="text-2xl font-semibold text-white">Edit Member</h1>
           </div>
         </div>
-        <p className="mt-2 text-sm text-gray-600">
-          Editing: <span className="font-medium">{currentMember.name}</span>
+        <p className="mt-2 text-sm text-zinc-400">
+          Editing: <span className="font-medium text-white">{currentMember.name}</span>
         </p>
       </div>
 
-      <div className="rounded-lg bg-white p-6 shadow form-container">
+      <div className="rounded-lg border border-zinc-900 bg-[#0b0b0c] p-6 shadow-sm form-container">
         {/* Profile Image Section */}
         <div className="mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-3">Profile Image</h3>
+          <h3 className="text-lg font-medium text-white mb-3">Profile Image</h3>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:items-start">
             <div className="order-2 md:order-1">
-              <div className="h-28 w-28 overflow-hidden rounded-full border-2 border-gray-200">
+              <div className="h-28 w-28 overflow-hidden rounded-full border-2 border-zinc-700">
                 {newPreview ? (
                   <Image src={newPreview} alt="New Profile" width={112} height={112} className="h-full w-full object-cover" unoptimized={true} />
                 ) : currentMember.profile_image?.url ? (
                   <Image src={currentMember.profile_image.url} alt={currentMember.name} width={112} height={112} className="h-full w-full object-cover" unoptimized={true} />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-gray-50 text-gray-400">
+                  <div className="flex h-full w-full items-center justify-center bg-[#141417] text-zinc-500">
                     <ImageIcon className="h-8 w-8" />
                   </div>
                 )}
@@ -391,7 +341,7 @@ export default function EditMemberPage() {
                 <button
                   type="button"
                   onClick={handleRemoveNewImage}
-                  className="mt-2 inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-100"
+                  className="mt-2 inline-flex items-center rounded-md bg-red-500/20 px-2 py-1 text-xs font-medium text-red-400 hover:bg-red-500/30"
                 >
                   <X className="mr-1 h-3 w-3" /> Remove
                 </button>
@@ -403,11 +353,11 @@ export default function EditMemberPage() {
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
                 onDrop={onDrop}
-                className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${dragActive ? 'border-indigo-400 bg-indigo-50' : 'border-gray-300 hover:bg-gray-50'}`}
+                className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${dragActive ? 'border-blue-500 bg-blue-500/10' : 'border-zinc-700 hover:bg-[#141417]'}`}
               >
-                <Upload className="mb-2 h-6 w-6 text-gray-500" />
-                <span className="text-sm text-gray-700">{newPreview ? 'Change profile image' : 'Click to upload or drag & drop'}</span>
-                <span className="mt-1 text-xs text-gray-500">PNG, JPG, JPEG up to 5MB</span>
+                <Upload className="mb-2 h-6 w-6 text-zinc-400" />
+                <span className="text-sm text-white">{newPreview ? 'Change profile image' : 'Click to upload or drag & drop'}</span>
+                <span className="mt-1 text-xs text-zinc-500">PNG, JPG, JPEG up to 5MB</span>
                 <input id="profile_image" type="file" accept="image/*" onChange={onInputChange} className="hidden" />
               </label>
             </div>
@@ -418,41 +368,55 @@ export default function EditMemberPage() {
           {/* Basic Information */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-medium text-white">
                 Full Name *
               </label>
               <input
                 type="text"
                 id="name"
                 {...register("name")}
-                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-zinc-700 bg-[#141417] text-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="e.g., Ayushman Rana"
               />
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
+              {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="email_id" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email_id" className="block text-sm font-medium text-white">
                 Email Address *
               </label>
               <input
                 type="email"
                 id="email_id"
                 {...register("email_id")}
-                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-zinc-700 bg-[#141417] text-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 placeholder="name@example.com"
               />
-              {errors.email_id && <p className="mt-1 text-sm text-red-600">{errors.email_id.message}</p>}
+              {errors.email_id && <p className="mt-1 text-sm text-red-500">{errors.email_id.message}</p>}
+            </div>
+
+            <div>
+              <label htmlFor="mobile_number" className="block text-sm font-medium text-white">
+                Mobile Number
+              </label>
+              <input
+                type="text"
+                id="mobile_number"
+                {...register("mobile_number")}
+                className="mt-1 block w-full rounded-md border border-zinc-700 bg-[#141417] text-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="e.g. 9876543210"
+              />
+              {errors.mobile_number && <p className="mt-1 text-sm text-red-500">{errors.mobile_number.message}</p>}
             </div>
 
             <div className="custom-select">
-              <label htmlFor="department" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="department" className="block text-sm font-medium text-white">
                 Department *
               </label>
               <select
                 id="department"
                 {...register("department")}
-                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-zinc-700 bg-[#141417] text-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 style={{ zIndex: 1000, position: 'relative' }}
               >
                 <option value="">Select Department</option>
@@ -462,72 +426,33 @@ export default function EditMemberPage() {
                   </option>
                 ))}
               </select>
-              {errors.department && <p className="mt-1 text-sm text-red-600">{errors.department.message}</p>}
+              {errors.department && <p className="mt-1 text-sm text-red-500">{errors.department.message}</p>}
             </div>
 
             <div className="custom-select">
-              <label htmlFor="designation" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="designation" className="block text-sm font-medium text-white">
                 Designation *
               </label>
               <select
                 id="designation"
                 {...register("designation")}
-                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm bg-white focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-zinc-700 bg-[#141417] text-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 style={{ zIndex: 1000, position: 'relative' }}
               >
                 <option value="">Select Designation</option>
                 {/* If current designation isn't in the new set, show it as a legacy option */}
-                {currentMember && ![
-                  "Founder",
-                  "Organizer",
-                  "PR and Mangement Lead",
-                  "Web Development Lead",
-                  "App Development Lead",
-                  "Machine Learning Lead",
-                  "Content Writer Lead",
-                  "Video Editor Lead",
-                  "Graphic Designer Lead",
-                  "Web Developer",
-                  "App Developer",
-                  "Machine Learning",
-                  "Technical Member",
-                  "Video Editor",
-                  "Graphic Designer",
-                  "Content Writer",
-                  "Photographer",
-                  "PR",
-                ].includes(currentMember.designation) && (
-                    <option value={currentMember.designation}>{currentMember.designation} (legacy)</option>
-                  )}
-                {[
-                  // New designations only for selection
-                  "Founder",
-                  "Organizer",
-                  "PR and Mangement Lead",
-                  "Web Development Lead",
-                  "App Development Lead",
-                  "Machine Learning Lead",
-                  "Content Writer Lead",
-                  "Video Editor Lead",
-                  "Graphic Designer Lead",
-                  "Web Developer",
-                  "App Developer",
-                  "Machine Learning",
-                  "Technical Member",
-                  "Video Editor",
-                  "Graphic Designer",
-                  "Content Writer",
-                  "Photographer",
-                  "PR",
-                ].map((d) => (
+                {currentMember && !designationEnum.some(d => d === currentMember.designation) && (
+                  <option value={currentMember.designation}>{currentMember.designation} (legacy)</option>
+                )}
+                {designationEnum.map((d) => (
                   <option key={d} value={d}>{d}</option>
                 ))}
               </select>
-              {errors.designation && <p className="mt-1 text-sm text-red-600">{errors.designation.message}</p>}
+              {errors.designation && <p className="mt-1 text-sm text-red-500">{errors.designation.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="batch" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="batch" className="block text-sm font-medium text-white">
                 Batch *
               </label>
               <input
@@ -535,13 +460,13 @@ export default function EditMemberPage() {
                 id="batch"
                 placeholder="e.g., 2024"
                 {...register("batch")}
-                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-zinc-700 bg-[#141417] text-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
-              {errors.batch && <p className="mt-1 text-sm text-red-600">{errors.batch.message}</p>}
+              {errors.batch && <p className="mt-1 text-sm text-red-500">{errors.batch.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="github_url" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="github_url" className="block text-sm font-medium text-white">
                 GitHub URL
               </label>
               <input
@@ -549,13 +474,13 @@ export default function EditMemberPage() {
                 id="github_url"
                 placeholder="https://github.com/username"
                 {...register("github_url")}
-                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-zinc-700 bg-[#141417] text-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
-              {errors.github_url && <p className="mt-1 text-sm text-red-600">{errors.github_url.message}</p>}
+              {errors.github_url && <p className="mt-1 text-sm text-red-500">{errors.github_url.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="linkedin_url" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="linkedin_url" className="block text-sm font-medium text-white">
                 LinkedIn URL
               </label>
               <input
@@ -563,42 +488,40 @@ export default function EditMemberPage() {
                 id="linkedin_url"
                 placeholder="https://linkedin.com/in/username"
                 {...register("linkedin_url")}
-                className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-zinc-700 bg-[#141417] text-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
-              {errors.linkedin_url && <p className="mt-1 text-sm text-red-600">{errors.linkedin_url.message}</p>}
+              {errors.linkedin_url && <p className="mt-1 text-sm text-red-500">{errors.linkedin_url.message}</p>}
             </div>
           </div>
 
           {/* Bio */}
           <div>
-            <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="bio" className="block text-sm font-medium text-white">
               Bio *
             </label>
             <textarea
               id="bio"
               rows={4}
               {...register("bio")}
-              className="mt-1 block w-full rounded-md border text-black border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
+              className="mt-1 block w-full rounded-md border border-zinc-700 bg-[#141417] text-white px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               placeholder="Tell us about yourself..."
             />
-            {errors.bio && <p className="mt-1 text-sm text-red-600">{errors.bio.message}</p>}
+            {errors.bio && <p className="mt-1 text-sm text-red-500">{errors.bio.message}</p>}
           </div>
-
-          {/* Profile Image Upload handled above */}
 
           {/* Submit Button */}
           <div className="flex justify-end space-x-3">
             <button
               type="button"
               onClick={() => router.push("/admin/members")}
-              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+              className="rounded-md border border-zinc-700 bg-[#141417] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-zinc-800"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50"
+              className="inline-flex items-center rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-600 disabled:opacity-50"
             >
               {isSubmitting ? (
                 "Updating..."

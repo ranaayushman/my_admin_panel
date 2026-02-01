@@ -44,14 +44,14 @@ export default function PageHeader({
             {/* Row 1: Title, Stats, Refresh, Add Button */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center">
-                    <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
+                    <h1 className="text-2xl font-semibold text-white">{title}</h1>
 
                     {stats.length > 0 && (
-                        <div className="ml-4 flex items-center space-x-3 text-sm text-gray-600">
+                        <div className="ml-4 flex items-center space-x-3 text-sm">
                             {stats.map((stat) => (
                                 <span
                                     key={stat.key}
-                                    className="text-sm shadow-md text-gray-500 border border-gray-200 p-1 px-2 rounded-full bg-white"
+                                    className="text-sm shadow-md text-white border border-zinc-900 p-1 px-2 rounded-full bg-[#18181B]"
                                 >
                                     {stat.label}: {stat.value}
                                 </span>
@@ -65,7 +65,7 @@ export default function PageHeader({
                         <button
                             aria-label="Refresh"
                             onClick={onRefresh}
-                            className="flex items-center justify-center rounded-full bg-white px-3 py-1 text-sm text-gray-700 shadow-sm hover:bg-gray-50"
+                            className="flex items-center justify-center rounded-full bg-blue-500 px-3 py-1 text-sm text-white shadow-sm hover:bg-[#141417] border border-zinc-900"
                             disabled={isLoading}
                         >
                             <svg
@@ -88,7 +88,7 @@ export default function PageHeader({
                     {addButtonLabel && addButtonHref && (
                         <button
                             onClick={() => router.push(addButtonHref)}
-                            className="flex items-center rounded-full bg-indigo-600 px-8 py-2.5 text-[16px] text-white shadow-sm hover:bg-indigo-700"
+                            className="flex items-center rounded-full bg-blue-500 px-8 py-2.5 text-[16px] text-white shadow-sm hover:bg-blue-600"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -112,16 +112,16 @@ export default function PageHeader({
 
             {/* Row 2: Filters + Search */}
             {(filters.length > 0 || onSearchChange) && (
-                <div className="flex justify-between gap-2 border px-2 bg-white py-2 rounded-full shadow-md">
+                <div className="flex justify-between gap-2 border border-zinc-900 px-2 bg-[#18181B] py-2 rounded-full shadow-md">
                     {filters.length > 0 && onFilterChange && (
                         <div className="flex gap-2">
                             {filters.map((filter) => (
                                 <button
                                     key={filter.key}
                                     onClick={() => onFilterChange(filter.key)}
-                                    className={`rounded-full text-black px-3 py-1 text-sm capitalize ${activeFilter === filter.key
-                                            ? "bg-indigo-100 text-indigo-800 font-medium"
-                                            : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                                    className={`rounded-full text-white px-3 py-1 text-sm capitalize ${activeFilter === filter.key
+                                        ? "bg-blue-500 text-white font-medium"
+                                        : "bg-[#141417] text-white hover:bg-zinc-800"
                                         }`}
                                 >
                                     {filter.label}
@@ -136,7 +136,7 @@ export default function PageHeader({
                             placeholder={searchPlaceholder}
                             value={searchQuery}
                             onChange={(e) => onSearchChange(e.target.value)}
-                            className="rounded-full bg-gray-100 text-black shadow-sm px-4 py-2 focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+                            className="rounded-full bg-[#141417] text-white shadow-sm px-4 py-2 border border-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-500"
                         />
                     )}
                 </div>

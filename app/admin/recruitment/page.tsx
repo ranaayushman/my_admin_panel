@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { recruitmentApi } from "@/services/api";
 import toast from "react-hot-toast";
 import PageHeader from "@/components/admin/PageHeader";
-import FormsTable from "@/components/admin/recruitment/FormsTable";
 
 interface RecruitmentForm {
     _id: string;
@@ -131,16 +130,16 @@ export default function RecruitmentDashboard() {
                         {Array.from({ length: 3 }).map((_, i) => (
                             <div
                                 key={i}
-                                className="animate-pulse rounded-lg bg-white p-6 shadow-sm"
+                                className="animate-pulse rounded-lg bg-[#18181B] p-6 shadow-sm border border-zinc-900"
                             >
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-2">
-                                        <div className="h-5 w-48 rounded bg-gray-200" />
-                                        <div className="h-4 w-32 rounded bg-gray-200" />
+                                        <div className="h-5 w-48 rounded bg-zinc-800" />
+                                        <div className="h-4 w-32 rounded bg-zinc-800" />
                                     </div>
                                     <div className="flex gap-2">
-                                        <div className="h-8 w-20 rounded bg-gray-200" />
-                                        <div className="h-8 w-20 rounded bg-gray-200" />
+                                        <div className="h-8 w-20 rounded bg-zinc-800" />
+                                        <div className="h-8 w-20 rounded bg-zinc-800" />
                                     </div>
                                 </div>
                             </div>
@@ -150,7 +149,7 @@ export default function RecruitmentDashboard() {
                     <div className="flex items-center justify-center py-12">
                         <div className="text-center">
                             <svg
-                                className="mx-auto h-12 w-12 text-gray-400"
+                                className="mx-auto h-12 w-12 text-zinc-500"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -162,17 +161,17 @@ export default function RecruitmentDashboard() {
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                             </svg>
-                            <h3 className="mt-2 text-lg font-medium text-gray-900">
+                            <h3 className="mt-2 text-lg font-medium text-white">
                                 No forms found
                             </h3>
-                            <p className="mt-1 text-sm text-gray-500">
+                            <p className="mt-1 text-sm text-zinc-400">
                                 {searchQuery || statusFilter !== "all"
                                     ? "Try adjusting your search or filters"
                                     : "Get started by creating a new recruitment form"}
                             </p>
                             <button
                                 onClick={() => router.push("/admin/recruitment/create")}
-                                className="mt-4 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
+                                className="mt-4 inline-flex items-center rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-600"
                             >
                                 <svg
                                     className="mr-2 h-4 w-4"
@@ -197,24 +196,24 @@ export default function RecruitmentDashboard() {
                             <div
                                 key={form._id}
                                 onClick={() => router.push(`/admin/recruitment/${form._id}`)}
-                                className="group cursor-pointer rounded-lg bg-white p-6 shadow-sm transition-all hover:shadow-md border border-gray-100"
+                                className="group cursor-pointer rounded-lg bg-[#18181B] p-6 shadow-sm transition-all hover:shadow-md border border-zinc-900 hover:border-zinc-700"
                             >
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <div className="flex items-center gap-3">
-                                            <h3 className="text-lg font-semibold text-gray-900 group-hover:text-indigo-600">
+                                            <h3 className="text-lg font-semibold text-white group-hover:text-blue-400">
                                                 {form.title}
                                             </h3>
                                             <span
                                                 className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${form.isActive
-                                                        ? "bg-green-100 text-green-800"
-                                                        : "bg-gray-200 text-gray-600"
+                                                    ? "bg-green-500/20 text-green-400"
+                                                    : "bg-zinc-700 text-zinc-300"
                                                     }`}
                                             >
                                                 {form.isActive ? "Active" : "Inactive"}
                                             </span>
                                         </div>
-                                        <p className="mt-1 text-sm text-gray-500">
+                                        <p className="mt-1 text-sm text-zinc-400">
                                             Created:{" "}
                                             {new Date(form.createdAt).toLocaleDateString()}
                                             {form.updatedAt && (
@@ -231,8 +230,8 @@ export default function RecruitmentDashboard() {
                                         <button
                                             onClick={() => handleToggleActive(form._id, form.isActive)}
                                             className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${form.isActive
-                                                    ? "bg-green-600 hover:bg-green-700"
-                                                    : "bg-gray-300 hover:bg-gray-400"
+                                                ? "bg-green-600 hover:bg-green-700"
+                                                : "bg-zinc-600 hover:bg-zinc-500"
                                                 }`}
                                             title="Toggle Status"
                                         >
@@ -245,7 +244,7 @@ export default function RecruitmentDashboard() {
                                         {/* Edit */}
                                         <button
                                             onClick={() => router.push(`/admin/recruitment/${form._id}/edit`)}
-                                            className="rounded-md bg-indigo-100 px-3 py-1.5 text-sm font-medium text-indigo-700 hover:bg-indigo-200"
+                                            className="rounded-md bg-blue-500/20 px-3 py-1.5 text-sm font-medium text-blue-400 hover:bg-blue-500/30"
                                         >
                                             Edit
                                         </button>
@@ -253,7 +252,7 @@ export default function RecruitmentDashboard() {
                                         {/* Delete */}
                                         <button
                                             onClick={() => handleDelete(form._id)}
-                                            className="rounded-md bg-red-100 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-200"
+                                            className="rounded-md bg-red-500/20 px-3 py-1.5 text-sm font-medium text-red-400 hover:bg-red-500/30"
                                         >
                                             Delete
                                         </button>

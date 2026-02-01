@@ -204,8 +204,8 @@ export default function EditEventPage() {
     return (
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-indigo-600"></div>
-          <span className="ml-3 text-lg">Loading event data...</span>
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+          <span className="ml-3 text-lg text-white">Loading event data...</span>
         </div>
       </div>
     );
@@ -216,11 +216,11 @@ export default function EditEventPage() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <h3 className="mt-2 text-lg font-medium text-gray-900">Error loading event</h3>
-            <p className="mt-1 text-sm text-red-500">{error || "Event not found"}</p>
+            <h3 className="mt-2 text-lg font-medium text-white">Error loading event</h3>
+            <p className="mt-1 text-sm text-red-400">{error || "Event not found"}</p>
             <button
               onClick={() => router.push("/admin/events")}
-              className="mt-4 inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700"
+              className="mt-4 inline-flex items-center rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-600"
             >
               Back to Events
             </button>
@@ -241,35 +241,35 @@ export default function EditEventPage() {
               <button
                 type="button"
                 onClick={() => router.push("/admin/events")}
-                className="rounded-md p-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100"
+                className="rounded-md p-1.5 text-sm font-medium text-white hover:bg-[#18181B]"
               >
                 <ArrowLeft />
               </button>
-              <h1 className="text-2xl font-bold text-gray-900">Edit Event</h1>
+              <h1 className="text-2xl font-bold text-white">Edit Event</h1>
             </div>
-            <p className="mt-1 ml-10 text-sm text-gray-500">
+            <p className="mt-1 ml-10 text-sm text-zinc-400">
               Update event details and settings
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 rounded-lg border border-gray-100 bg-white p-2 shadow-sm">
+          <div className="flex flex-wrap items-center gap-4 rounded-lg border border-zinc-900 bg-[#18181B] p-2 shadow-sm">
 
             {/* Upcoming Toggle */}
-            <div className="flex items-center gap-2 px-3 border-r border-gray-100">
+            <div className="flex items-center gap-2 px-3 border-r border-zinc-800">
               <label className="inline-flex cursor-pointer items-center">
                 <input type="checkbox" {...register("is_upcoming")} className="sr-only peer" />
-                <span className="relative h-5 w-9 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-indigo-600 peer-checked:after:translate-x-full" />
+                <span className="relative h-5 w-9 rounded-full bg-zinc-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-blue-500 peer-checked:after:translate-x-full" />
               </label>
-              <span className="text-sm font-medium text-gray-700">Upcoming</span>
+              <span className="text-sm font-medium text-white">Upcoming</span>
             </div>
 
             {/* Registration Toggle */}
-            <div className="flex items-center gap-2 px-3 border-r border-gray-100">
+            <div className="flex items-center gap-2 px-3 border-r border-zinc-800">
               <label className="inline-flex cursor-pointer items-center">
                 <input type="checkbox" {...register("registration_open")} className="sr-only peer" />
-                <span className="relative h-5 w-9 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-green-600 peer-checked:after:translate-x-full" />
+                <span className="relative h-5 w-9 rounded-full bg-zinc-700 after:absolute after:left-[2px] after:top-[2px] after:h-4 after:w-4 after:rounded-full after:bg-white after:transition-all peer-checked:bg-green-600 peer-checked:after:translate-x-full" />
               </label>
-              <span className="text-sm font-medium text-gray-700">Registration</span>
+              <span className="text-sm font-medium text-white">Registration</span>
             </div>
 
 
@@ -278,14 +278,14 @@ export default function EditEventPage() {
               <button
                 type="button"
                 onClick={() => router.push("/admin/events")}
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-100"
+                className="rounded-md px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="rounded-md bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="rounded-md bg-blue-500 px-4 py-1.5 text-sm font-semibold text-white hover:bg-blue-600 disabled:opacity-50"
               >
                 {isSubmitting ? "Updating..." : "Update Event"}
               </button>
@@ -294,18 +294,18 @@ export default function EditEventPage() {
         </div>
 
         {/* ================= Event Media ================= */}
-        <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 flex items-center text-lg font-semibold text-gray-800">
-            <ImageIcon className="mr-2 h-5 w-5 text-indigo-600" />
+        <div className="rounded-xl border border-zinc-900 bg-[#18181B] p-6 shadow-sm">
+          <h3 className="mb-4 flex items-center text-lg font-semibold text-white">
+            <ImageIcon className="mr-2 h-5 w-5 text-blue-500" />
             Event Media
           </h3>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
 
             {/* Banner */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Event Banner</label>
+              <label className="block text-sm font-medium text-white">Event Banner</label>
               {bannerPreview ? (
-                <div className="group relative h-48 w-full overflow-hidden rounded-lg border border-gray-200">
+                <div className="group relative h-48 w-full overflow-hidden rounded-lg border border-zinc-800">
                   <img
                     src={bannerPreview}
                     alt="Banner Preview"
@@ -324,13 +324,13 @@ export default function EditEventPage() {
                   </div>
                 </div>
               ) : (
-                <label className="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 transition-colors hover:bg-gray-100">
+                <label className="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-zinc-700 bg-[#141417] transition-colors hover:bg-zinc-800">
                   <span className="flex flex-col items-center justify-center pb-6 pt-5">
-                    <span className="mb-3 rounded-full bg-indigo-50 p-3">
-                      <Upload className="h-6 w-6 text-indigo-600" />
+                    <span className="mb-3 rounded-full bg-blue-500/20 p-3">
+                      <Upload className="h-6 w-6 text-blue-400" />
                     </span>
-                    <span className="mb-1 text-sm font-medium text-gray-700">Click to upload banner</span>
-                    <span className="text-xs text-gray-500">SVG, PNG, JPG (MAX. 800x400px)</span>
+                    <span className="mb-1 text-sm font-medium text-white">Click to upload banner</span>
+                    <span className="text-xs text-zinc-500">SVG, PNG, JPG (MAX. 800x400px)</span>
                   </span>
                   <input
                     type="file"
@@ -344,13 +344,13 @@ export default function EditEventPage() {
 
             {/* Poster */}
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">Event Poster</label>
+              <label className="block text-sm font-medium text-white">Event Poster</label>
               {posterPreview ? (
-                <div className="group relative h-48 w-full overflow-hidden rounded-lg border border-gray-200">
+                <div className="group relative h-48 w-full overflow-hidden rounded-lg border border-zinc-800">
                   <img
                     src={posterPreview}
                     alt="Poster Preview"
-                    className="h-full w-full object-contain bg-gray-50"
+                    className="h-full w-full object-contain bg-zinc-900"
                   />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                     <button
@@ -364,13 +364,13 @@ export default function EditEventPage() {
                   </div>
                 </div>
               ) : (
-                <label className="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 transition-colors hover:bg-gray-100">
+                <label className="flex h-48 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-zinc-700 bg-[#141417] transition-colors hover:bg-zinc-800">
                   <span className="flex flex-col items-center justify-center pb-6 pt-5">
-                    <span className="mb-3 rounded-full bg-purple-50 p-3">
-                      <Upload className="h-6 w-6 text-purple-600" />
+                    <span className="mb-3 rounded-full bg-purple-500/20 p-3">
+                      <Upload className="h-6 w-6 text-purple-400" />
                     </span>
-                    <span className="mb-1 text-sm font-medium text-gray-700">Click to upload poster</span>
-                    <span className="text-xs text-gray-500">SVG, PNG, JPG (MAX. 400x500px)</span>
+                    <span className="mb-1 text-sm font-medium text-white">Click to upload poster</span>
+                    <span className="text-xs text-zinc-500">SVG, PNG, JPG (MAX. 400x500px)</span>
                   </span>
                   <input
                     type="file"
@@ -385,9 +385,9 @@ export default function EditEventPage() {
         </div>
 
         {/* ================= Event Details ================= */}
-        <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-          <h3 className="mb-6 flex items-center text-lg font-semibold text-gray-800">
-            <Type className="mr-2 h-5 w-5 text-indigo-600" />
+        <div className="rounded-xl border border-zinc-900 bg-[#18181B] p-6 shadow-sm">
+          <h3 className="mb-6 flex items-center text-lg font-semibold text-white">
+            <Type className="mr-2 h-5 w-5 text-blue-500" />
             Event Details
           </h3>
 
@@ -396,22 +396,22 @@ export default function EditEventPage() {
             {/* Left */}
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-0.5">
+                <label className="block text-sm font-medium text-white mb-0.5">
                   Event Name *
                 </label>
                 <input
                   {...register("name")}
-                  className="h-10 w-full rounded-lg border-gray-300 px-3 text-black shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  className="h-10 w-full rounded-lg border border-zinc-700 bg-[#141417] px-3 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="Event title"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-0.5">Category *</label>
+                  <label className="block text-sm font-medium text-white mb-0.5">Category *</label>
                   <select
                     {...register("category")}
-                    className="h-10 w-full rounded-lg border-gray-300 bg-white px-3 text-black shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="h-10 w-full rounded-lg border border-zinc-700 bg-[#141417] px-3 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   >
                     <option value="">Select category</option>
                     <option value="workshop">Workshop</option>
@@ -425,10 +425,10 @@ export default function EditEventPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-0.5">Venue *</label>
+                  <label className="block text-sm font-medium text-white mb-0.5">Venue *</label>
                   <input
                     {...register("venue")}
-                    className="h-10 w-full rounded-lg border-gray-300 px-3 text-black shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="h-10 w-full rounded-lg border border-zinc-700 bg-[#141417] px-3 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     placeholder="Event location"
                   />
                 </div>
@@ -436,29 +436,29 @@ export default function EditEventPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-0.5">Date *</label>
+                  <label className="block text-sm font-medium text-white mb-0.5">Date *</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Calendar className="h-4 w-4 text-gray-400" />
+                      <Calendar className="h-4 w-4 text-zinc-500" />
                     </div>
                     <input
                       type="text"
                       {...register("eventDate")}
-                      className="pl-9 w-full h-10 rounded-lg border-gray-300 px-3 text-black shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      className="pl-9 w-full h-10 rounded-lg border border-zinc-700 bg-[#141417] px-3 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                       placeholder="15th Jan"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-0.5">Time *</label>
+                  <label className="block text-sm font-medium text-white mb-0.5">Time *</label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Clock className="h-4 w-4 text-gray-400" />
+                      <Clock className="h-4 w-4 text-zinc-500" />
                     </div>
                     <input
                       type="text"
                       {...register("eventTime")}
-                      className="pl-9 w-full h-10 rounded-lg border-gray-300 px-3 text-black shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      className="pl-9 w-full h-10 rounded-lg border border-zinc-700 bg-[#141417] px-3 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                       placeholder="10 AM - 2 PM"
                     />
                   </div>
@@ -466,13 +466,13 @@ export default function EditEventPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-0.5">
+                <label className="block text-sm font-medium text-white mb-0.5">
                   Short Description *
                 </label>
                 <textarea
                   {...register("description")}
                   rows={3}
-                  className="w-full rounded-lg border-gray-300 px-3 py-2 text-black shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-zinc-700 bg-[#141417] px-3 py-2 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="Brief overview of the event"
                 />
               </div>
@@ -482,45 +482,45 @@ export default function EditEventPage() {
             <div className="space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-0.5">Fee</label>
+                  <label className="block text-sm font-medium text-white mb-0.5">Fee</label>
                   <div className="relative">
 
                     <input
                       {...register("registrationFee")}
-                      className="pl-9 h-10 w-full rounded-lg border-gray-300 px-3 text-black shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      className="pl-9 h-10 w-full rounded-lg border border-zinc-700 bg-[#141417] px-3 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                       placeholder="Amount or Free"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-0.5">UPI ID</label>
+                  <label className="block text-sm font-medium text-white mb-0.5">UPI ID</label>
                   <input
                     {...register("upiID")}
-                    className="h-10 w-full rounded-lg border-gray-300 px-3 text-black shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="h-10 w-full rounded-lg border border-zinc-700 bg-[#141417] px-3 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     placeholder="example@upi"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-0.5">WhatsApp Group *</label>
+                <label className="block text-sm font-medium text-white mb-0.5">WhatsApp Group *</label>
                 <input
                   type="text"
                   {...register("whatsappLink")}
-                  className="h-10 w-full rounded-lg border-gray-300 px-3 text-black shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  className="h-10 w-full rounded-lg border border-zinc-700 bg-[#141417] px-3 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="https://chat.whatsapp.com/..."
                 />
-                {errors.whatsappLink && <p className="mt-1 text-sm text-red-600">{errors.whatsappLink.message}</p>}
+                {errors.whatsappLink && <p className="mt-1 text-sm text-red-500">{errors.whatsappLink.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-0.5">
+                <label className="block text-sm font-medium text-white mb-0.5">
                   Full Event Details *
                 </label>
                 <textarea
                   {...register("details")}
                   rows={4}
-                  className="w-full rounded-lg border-gray-300 px-3 py-2 text-black shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  className="w-full rounded-lg border border-zinc-700 bg-[#141417] px-3 py-2 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   placeholder="Complete event information"
                 />
               </div>
@@ -529,16 +529,16 @@ export default function EditEventPage() {
         </div>
 
         {/* ================= Contacts ================= */}
-        <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-zinc-900 bg-[#18181B] p-6 shadow-sm">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="flex items-center text-sm font-semibold text-gray-800">
-              <User className="mr-2 h-4 w-4 text-indigo-600" />
+            <h3 className="flex items-center text-sm font-semibold text-white">
+              <User className="mr-2 h-4 w-4 text-blue-500" />
               Contact Persons
             </h3>
             <button
               type="button"
               onClick={() => append({ name: "", mobile: "", year: "" })}
-              className="rounded bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-100"
+              className="rounded bg-blue-500/20 px-2 py-1 text-xs font-medium text-blue-400 hover:bg-blue-500/30"
             >
               Add Contact
             </button>
@@ -548,29 +548,29 @@ export default function EditEventPage() {
             {fields.map((field, index) => (
               <div
                 key={field.id}
-                className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3"
+                className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-[#141417] p-3"
               >
                 <div className="grid flex-grow grid-cols-3 gap-2">
                   <input
                     {...register(`contactInfo.${index}.name`)}
-                    className="h-9 rounded border-gray-300 px-2 text-sm text-black focus:ring-indigo-500"
+                    className="h-9 rounded border border-zinc-700 bg-zinc-900 px-2 text-sm text-white focus:ring-blue-500"
                     placeholder="Name"
                   />
                   <input
                     {...register(`contactInfo.${index}.mobile`)}
-                    className="h-9 rounded border-gray-300 px-2 text-sm text-black focus:ring-indigo-500"
+                    className="h-9 rounded border border-zinc-700 bg-zinc-900 px-2 text-sm text-white focus:ring-blue-500"
                     placeholder="Mobile"
                   />
                   <input
                     {...register(`contactInfo.${index}.year`)}
-                    className="h-9 rounded border-gray-300 px-2 text-sm text-black focus:ring-indigo-500"
+                    className="h-9 rounded border border-zinc-700 bg-zinc-900 px-2 text-sm text-white focus:ring-blue-500"
                     placeholder="Year"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={() => remove(index)}
-                  className="text-red-500 hover:text-red-700"
+                  className="text-red-400 hover:text-red-500"
                 >
                   <X size={16} />
                 </button>

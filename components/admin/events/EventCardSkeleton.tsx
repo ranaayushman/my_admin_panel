@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 
 export function EventCardSkeleton() {
     return (
-        <div className="group relative overflow-hidden rounded-xl bg-white shadow-md">
+        <div className="group relative overflow-hidden rounded-xl bg-[#18181B] border border-zinc-900 shadow-md">
             {/* Banner Skeleton */}
             <Skeleton className="h-52 w-full rounded-none" />
 

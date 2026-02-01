@@ -191,12 +191,12 @@ export default function MembersPage() {
       <div className="mb-6 flex flex-col space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <h1 className="text-2xl font-semibold text-gray-800">Members</h1>
+            <h1 className="text-2xl font-semibold text-white">Members</h1>
 
-            <div className="ml-4 flex items-center space-x-3 text-sm text-gray-600">
+            <div className="ml-4 flex items-center space-x-3 text-sm">
               {stats.map((stat) => {
                 return (
-                  <span key={stat.key} className="ml-4 text-sm shadow-md text-gray-500 border border-gray-200 p-1 px-2 rounded-full bg-white">
+                  <span key={stat.key} className="ml-4 text-sm shadow-md text-white border border-gray-700 p-1 px-2 rounded-full bg-zinc-800/90">
                     {stat.label}: {stat.value}
                   </span>
                 )
@@ -208,7 +208,7 @@ export default function MembersPage() {
             <button
               aria-label="Refresh events"
               onClick={refreshMembers}
-              className="ml-4 flex items-center justify-center rounded-full bg-white px-3 py-1 text-sm text-gray-700 shadow-sm hover:bg-gray-50"
+              className="ml-4 flex items-center justify-center rounded-full bg-blue-500 px-3 py-1 text-sm text-white shadow-sm hover:bg-blue-600 border border-zinc-900"
               disabled={isLoading}
             >
               <svg
@@ -228,7 +228,7 @@ export default function MembersPage() {
             </button>
             <button
               onClick={() => router.push('/admin/members/add')}
-              className="flex items-center rounded-full bg-indigo-600 px-8 py-2.5 text-[16px] text-white shadow-sm hover:bg-indigo-700"
+              className="flex items-center rounded-full bg-blue-500 px-8 py-2.5 text-[16px] text-white shadow-sm hover:bg-blue-600"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -250,7 +250,7 @@ export default function MembersPage() {
 
         </div>
 
-        <div className=" flex justify-between gap-2 border px-2 bg-white py-2 rounded-full shadow-md">
+        <div className="flex justify-between gap-2 border border-zinc-900 px-2 bg-[#18181B] py-2 rounded-full shadow-md">
           <div className="flex gap-2 " >
             {(
               [
@@ -262,9 +262,9 @@ export default function MembersPage() {
               <button
                 key={opt.key}
                 onClick={() => setStatusFilter(opt.key)}
-                className={`rounded-full text-black px-3 py-1 text-sm capitalize ${statusFilter === opt.key
-                  ? "bg-indigo-100 text-indigo-800 font-medium"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                className={`rounded-full text-white px-3 py-1 text-sm capitalize ${statusFilter === opt.key
+                  ? "bg-blue-500 text-white font-medium"
+                  : "bg-[#141417] text-white hover:bg-zinc-800"
                   }`}
               >
                 {opt.label}
@@ -276,67 +276,67 @@ export default function MembersPage() {
             placeholder="Search members..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className=" bg-gray-100 text-black rounded-full px-4 py-2 focus:border-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-500"
+            className="bg-[#141417] text-white rounded-full px-4 py-2 border border-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-500"
           />
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto rounded-lg border border-zinc-900">
+        <table className="min-w-full divide-y divide-zinc-900">
+          <thead className="bg-[#141417]">
             <tr>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Profile
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Name
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Email
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Designation
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Department
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Status
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
+          <tbody className="divide-y divide-zinc-900 bg-[#18181B]">
             {/* ================= Loading ================= */}
             {isLoading ? (
               <tr>
                 <td colSpan={7} className="px-6 py-12 text-center">
                   <div className="flex flex-col items-center justify-center gap-3">
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-                    <span className="text-sm text-gray-500">Loading members</span>
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                    <span className="text-sm text-white">Loading members</span>
                   </div>
                 </td>
               </tr>
@@ -350,7 +350,7 @@ export default function MembersPage() {
             ) : filteredMembers.length === 0 ? (
               /* ================= Empty ================= */
               <tr>
-                <td colSpan={7} className="px-6 py-10 text-center text-sm text-gray-500">
+                <td colSpan={7} className="px-6 py-10 text-center text-sm text-white">
                   No members found
                 </td>
               </tr>
@@ -358,7 +358,7 @@ export default function MembersPage() {
               filteredMembers.map((member) => (
                 <tr
                   key={member.uniqueKey || member._id}
-                  className="transition-colors hover:bg-gray-50"
+                  className="transition-colors hover:bg-[#141417] cursor-pointer"
                   onClick={() => router.push(`/admin/members/edit/${member._id}`)}
                 >
                   {/* Avatar */}
@@ -372,10 +372,10 @@ export default function MembersPage() {
                             width={40}
                             height={40}
                             unoptimized
-                            className="h-10 w-10 rounded-full object-cover"
+                            className="h-10 w-10 rounded-full object-cover border border-zinc-900"
                           />
                         ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-sm font-semibold text-indigo-600">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white">
                             {member.name.charAt(0).toUpperCase()}
                           </div>
                         )}
@@ -385,25 +385,24 @@ export default function MembersPage() {
 
                   {/* Name */}
                   <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-medium text-white">
                       {member.name}
                     </div>
                   </td>
 
                   {/* Email */}
                   <td className="px-6 py-4">
-                    <div className="max-w-[220px] truncate text-sm text-gray-500">
+                    <div className="max-w-[220px] truncate text-sm text-white">
                       {member.email_id}
                     </div>
                   </td>
 
-                  {/* Phone */}
                   {/* Designation */}
                   <td className="px-6 py-4">
                     <span
                       className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${member.designation.toLowerCase().includes("lead")
-                        ? "bg-red-100 text-red-800"
-                        : "bg-blue-100 text-blue-800"
+                        ? "bg-red-500/20 text-red-400"
+                        : "bg-blue-500/20 text-blue-400"
                         }`}
                     >
                       {member.designation}
@@ -411,9 +410,9 @@ export default function MembersPage() {
                   </td>
 
                   {/* Department */}
-                  <td className="px-6 py-4 text-sm text-gray-500">
+                  <td className="px-6 py-4 text-sm text-white">
                     {member.department}
-                    <span className="ml-1 text-xs text-gray-400">
+                    <span className="ml-1 text-xs text-zinc-400">
                       ({member.batch})
                     </span>
                   </td>
@@ -423,8 +422,8 @@ export default function MembersPage() {
                     <div className="flex items-center gap-3">
                       <span
                         className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${member.isActive !== false
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-200 text-gray-700"
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-zinc-700 text-zinc-300"
                           }`}
                       >
                         {member.isActive !== false ? "Active" : "Inactive"}
@@ -432,13 +431,13 @@ export default function MembersPage() {
 
                       <button
                         type="button"
-                        onClick={() => handleToggleActive(member._id)}
+                        onClick={(e) => { e.stopPropagation(); handleToggleActive(member._id); }}
                         disabled={togglingIds.has(member._id)}
                         className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${togglingIds.has(member._id)
                           ? "opacity-50"
                           : member.isActive !== false
                             ? "bg-green-600 hover:bg-green-700"
-                            : "bg-gray-300 hover:bg-gray-400"
+                            : "bg-zinc-600 hover:bg-zinc-500"
                           }`}
                       >
                         <span
@@ -457,7 +456,8 @@ export default function MembersPage() {
                           href={member.linkedin_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
+                          className="text-blue-400 hover:underline"
+                          onClick={(e) => e.stopPropagation()}
                         >
                           <img src="/linkedin.svg" className="w-5 h-5" alt="" />
                         </a>
@@ -466,27 +466,29 @@ export default function MembersPage() {
                             href={member.github_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-gray-600 hover:underline"
+                            className="text-white hover:underline"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <img src="/github.svg" className="w-4 h-4" alt="" />
+                            <img src="/github.svg" className="w-4 h-4 invert" alt="" />
                           </a>
                         )}
                       </div>
 
                       <div className="flex gap-2">
                         <button
-                          onClick={() =>
-                            router.push(`/admin/members/edit/${member._id}`)
-                          }
-                          className="text-indigo-600 hover:underline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/admin/members/edit/${member._id}`);
+                          }}
+                          className="text-blue-400 hover:underline"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z" /></svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z" /></svg>
                         </button>
                         <button
-                          onClick={() => handleDelete(member._id)}
-                          className="text-red-600 hover:underline"
+                          onClick={(e) => { e.stopPropagation(); handleDelete(member._id); }}
+                          className="text-red-400 hover:underline"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="M312-144q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480ZM384-288h72v-336h-72v336Zm120 0h72v-336h-72v336ZM312-696v480-480Z" /></svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M312-144q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480ZM384-288h72v-336h-72v336Zm120 0h72v-336h-72v336ZM312-696v480-480Z" /></svg>
                         </button>
                       </div>
                     </div>

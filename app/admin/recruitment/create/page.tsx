@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { recruitmentApi } from "@/services/api";
 import { DEFAULT_ROLES_DATA } from "@/constants/recruitmentDefaults";
 import BasicDetails from "@/components/admin/recruitment/create/BasicDetails";
@@ -102,10 +103,11 @@ export default function CreateRecruitmentForm() {
                 ...formData,
                 roles,
             });
+            toast.success("Recruitment form created successfully");
             router.push("/admin/recruitment");
         } catch (err) {
             console.error(err);
-            alert("Failed to create form");
+            toast.error("Failed to create form");
         } finally {
             setLoading(false);
         }
@@ -113,10 +115,10 @@ export default function CreateRecruitmentForm() {
 
     return (
         <div className="mx-auto max-w-4xl p-6">
-            <h1 className="mb-6 text-3xl font-bold text-gray-800">
+            <h1 className="mb-6 text-3xl font-bold text-white">
                 Create Recruitment Form
                 {formData.isActive && (
-                    <span className="ml-3 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                    <span className="ml-3 rounded-full bg-green-900/30 px-3 py-1 text-xs font-semibold text-green-400 border border-green-800">
                         Active
                     </span>
                 )}
@@ -131,11 +133,11 @@ export default function CreateRecruitmentForm() {
 
                 <div className="space-y-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <h2 className="text-2xl font-bold text-black">Roles & Questions</h2>
+                        <h2 className="text-2xl font-bold text-white">Roles & Questions</h2>
                         <button
                             type="button"
                             onClick={addRole}
-                            className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo-700"
+                            className="inline-flex items-center justify-center rounded-lg bg-blue-500 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-blue-600 transition-colors"
                         >
                             + Add Custom Role
                         </button>
