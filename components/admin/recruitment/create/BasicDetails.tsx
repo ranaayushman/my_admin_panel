@@ -6,7 +6,11 @@ interface BasicDetailsProps {
         generalInstructions: string;
         isActive: boolean;
     };
-    setFormData: (data: any) => void;
+    setFormData: React.Dispatch<React.SetStateAction<{
+        title: string;
+        generalInstructions: string;
+        isActive: boolean;
+    }>>;
 }
 
 function ToggleSwitch({
@@ -23,8 +27,8 @@ function ToggleSwitch({
     return (
         <div className="flex items-start justify-between gap-4">
             <div>
-                <p className="text-sm font-medium text-gray-900">{label}</p>
-                {hint && <p className="text-xs text-gray-500">{hint}</p>}
+                <p className="text-sm font-medium text-white">{label}</p>
+                {hint && <p className="text-xs text-zinc-400">{hint}</p>}
             </div>
 
             <button
@@ -32,7 +36,7 @@ function ToggleSwitch({
                 role="switch"
                 aria-checked={enabled}
                 onClick={() => onChange(!enabled)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${enabled ? "bg-indigo-600" : "bg-gray-300"
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${enabled ? "bg-blue-500" : "bg-zinc-700"
                     }`}
             >
                 <span
@@ -56,16 +60,16 @@ export default function BasicDetails({ formData, setFormData }: BasicDetailsProp
     };
 
     return (
-        <div className="rounded-lg bg-white p-6 shadow text-black space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">Basic Details</h2>
+        <div className="rounded-lg border border-zinc-900 bg-[#0b0b0c] p-6 shadow-sm space-y-4">
+            <h2 className="text-xl font-semibold text-white">Basic Details</h2>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-white">
                     Form Title
                 </label>
                 <input
                     required
-                    className="mt-1 w-full rounded border border-gray-300 bg-white p-2 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                    className="mt-1 w-full rounded border border-zinc-700 bg-[#141417] p-2 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     value={formData.title}
                     onChange={(e) =>
                         setFormData({ ...formData, title: e.target.value })
@@ -75,12 +79,12 @@ export default function BasicDetails({ formData, setFormData }: BasicDetailsProp
             </div>
 
             <div>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-white">
                     Instructions
                 </label>
                 <textarea
                     rows={3}
-                    className="mt-1 w-full rounded border border-gray-300 bg-white p-2 text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                    className="mt-1 w-full rounded border border-zinc-700 bg-[#141417] p-2 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     value={formData.generalInstructions}
                     onChange={(e) =>
                         setFormData({

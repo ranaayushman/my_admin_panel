@@ -42,7 +42,7 @@ function StatCard({
     small = false,
 }: {
     label: string;
-    value: any;
+    value: string | number;
     accent?: "indigo" | "green" | "red";
     small?: boolean;
 }) {

@@ -6,9 +6,9 @@ import { useAuth } from "@/context/AuthContext";
 
 // Navigation items for the sidebar
 const navItems = [
-   {
+  {
     name: "Dashboard",
-    href: "/admin/dashboard",
+    href: "/admin",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -86,7 +86,7 @@ const navItems = [
       </svg>
     ),
   },
- 
+
   {
     name: "Settings",
     href: "/admin/settings",
@@ -112,7 +112,7 @@ const navItems = [
       </svg>
     ),
   },
-  
+
 ];
 
 export default function Sidebar() {
@@ -120,9 +120,9 @@ export default function Sidebar() {
   const { logout } = useAuth();
 
   return (
-    <aside className="w-56 bg-gray-800 text-white">
+    <aside className="w-56 bg-[#141417] text-white border-r border-zinc-900">
       <div className="p-4">
-        <h1 className="text-xl font-bold">GDG Admin Panel</h1>
+        <h1 className="text-xl font-bold text-white">GDG Admin Panel</h1>
       </div>
       <nav className="mt-8">
         <ul className="space-y-2 px-2">
@@ -131,8 +131,8 @@ export default function Sidebar() {
               <Link
                 href={item.href}
                 className={`flex items-center rounded-lg px-4 py-2 text-sm ${pathname === item.href
-                    ? "bg-indigo-700 text-white"
-                    : "text-gray-300 hover:bg-gray-700"
+                  ? "bg-blue-500 text-white"
+                  : "text-white hover:bg-[#18181B]"
                   }`}
               >
                 <span className="mr-3">{item.icon}</span>
@@ -142,10 +142,10 @@ export default function Sidebar() {
           ))}
         </ul>
       </nav>
-      <div className="absolute bottom-0 left-0 w-64 p-4">
+      <div className="absolute bottom-0 left-0 w-56 p-4 border-t border-zinc-900">
         <button
           onClick={logout}
-          className="flex w-full items-center rounded-lg px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+          className="flex w-full items-center rounded-lg px-4 py-2 text-sm text-white hover:bg-[#18181B]"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

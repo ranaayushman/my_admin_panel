@@ -29,6 +29,7 @@ export type Member = {
   _id: string;
   name: string;
   email_id: string;
+  mobile_number: string;
   department: string;
   designation: string;
   batch: string;
@@ -100,6 +101,7 @@ export type ApiResponse<T> = {
 export type NewMemberFormData = {
   name: string;
   email_id: string;
+  mobile_number: string; // Added field
   department: string;
   designation: string;
   batch: string;

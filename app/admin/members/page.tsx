@@ -6,6 +6,7 @@ import { membersApi } from "@/services/api";
 import { Member, MembersAdminAllResponse } from "@/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 export default function MembersPage() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function MembersPage() {
     "all" | "active" | "inactive"
   >("all");
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; memberId: string | null; memberName: string }>({ isOpen: false, memberId: null, memberName: "" });
 
   // Fetch members data
   useEffect(() => {
@@ -42,7 +44,7 @@ export default function MembersPage() {
         const errorMessage =
           err instanceof Error && "response" in err
             ? (err as { response?: { data?: { message?: string } } }).response
-                ?.data?.message
+              ?.data?.message
             : "An error occurred while fetching members";
         setError(errorMessage || "An error occurred while fetching members");
         toast.error("Failed to load members");
@@ -72,13 +74,18 @@ export default function MembersPage() {
     return matchesSearch;
   });
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, name: string) => {
+    setDeleteDialog({ isOpen: true, memberId: id, memberName: name });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteDialog.memberId) return;
     try {
-      const response = await membersApi.deleteMember(id);
+      const response = await membersApi.deleteMember(deleteDialog.memberId);
       if (response.data && response.data.success) {
         // Remove from list and update counters
-        setAllMembers((prev) => prev.filter((m) => m._id !== id));
-        const removed = allMembers.find((m) => m._id === id);
+        setAllMembers((prev) => prev.filter((m) => m._id !== deleteDialog.memberId));
+        const removed = allMembers.find((m) => m._id === deleteDialog.memberId);
         setTotalMembers((t) => Math.max(0, t - 1));
         if (removed) {
           if (removed.isActive !== false) {
@@ -96,7 +103,7 @@ export default function MembersPage() {
       const errorMessage =
         err instanceof Error && "response" in err
           ? (err as { response?: { data?: { message?: string } } }).response
-              ?.data?.message
+            ?.data?.message
           : "Failed to delete member";
       toast.error(errorMessage || "Failed to delete member");
     }
@@ -180,20 +187,40 @@ export default function MembersPage() {
       .finally(() => setIsLoading(false));
   };
 
+  const stats = [
+    { key: "total", label: "Total", value: totalMembers },
+    { key: "active", label: "Active", value: activeMembers },
+    { key: "inactive", label: "Inactive", value: inactiveMembers }
+  ]
+
   return (
     <div className="container mx-auto px-4 py-6">
       <div className="mb-6 flex flex-col space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <h1 className="text-2xl font-semibold text-gray-800">Members</h1>
+            <h1 className="text-2xl font-semibold text-white">Members</h1>
+
+            <div className="ml-4 flex items-center space-x-3 text-sm">
+              {stats.map((stat) => {
+                return (
+                  <span key={stat.key} className="ml-4 text-sm shadow-md text-white border border-gray-700 p-1 px-2 rounded-full bg-zinc-800/90">
+                    {stat.label}: {stat.value}
+                  </span>
+                )
+              })}
+            </div>
+
+          </div>
+          <div className="flex gap-2">
             <button
+              aria-label="Refresh events"
               onClick={refreshMembers}
-              className="ml-4 flex items-center rounded-md bg-white px-2 py-1 text-sm text-gray-700 shadow-sm hover:bg-gray-50"
+              className="ml-4 flex items-center justify-center rounded-full bg-blue-500 px-3 py-1 text-sm text-white shadow-sm hover:bg-blue-600 border border-zinc-900"
               disabled={isLoading}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="mr-1 h-4 w-4"
+                className="h-6 w-6"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -205,35 +232,14 @@ export default function MembersPage() {
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-              Refresh
             </button>
-            <div className="ml-4 flex items-center space-x-3 text-sm text-gray-600">
-              <span>
-                Total:{" "}
-                <span className="font-medium text-gray-800">
-                  {totalMembers}
-                </span>
-              </span>
-              <span>
-                Active:{" "}
-                <span className="font-medium text-green-700">
-                  {activeMembers}
-                </span>
-              </span>
-              <span>
-                Inactive:{" "}
-                <span className="font-medium text-red-700">
-                  {inactiveMembers}
-                </span>
-              </span>
-            </div>
             <button
-              onClick={() => router.push("/admin/members/add")}
-              className="ml-4 flex items-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm text-white shadow-sm hover:bg-indigo-700"
+              onClick={() => router.push('/admin/members/add')}
+              className="flex items-center rounded-full bg-blue-500 px-8 py-2.5 text-[16px] text-white shadow-sm hover:bg-blue-600"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="mr-1 h-4 w-4"
+                className="mr-1 h-6 w-6"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -248,234 +254,248 @@ export default function MembersPage() {
               Add Member
             </button>
           </div>
-          <div className="w-64">
-            <input
-              type="text"
-              placeholder="Search members..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            />
-          </div>
+
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          {(
-            [
-              { key: "all", label: "All" },
-              { key: "active", label: "Active" },
-              { key: "inactive", label: "Inactive" },
-            ] as Array<{ key: "all" | "active" | "inactive"; label: string }>
-          ).map((opt) => (
-            <button
-              key={opt.key}
-              onClick={() => setStatusFilter(opt.key)}
-              className={`rounded-full px-3 py-1 text-sm ${
-                statusFilter === opt.key
-                  ? "bg-indigo-100 text-indigo-800 font-medium"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
+        <div className="flex justify-between gap-2 border border-zinc-900 px-2 bg-[#18181B] py-2 rounded-full shadow-md">
+          <div className="flex gap-2 " >
+            {(
+              [
+                { key: "all", label: "All" },
+                { key: "active", label: "Active" },
+                { key: "inactive", label: "Inactive" },
+              ] as Array<{ key: "all" | "active" | "inactive"; label: string }>
+            ).map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => setStatusFilter(opt.key)}
+                className={`rounded-full text-white px-3 py-1 text-sm capitalize ${statusFilter === opt.key
+                  ? "bg-blue-500 text-white font-medium"
+                  : "bg-[#141417] text-white hover:bg-zinc-800"
+                  }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <input
+            type="text"
+            placeholder="Search members..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="bg-[#141417] text-white rounded-full px-4 py-2 border border-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-500"
+          />
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="overflow-x-auto rounded-lg border border-zinc-900">
+        <table className="min-w-full divide-y divide-zinc-900">
+          <thead className="bg-[#141417]">
             <tr>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Profile
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Name
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Email
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Designation
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Department
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Status
               </th>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
               >
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody className="divide-y divide-zinc-900 bg-[#18181B]">
+            {/* ================= Loading ================= */}
             {isLoading ? (
               <tr>
-                <td colSpan={7} className="px-6 py-4 text-center">
-                  <div className="flex items-center justify-center">
-                    <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-t-2 border-indigo-600"></div>
-                    <span className="ml-2">Loading...</span>
+                <td colSpan={7} className="px-6 py-12 text-center">
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+                    <span className="text-sm text-white">Loading members</span>
                   </div>
                 </td>
               </tr>
             ) : error ? (
+              /* ================= Error ================= */
               <tr>
-                <td
-                  colSpan={7}
-                  className="px-6 py-4 text-center text-sm text-red-500"
-                >
+                <td colSpan={7} className="px-6 py-10 text-center text-sm text-red-500">
                   {error}
                 </td>
               </tr>
             ) : filteredMembers.length === 0 ? (
+              /* ================= Empty ================= */
               <tr>
-                <td
-                  colSpan={7}
-                  className="px-6 py-4 text-center text-sm text-gray-500"
-                >
+                <td colSpan={7} className="px-6 py-10 text-center text-sm text-white">
                   No members found
                 </td>
               </tr>
             ) : (
               filteredMembers.map((member) => (
-                <tr key={member.uniqueKey || member._id}>
-                  <td className="whitespace-nowrap px-6 py-4">
+                <tr
+                  key={member.uniqueKey || member._id}
+                  className="transition-colors hover:bg-[#141417] cursor-pointer"
+                  onClick={() => router.push(`/admin/members/edit/${member._id}`)}
+                >
+                  {/* Avatar */}
+                  <td className="px-6 py-4">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">
                         {member.profile_image?.url ? (
                           <Image
-                            className="h-10 w-10 rounded-full object-cover"
                             src={member.profile_image.url}
                             alt={member.name}
                             width={40}
                             height={40}
-                            unoptimized={true} // Use this for external images if needed
+                            unoptimized
+                            className="h-10 w-10 rounded-full object-cover border border-zinc-900"
                           />
                         ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white">
                             {member.name.charAt(0).toUpperCase()}
                           </div>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">
+
+                  {/* Name */}
+                  <td className="px-6 py-4">
+                    <div className="text-sm font-medium text-white">
                       {member.name}
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4">
-                    <div className="text-sm text-gray-500">
+
+                  {/* Email */}
+                  <td className="px-6 py-4">
+                    <div className="max-w-[220px] truncate text-sm text-white">
                       {member.email_id}
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4">
+
+                  {/* Designation */}
+                  <td className="px-6 py-4">
                     <span
-                      className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                        member.designation.toLowerCase().includes("lead")
-                          ? "bg-red-100 text-red-800"
-                          : "bg-blue-100 text-blue-800"
-                      }`}
+                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${member.designation.toLowerCase().includes("lead")
+                        ? "bg-red-500/20 text-red-400"
+                        : "bg-blue-500/20 text-blue-400"
+                        }`}
                     >
                       {member.designation}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                    {member.department} ({member.batch})
+
+                  {/* Department */}
+                  <td className="px-6 py-4 text-sm text-white">
+                    {member.department}
+                    <span className="ml-1 text-xs text-zinc-400">
+                      ({member.batch})
+                    </span>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4">
+
+                  {/* Status */}
+                  <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <span
-                        className={`inline-flex items-center rounded-full px-2 text-xs font-semibold leading-5 ${
-                          member.isActive !== false
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-200 text-gray-700"
-                        }`}
+                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${member.isActive !== false
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-zinc-700 text-zinc-300"
+                          }`}
                       >
                         {member.isActive !== false ? "Active" : "Inactive"}
                       </span>
+
                       <button
-                        onClick={() => handleToggleActive(member._id)}
-                        disabled={togglingIds.has(member._id)}
-                        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          togglingIds.has(member._id)
-                            ? "opacity-50"
-                            : member.isActive !== false
-                            ? "bg-green-600 hover:bg-green-700"
-                            : "bg-gray-300 hover:bg-gray-400"
-                        }`}
-                        aria-pressed={member.isActive !== false}
-                        aria-label="Toggle active status"
                         type="button"
+                        onClick={(e) => { e.stopPropagation(); handleToggleActive(member._id); }}
+                        disabled={togglingIds.has(member._id)}
+                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${togglingIds.has(member._id)
+                          ? "opacity-50"
+                          : member.isActive !== false
+                            ? "bg-green-600 hover:bg-green-700"
+                            : "bg-zinc-600 hover:bg-zinc-500"
+                          }`}
                       >
                         <span
-                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                            member.isActive !== false
-                              ? "translate-x-5"
-                              : "translate-x-0"
-                          }`}
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${member.isActive !== false ? "translate-x-4" : "translate-x-0"
+                            }`}
                         />
                       </button>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                    <div className="flex flex-col space-y-1">
-                      <div className="flex space-x-2">
+
+                  {/* Actions */}
+                  <td className="px-6 py-4 text-sm">
+                    <div className="flex gap-2">
+                      <div className="flex items-center gap-3">
                         <a
                           href={member.linkedin_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-blue-400 hover:underline"
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          LinkedIn
+                          <Image src="/linkedin.svg" width={20} height={20} className="w-5 h-5" alt="LinkedIn" />
                         </a>
                         {member.github_url && member.github_url !== "NA" && (
                           <a
                             href={member.github_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-gray-600 hover:text-gray-900"
+                            className="text-white hover:underline"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            GitHub
+                            <Image src="/github.svg" width={16} height={16} className="w-4 h-4 invert" alt="GitHub" />
                           </a>
                         )}
                       </div>
-                      <div className="flex space-x-2">
+
+                      <div className="flex gap-2">
                         <button
-                          onClick={() =>
-                            router.push(`/admin/members/edit/${member._id}`)
-                          }
-                          className="text-indigo-600 hover:text-indigo-900"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/admin/members/edit/${member._id}`);
+                          }}
+                          className="text-blue-400 hover:underline"
                         >
-                          Edit
+                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z" /></svg>
                         </button>
                         <button
-                          onClick={() => handleDelete(member._id)}
-                          className="text-red-600 hover:text-red-900"
+                          onClick={(e) => { e.stopPropagation(); handleDelete(member._id, member.name); }}
+                          className="text-red-400 hover:underline"
                         >
-                          Delete
+                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M312-144q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480ZM384-288h72v-336h-72v336Zm120 0h72v-336h-72v336ZM312-696v480-480Z" /></svg>
                         </button>
                       </div>
                     </div>
@@ -484,8 +504,17 @@ export default function MembersPage() {
               ))
             )}
           </tbody>
+
         </table>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, memberId: null, memberName: "" })}
+        onConfirm={confirmDelete}
+        message={`Are you sure you want to delete "${deleteDialog.memberName}"? This action cannot be undone.`}
+      />
     </div>
   );
 }

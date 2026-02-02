@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { recruitmentApi } from "@/services/api";
@@ -50,9 +50,11 @@ export default function RecruitmentDetails() {
 
     const [title, setTitle] = useState("Loading...");
     const [roleOptions, setRoleOptions] = useState<string[]>([]);
-    const [stats, setStats] = useState<any>(null); // For total filtered count
-    const [positionStats, setPositionStats] = useState<any[]>([]); // For role breakdown
-    const [applications, setApplications] = useState<any[]>([]);
+    const [stats, setStats] = useState<{ total: number } | null>(null);
+    const [positionStats, setPositionStats] = useState<{ _id: string; count: number }[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [applications, setApplications] = useState<any[]>([]); // Keeping explicit any for complex nested app object or define interface if possible
+
     const [loading, setLoading] = useState(true);
 
     // Filters
@@ -69,10 +71,12 @@ export default function RecruitmentDetails() {
             const fetchFormDetails = async () => {
                 try {
                     const formsRes = await recruitmentApi.getAllForms();
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const currentForm = formsRes.data.forms.find((f: any) => f._id === id);
                     if (currentForm) {
                         setTitle(currentForm.title);
                         if (currentForm.roles && Array.isArray(currentForm.roles)) {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             setRoleOptions(currentForm.roles.map((r: any) => r.roleName));
                         }
                     }
@@ -91,6 +95,7 @@ export default function RecruitmentDetails() {
                     });
                     if (res.data.success && res.data.data.positionStats) {
                         // Sort by count descending
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const sortedStats = res.data.data.positionStats.sort((a: any, b: any) => b.count - a.count);
                         setPositionStats(sortedStats);
                     }
@@ -104,16 +109,11 @@ export default function RecruitmentDetails() {
         }
     }, [id]);
 
-    // Fetch Applications when filters or page change
-    useEffect(() => {
-        if (id) fetchApplications();
-    }, [id, page, branch, position]);
-
-    const fetchApplications = async () => {
+    const fetchApplications = useCallback(async () => {
         try {
             setLoading(true);
             const appsRes = await recruitmentApi.getRecruitmentData({
-                formId: id,
+                formId: id as string,
                 page,
                 limit: 20,
                 branch: branch || undefined,
@@ -131,7 +131,12 @@ export default function RecruitmentDetails() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, page, branch, position]);
+
+    // Fetch Applications when filters or page change
+    useEffect(() => {
+        if (id) fetchApplications();
+    }, [id, fetchApplications]);
 
     const handleBranchChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setBranch(e.target.value);
@@ -172,6 +177,7 @@ export default function RecruitmentDetails() {
                 <StatsCard label={`Total ${branch || position ? '(Filtered)' : ''}`} count={stats?.total || 0} />
 
                 {/* Dynamic Role Cards (Form Overview) */}
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {positionStats.map((stat: any) => (
                     <StatsCard key={stat._id} label={stat._id} count={stat.count} />
                 ))}
@@ -251,6 +257,7 @@ export default function RecruitmentDetails() {
 
                                 <tbody className="divide-y divide-gray-100">
                                     {applications.length > 0 ? (
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                         applications.map((app: any) => (
                                             <tr
                                                 key={app._id}

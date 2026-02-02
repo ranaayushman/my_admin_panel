@@ -97,6 +97,10 @@ export const membersApi = {
     return apiClient.get(getApiEndpoint(`/members/${id}`));
   },
 
+  getMemberByIdAdmin: (id: string) => {
+    return apiClient.get(getApiEndpoint(`/members/admin/${id}`));
+  },
+
   updateMember: (id: string, memberData: any) => {
     return apiClient.put(getApiEndpoint(`/members/${id}`), memberData);
   },

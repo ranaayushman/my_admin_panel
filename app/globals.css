@@ -1,8 +1,34 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Default to Dark Mode colors */
+  --background: #09090b;
+  /* Zinc 950 - slightly richer black */
+  --foreground: #f4f4f5;
+  /* Zinc 100 */
+
+  /* Card & Element colors */
+  --card-bg: #18181b;
+  /* Zinc 900 */
+  --card-border: #27272a;
+  /* Zinc 800 */
+  --input-bg: #18181b;
+  --hover-bg: #27272a;
+
+  /* Brand colors - Updated to blue */
+  --primary: #3b82f6;
+  /* blue-500 */
+  --primary-hover: #2563eb;
+  /* blue-600 */
+  --primary-foreground: #ffffff;
+
+  /* Text colors */
+  --text-primary: #f4f4f5;
+  /* Zinc 100 */
+  --text-secondary: #a1a1aa;
+  /* Zinc 400 */
+  --text-muted: #71717a;
+  /* Zinc 500 */
 }
 
 body {
@@ -12,128 +38,284 @@ body {
   overflow-x: hidden;
 }
 
-/* Fix dropdown visibility issues */
-select {
-  /* Ensure dropdown options are visible */
-  z-index: 1000;
-  position: relative;
-  background-color: white;
-  color: black;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-/* Fix for select dropdowns getting clipped */
-select option {
-  background-color: white;
-  color: black;
-  padding: 8px 12px;
-  border: none;
+::-webkit-scrollbar-track {
+  background: #18181b;
+  /* Zinc 900 */
+  border-radius: 5px;
 }
 
-/* Custom select styling to ensure visibility */
-.custom-select {
-  position: relative;
-  z-index: 10;
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  /* Zinc 700 */
+  border-radius: 5px;
+  border: 2px solid #18181b;
+  /* Border matches track for padding effect */
 }
 
-.custom-select select {
-  position: relative;
-  z-index: 10;
-  background-color: white;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.5em 1.5em;
-  padding-right: 2.5rem;
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+  /* Zinc 600 */
 }
 
-.custom-select select:focus {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 1px #4f46e5;
+/* Firefox Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3f3f46 #18181b;
 }
 
-/* Fix for main content container to allow dropdown overflow but prevent horizontal overflow */
-.main-content {
-  overflow-x: hidden;
-  overflow-y: auto;
-  min-height: calc(100vh - 4rem);
-  padding-bottom: 2rem;
+/* Re-style common elements to use variables with higher specificity */
+
+/* Main Backgrounds */
+.bg-gray-50,
+.bg-gray-100,
+.bg-gray-50\/50 {
+  background-color: var(--background) !important;
 }
 
-/* Override any container that might clip dropdowns */
-.form-container {
-  overflow: visible;
-  position: relative;
-  z-index: 1;
+/* Cards & Containers - Soften the contrast */
+.bg-white {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary);
+  border-color: var(--card-border);
 }
 
-/* Fix table overflow */
-.table-container {
-  overflow-x: auto;
-  max-width: 100%;
+/* Text refinements */
+.text-gray-900,
+.text-slate-900,
+.text-zinc-900 {
+  color: var(--text-primary) !important;
 }
 
-/* Responsive table styling */
-@media (max-width: 768px) {
-  .table-container {
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  }
+.text-gray-600,
+.text-gray-500,
+.text-slate-500 {
+  color: var(--text-secondary) !important;
 }
 
-/* Prevent content from extending beyond viewport */
-.container {
-  max-width: 100%;
-  overflow-x: hidden;
+.text-gray-400 {
+  color: var(--text-muted) !important;
 }
 
-/* Fix for cards and content containers */
-.content-card {
-  max-width: 100%;
-  overflow: hidden;
+/* Borders - Make them subtle */
+.border,
+.border-gray-200,
+.border-gray-100,
+.border-gray-300,
+.divide-y,
+.divide-gray-200>*+* {
+  border-color: var(--card-border) !important;
 }
 
-/* Ensure pagination doesn't overflow */
-.pagination-container {
-  overflow-x: auto;
-  overflow-y: visible;
+/* Shadows - Thicker dark shadows for depth in dark mode */
+/* Removed background-color from shadows to not override button colors */
+.shadow-sm,
+.shadow-md,
+.shadow-lg {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* Line clamp utilities */
-.line-clamp-1 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-  line-clamp: 1;
+/* Inputs, Selects, Textareas - Cleaner look */
+input,
+select,
+textarea {
+  background-color: var(--background) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--card-border) !important;
 }
 
-.line-clamp-2 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary) !important;
+  outline: none;
+  ring: 2px var(--primary);
 }
 
-.line-clamp-3 {
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+/* Buttons - Preserve blue button colors */
+button.bg-white {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--card-border) !important;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+button.bg-white:hover {
+  background-color: #27272a !important;
+  /* Zinc 800 */
+}
+
+/* Blue buttons - preserve their colors */
+.bg-blue-500,
+button.bg-blue-500 {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.bg-blue-500:hover,
+button.bg-blue-500:hover,
+.hover\:bg-blue-600:hover {
+  background-color: #2563eb !important;
+}
+
+.bg-blue-600,
+button.bg-blue-600 {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+/* Indigo buttons fallback - convert to blue */
+.bg-indigo-600,
+button.bg-indigo-600 {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.bg-indigo-600:hover,
+button.bg-indigo-600:hover,
+.hover\:bg-indigo-700:hover {
+  background-color: #2563eb !important;
+}
+
+/* Status Badges - refined for readability */
+.bg-green-100 {
+  background-color: rgba(22, 101, 52, 0.3) !important;
+  color: #86efac !important;
+  border: 1px solid rgba(22, 101, 52, 0.5) !important;
+}
+
+.bg-blue-100 {
+  background-color: rgba(30, 64, 175, 0.3) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(30, 64, 175, 0.5) !important;
+}
+
+.bg-red-100 {
+  background-color: rgba(153, 27, 27, 0.3) !important;
+  color: #fca5a5 !important;
+  border: 1px solid rgba(153, 27, 27, 0.5) !important;
+}
+
+.bg-purple-100 {
+  background-color: rgba(107, 33, 168, 0.3) !important;
+  color: #d8b4fe !important;
+  border: 1px solid rgba(107, 33, 168, 0.5) !important;
+}
+
+.bg-indigo-100 {
+  background-color: rgba(55, 48, 163, 0.3) !important;
+  color: #a5b4fc !important;
+  border: 1px solid rgba(55, 48, 163, 0.5) !important;
+}
+
+.bg-yellow-100 {
+  background-color: rgba(161, 98, 7, 0.3) !important;
+  color: #fde047 !important;
+  border: 1px solid rgba(161, 98, 7, 0.5) !important;
+}
+
+.bg-pink-100 {
+  background-color: rgba(157, 23, 77, 0.3) !important;
+  color: #f9a8d4 !important;
+  border: 1px solid rgba(157, 23, 77, 0.5) !important;
+}
+
+.bg-gray-200 {
+  background-color: #27272a !important;
+  color: #e4e4e7 !important;
+}
+
+/* Invert icons in buttons if needed, usually text color handles it */
+svg.text-gray-400 {
+  color: var(--text-muted) !important;
+}
+
+svg.text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+
+/* Table specific overrides */
+thead.bg-gray-50 th {
+  background-color: var(--card-bg) !important;
+  /* Make headers slightly lighter than body */
+  color: var(--text-secondary) !important;
+  border-bottom: 1px solid var(--card-border);
+}
+
+tbody.bg-white tr:hover {
+  background-color: #27272a !important;
+  /* Zinc 800 hover effect */
+}
+
+/* Sidebar override for better match */
+aside.bg-gray-800 {
+  background-color: #09090b !important;
+  /* Match main background or go slightly lighter */
+  border-right: 1px solid var(--card-border);
+}
+
+/* Specific fix for "Full White" text that disappears */
+.text-white {
+  color: #ffffff !important;
+}
+
+/* Sidebar Nav active state - use blue instead of indigo */
+.bg-indigo-700 {
+  background-color: var(--primary) !important;
+}
+
+.text-gray-300 {
+  color: #a1a1aa !important;
+}
+
+/* Fix Bluish Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary) !important;
+}
+
+/* Green buttons for success actions */
+.bg-green-500,
+button.bg-green-500 {
+  background-color: #22c55e !important;
+  color: #ffffff !important;
+}
+
+.bg-green-500:hover,
+button.bg-green-500:hover,
+.hover\:bg-green-600:hover {
+  background-color: #16a34a !important;
+}
+
+.bg-green-600,
+button.bg-green-600 {
+  background-color: #16a34a !important;
+  color: #ffffff !important;
+}
+
+/* Red buttons for destructive actions */
+.bg-red-500,
+button.bg-red-500 {
+  background-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+.bg-red-500:hover,
+button.bg-red-500:hover,
+.hover\:bg-red-600:hover {
+  background-color: #dc2626 !important;
+}
+
+.bg-red-600,
+button.bg-red-600 {
+  background-color: #dc2626 !important;
+  color: #ffffff !important;
 }
