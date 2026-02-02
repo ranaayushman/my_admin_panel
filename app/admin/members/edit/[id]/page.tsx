@@ -33,10 +33,12 @@ const departments = [
 
 // Designations
 const designationEnum = [
-  // Founders
   "Founder",
-  // Core Team
   "Organizer",
+  "Treasurer",
+  "Secretary",
+  "Co-Organizer",
+  // Lead
   "PR and Mangement Lead",
   "Web Development Lead",
   "App Development Lead",
@@ -44,6 +46,8 @@ const designationEnum = [
   "Content Writer Lead",
   "Video Editor Lead",
   "Graphic Designer Lead",
+  "Technical Lead",
+  "Management Head",
   // Tech Team
   "Web Developer",
   "App Developer",
@@ -59,7 +63,7 @@ const designationEnum = [
   // Legacy
   "PR and Management Lead",
   "Machine Learning Engineer",
-  "Tech Member",
+
 ] as const;
 
 const memberSchema = z.object({

@@ -188,6 +188,11 @@ export default function EditEventPage() {
       }
     } catch (err: unknown) {
       console.error("Error updating event:", err);
+      // Log detailed error info if available
+      if (err && typeof err === 'object' && 'response' in err) {
+        console.log("Error Response Data:", (err as any).response?.data);
+      }
+
       const errorMessage = err instanceof Error && 'message' in err
         ? (err as Error).message
         : err && typeof err === 'object' && 'response' in err

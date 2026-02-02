@@ -32,6 +32,11 @@ const departments = [
 const newDesignations = [
   "Founder",
   "Organizer",
+  "Treasurer",
+  "Secretary",
+  "Co-Organizer",
+  "Technical Lead",
+  "Management Head",
   "PR and Mangement Lead",
   "Web Development Lead",
   "App Development Lead",
@@ -196,7 +201,12 @@ export default function AddMemberPage() {
         toast.error(response.data.message || "Failed to add member");
       }
     } catch (err: unknown) {
-      console.error("Error adding member:", err);
+      console.error("Error adding member - Full Error Object:", err);
+
+      if (err && typeof err === 'object' && 'response' in err) {
+        console.error("Server Response Data:", (err as any).response?.data);
+      }
+
       const errorMessage = err instanceof Error && 'response' in err
         ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
         : "An error occurred while adding the member";
