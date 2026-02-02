@@ -7,6 +7,7 @@ import { eventsApi } from "@/services/api";
 import { Event } from "@/types";
 import Image from "next/image";
 import { EventCardSkeleton } from "@/components/admin/events/EventCardSkeleton";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 export default function EventsPage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function EventsPage() {
   const [activeFilter, setActiveFilter] = useState<string>("all");
   const [participantCounts, setParticipantCounts] = useState<Record<string, number>>({});
   const [loadingParticipants, setLoadingParticipants] = useState<Record<string, boolean>>({});
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; eventId: string | null; eventName: string }>({ isOpen: false, eventId: null, eventName: "" });
 
   // Fetch participant count for a specific event
   const fetchParticipantCount = useCallback(async (eventId: string) => {
@@ -113,11 +115,16 @@ export default function EventsPage() {
     return timeString;
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, name: string) => {
+    setDeleteDialog({ isOpen: true, eventId: id, eventName: name });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteDialog.eventId) return;
     try {
-      const response = await eventsApi.deleteEvent(id);
+      const response = await eventsApi.deleteEvent(deleteDialog.eventId);
       if (response.data && response.data.success) {
-        setEvents(events.filter((event) => event._id !== id));
+        setEvents(events.filter((event) => event._id !== deleteDialog.eventId));
         toast.success("Event deleted successfully");
       } else {
         toast.error("Failed to delete event");
@@ -371,7 +378,7 @@ export default function EventsPage() {
           <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {filteredEvents.map((event) => (
               <div
-                onClick={() => router.push(`/admin/events/edit/${event._id}`)}
+                onClick={() => router.push(`/admin/events/${event._id}`)}
                 key={event._id}
                 className="group relative overflow-hidden rounded-xl bg-[#18181B] border border-zinc-900 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-zinc-700"
               >
@@ -528,7 +535,7 @@ export default function EventsPage() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDelete(event._id);
+                          handleDelete(event._id, event.name);
                         }}
                         className="rounded-md bg-red-600 px-3 py-2 text-white hover:bg-red-700"
                         title="Delete"
@@ -544,6 +551,14 @@ export default function EventsPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, eventId: null, eventName: "" })}
+        onConfirm={confirmDelete}
+        message={`Are you sure you want to delete "${deleteDialog.eventName}"? This action cannot be undone and all participant data will be removed.`}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { membersApi } from "@/services/api";
 import { Member, MembersAdminAllResponse } from "@/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 export default function MembersPage() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function MembersPage() {
     "all" | "active" | "inactive"
   >("all");
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; memberId: string | null; memberName: string }>({ isOpen: false, memberId: null, memberName: "" });
 
   // Fetch members data
   useEffect(() => {
@@ -72,13 +74,18 @@ export default function MembersPage() {
     return matchesSearch;
   });
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, name: string) => {
+    setDeleteDialog({ isOpen: true, memberId: id, memberName: name });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteDialog.memberId) return;
     try {
-      const response = await membersApi.deleteMember(id);
+      const response = await membersApi.deleteMember(deleteDialog.memberId);
       if (response.data && response.data.success) {
         // Remove from list and update counters
-        setAllMembers((prev) => prev.filter((m) => m._id !== id));
-        const removed = allMembers.find((m) => m._id === id);
+        setAllMembers((prev) => prev.filter((m) => m._id !== deleteDialog.memberId));
+        const removed = allMembers.find((m) => m._id === deleteDialog.memberId);
         setTotalMembers((t) => Math.max(0, t - 1));
         if (removed) {
           if (removed.isActive !== false) {
@@ -485,7 +492,7 @@ export default function MembersPage() {
                           <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z" /></svg>
                         </button>
                         <button
-                          onClick={(e) => { e.stopPropagation(); handleDelete(member._id); }}
+                          onClick={(e) => { e.stopPropagation(); handleDelete(member._id, member.name); }}
                           className="text-red-400 hover:underline"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M312-144q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480ZM384-288h72v-336h-72v336Zm120 0h72v-336h-72v336ZM312-696v480-480Z" /></svg>
@@ -500,6 +507,14 @@ export default function MembersPage() {
 
         </table>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, memberId: null, memberName: "" })}
+        onConfirm={confirmDelete}
+        message={`Are you sure you want to delete "${deleteDialog.memberName}"? This action cannot be undone.`}
+      />
     </div>
   );
 }

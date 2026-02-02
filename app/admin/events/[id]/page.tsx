@@ -181,7 +181,7 @@ export default function EventParticipantsPage() {
             <div className="flex items-center">
               <button
                 onClick={() => router.push("/admin/events")}
-                className="flex items-center rounded-md bg-gray-100 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-200 mr-4"
+                className="flex items-center rounded-md bg-gray-100 px-3 py-1.5 text-sm text-white hover:bg-gray-200 "
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -192,14 +192,12 @@ export default function EventParticipantsPage() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Back to Events
+               
               </button>
-              <h1 className="text-2xl font-semibold text-gray-800">Event Participants</h1>
+              <h1 className="text-2xl font-semibold text-white">Event Participants</h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">
-                Total: {totalParticipants} participants
-              </span>
+            <div className="flex items-center space-x-4 ">
+             
               <button
                 onClick={exportToCSV}
                 disabled={totalFilteredItems === 0}
@@ -216,6 +214,26 @@ export default function EventParticipantsPage() {
                 </svg>
                 Export CSV
               </button>
+              <button
+                onClick={() => router.push(`/admin/events/edit/${eventId}/`)}
+                className="flex items-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm text-white shadow-sm hover:bg-indigo-700"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="mr-1 h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+                Edit Event
+              </button>
             </div>
           </div>
         </div>
@@ -224,7 +242,7 @@ export default function EventParticipantsPage() {
         <div className="mb-6 bg-white rounded-lg shadow p-4">
           <div className="flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4 lg:items-end">
             <div className="flex-1">
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="search" className="block text-sm font-medium text-white mb-1">
                 Search Participants
               </label>
               <input
@@ -238,7 +256,7 @@ export default function EventParticipantsPage() {
             </div>
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
               <div className="custom-select">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Sort By
                 </label>
                 <select
@@ -253,7 +271,7 @@ export default function EventParticipantsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Order
                 </label>
                 <button
@@ -264,7 +282,7 @@ export default function EventParticipantsPage() {
                 </button>
               </div>
               <div className="custom-select">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Items per page
                 </label>
                 <select

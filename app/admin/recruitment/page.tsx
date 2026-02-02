@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { recruitmentApi } from "@/services/api";
 import toast from "react-hot-toast";
 import PageHeader from "@/components/admin/PageHeader";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface RecruitmentForm {
     _id: string;
@@ -21,6 +22,7 @@ export default function RecruitmentDashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+    const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; formId: string | null; formTitle: string }>({ isOpen: false, formId: null, formTitle: "" });
 
     const fetchData = useCallback(async () => {
         setIsLoading(true);
@@ -45,11 +47,15 @@ export default function RecruitmentDashboard() {
         });
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this form?")) return;
+    const handleDelete = async (id: string, title: string) => {
+        setDeleteDialog({ isOpen: true, formId: id, formTitle: title });
+    };
+
+    const confirmDelete = async () => {
+        if (!deleteDialog.formId) return;
         try {
-            await recruitmentApi.deleteForm(id);
-            setForms((prev) => prev.filter((f) => f._id !== id));
+            await recruitmentApi.deleteForm(deleteDialog.formId);
+            setForms((prev) => prev.filter((f) => f._id !== deleteDialog.formId));
             toast.success("Form deleted successfully");
         } catch (error) {
             console.error("Error deleting form:", error);
@@ -251,7 +257,7 @@ export default function RecruitmentDashboard() {
 
                                         {/* Delete */}
                                         <button
-                                            onClick={() => handleDelete(form._id)}
+                                            onClick={() => handleDelete(form._id, form.title)}
                                             className="rounded-md bg-red-500/20 px-3 py-1.5 text-sm font-medium text-red-400 hover:bg-red-500/30"
                                         >
                                             Delete
@@ -263,6 +269,14 @@ export default function RecruitmentDashboard() {
                     </div>
                 )}
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <ConfirmDialog
+                isOpen={deleteDialog.isOpen}
+                onClose={() => setDeleteDialog({ isOpen: false, formId: null, formTitle: "" })}
+                onConfirm={confirmDelete}
+                message={`Are you sure you want to delete "${deleteDialog.formTitle}"? This action cannot be undone.`}
+            />
         </div>
     );
 }
