@@ -35,35 +35,34 @@ const departments = [
 const designationEnum = [
   "Founder",
   "Organizer",
-  "Treasurer",
-  "Secretary",
   "Co-Organizer",
-  // Lead
-  "PR and Mangement Lead",
+  "Secretary",
+  "Join Secretary",
+  "Treasurer",
+  "Joint Treasurer",
+  "Management Head",
+  "Joint Management Head",
+  "Public Relation Head",
+  "Joint Public Relation Head",
+  "Technical Lead",
+  "Joint Technical Lead",
   "Web Development Lead",
   "App Development Lead",
   "Machine Learning Lead",
   "Content Writer Lead",
+  "Joint Content Writer Lead",
   "Video Editor Lead",
+  "Joint Video Editor Lead",
   "Graphic Designer Lead",
-  "Technical Lead",
-  "Management Head",
-  // Tech Team
   "Web Developer",
   "App Developer",
   "Machine Learning",
   "Technical Member",
-  // Media Team
   "Video Editor",
   "Graphic Designer",
   "Content Writer",
   "Photographer",
-  // PR Team
   "PR",
-  // Legacy
-  "PR and Management Lead",
-  "Machine Learning Engineer",
-
 ] as const;
 
 const memberSchema = z.object({
