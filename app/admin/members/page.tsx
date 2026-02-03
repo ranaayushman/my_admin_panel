@@ -194,16 +194,16 @@ export default function MembersPage() {
   ]
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="mb-6 flex flex-col space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <h1 className="text-2xl font-semibold text-white">Members</h1>
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      <div className="mb-4 sm:mb-6 flex flex-col space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-semibold text-white">Members</h1>
 
-            <div className="ml-4 flex items-center space-x-3 text-sm">
+            <div className="flex items-center flex-wrap gap-2 text-xs sm:text-sm">
               {stats.map((stat) => {
                 return (
-                  <span key={stat.key} className="ml-4 text-sm shadow-md text-white border border-gray-700 p-1 px-2 rounded-full bg-zinc-800/90">
+                  <span key={stat.key} className="shadow-md text-white border border-gray-700 p-1 px-2 rounded-full bg-zinc-800/90">
                     {stat.label}: {stat.value}
                   </span>
                 )
@@ -213,14 +213,14 @@ export default function MembersPage() {
           </div>
           <div className="flex gap-2">
             <button
-              aria-label="Refresh events"
+              aria-label="Refresh members"
               onClick={refreshMembers}
-              className="ml-4 flex items-center justify-center rounded-full bg-blue-500 px-3 py-1 text-sm text-white shadow-sm hover:bg-blue-600 border border-zinc-900"
+              className="flex items-center justify-center rounded-full bg-blue-500 p-2 sm:px-3 sm:py-1 text-sm text-white shadow-sm hover:bg-blue-600 border border-zinc-900"
               disabled={isLoading}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
+                className="h-5 w-5 sm:h-6 sm:w-6"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -235,11 +235,11 @@ export default function MembersPage() {
             </button>
             <button
               onClick={() => router.push('/admin/members/add')}
-              className="flex items-center rounded-full bg-blue-500 px-8 py-2.5 text-[16px] text-white shadow-sm hover:bg-blue-600"
+              className="flex items-center rounded-full bg-blue-500 px-4 sm:px-8 py-2 sm:py-2.5 text-sm sm:text-base text-white shadow-sm hover:bg-blue-600"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="mr-1 h-6 w-6"
+                className="mr-1 h-5 w-5 sm:h-6 sm:w-6"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -251,14 +251,15 @@ export default function MembersPage() {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              Add Member
+              <span className="hidden sm:inline">Add Member</span>
+              <span className="sm:hidden">Add</span>
             </button>
           </div>
 
         </div>
 
-        <div className="flex justify-between gap-2 border border-zinc-900 px-2 bg-[#18181B] py-2 rounded-full shadow-md">
-          <div className="flex gap-2 " >
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-3 border border-zinc-900 px-2 bg-[#18181B] py-2 rounded-lg sm:rounded-full shadow-md">
+          <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide" >
             {(
               [
                 { key: "all", label: "All" },
@@ -269,7 +270,7 @@ export default function MembersPage() {
               <button
                 key={opt.key}
                 onClick={() => setStatusFilter(opt.key)}
-                className={`rounded-full text-white px-3 py-1 text-sm capitalize ${statusFilter === opt.key
+                className={`rounded-full text-white px-3 py-1 text-xs sm:text-sm capitalize whitespace-nowrap ${statusFilter === opt.key
                   ? "bg-blue-500 text-white font-medium"
                   : "bg-[#141417] text-white hover:bg-zinc-800"
                   }`}
@@ -283,12 +284,101 @@ export default function MembersPage() {
             placeholder="Search members..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-[#141417] text-white rounded-full px-4 py-2 border border-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-500"
+            className="bg-[#141417] text-white rounded-full px-4 py-2 text-sm border border-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-500"
           />
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-zinc-900">
+      {/* Mobile Card View */}
+      <div className="block md:hidden space-y-3">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-12">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+            <span className="text-sm text-white">Loading members</span>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8">
+            <p className="text-red-400">{error}</p>
+          </div>
+        ) : filteredMembers.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-zinc-400">No members found</p>
+          </div>
+        ) : (
+          filteredMembers.map((member) => (
+            <div key={member._id} className="bg-[#18181B] border border-zinc-900 rounded-lg p-4">
+              <div className="flex items-start gap-3 mb-3">
+                {member.profile_image?.url ? (
+                  <Image
+                    src={member.profile_image.url}
+                    alt={member.name}
+                    width={48}
+                    height={48}
+                    className="rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                    {member.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-white truncate">{member.name}</h3>
+                  <p className="text-xs text-zinc-400 truncate">{member.email_id}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      member.isActive !== false
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-red-500/20 text-red-400"
+                    }`}>
+                      {member.isActive !== false ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-1 text-xs text-zinc-400 mb-3">
+                <p><span className="text-zinc-500">Designation:</span> {member.designation}</p>
+                <p><span className="text-zinc-500">Department:</span> {member.department}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="text-xs text-zinc-400">Status:</span>
+                  <button
+                    onClick={() => handleToggleActive(member._id)}
+                    disabled={togglingIds.has(member._id)}
+                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${
+                      member.isActive !== false
+                        ? "bg-green-600 hover:bg-green-700"
+                        : "bg-zinc-600 hover:bg-zinc-500"
+                    } ${togglingIds.has(member._id) ? "opacity-50 cursor-not-allowed" : ""}`}
+                    title={member.isActive !== false ? "Deactivate" : "Activate"}
+                  >
+                    <span
+                      className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition ${
+                        member.isActive !== false ? "translate-x-5" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+                <button
+                  onClick={() => router.push(`/admin/members/edit/${member._id}`)}
+                  className="rounded-md bg-blue-600 px-3 py-1.5 text-xs text-white hover:bg-blue-700"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(member._id, member.name)}
+                  className="rounded-md bg-red-600 px-3 py-1.5 text-xs text-white hover:bg-red-700"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto rounded-lg border border-zinc-900">
         <table className="min-w-full divide-y divide-zinc-900">
           <thead className="bg-[#141417]">
             <tr>

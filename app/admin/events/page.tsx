@@ -22,11 +22,22 @@ export default function EventsPage() {
 
   // Fetch participant count for a specific event
   const fetchParticipantCount = useCallback(async (eventId: string) => {
-    if (loadingParticipants[eventId] || participantCounts[eventId] !== undefined) {
-      return; // Already loading or already have data
-    }
+    setLoadingParticipants(prev => {
+      // Check if already loading or already have data
+      if (prev[eventId] !== undefined) {
+        return prev; // Already loading or loaded
+      }
+      return { ...prev, [eventId]: true };
+    });
+    
+    setParticipantCounts(prev => {
+      // If we already have data, don't fetch again
+      if (prev[eventId] !== undefined) {
+        return prev;
+      }
+      return prev;
+    });
 
-    setLoadingParticipants(prev => ({ ...prev, [eventId]: true }));
     try {
       const response = await eventsApi.getEventParticipants(eventId);
       if (response.data && response.data.success) {
@@ -41,7 +52,7 @@ export default function EventsPage() {
     } finally {
       setLoadingParticipants(prev => ({ ...prev, [eventId]: false }));
     }
-  }, [loadingParticipants, participantCounts]);
+  }, []);
 
   // Fetch events data
   useEffect(() => {
@@ -74,7 +85,8 @@ export default function EventsPage() {
     };
 
     fetchEvents();
-  }, [fetchParticipantCount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Filter events based on search query and active filter
   const filteredEvents = events.filter((event) => {
@@ -219,25 +231,25 @@ export default function EventsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="mb-6 flex flex-col space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center px-3">
-            <h1 className="text-2xl font-semibold text-white">Events</h1>
-            <span className="ml-4 text-sm shadow-md text-white border border-zinc-900 p-1 px-2 rounded-full bg-[#18181B]">
-              Total: {filteredEvents.length} events
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      <div className="mb-4 sm:mb-6 flex flex-col space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center px-1 sm:px-3">
+            <h1 className="text-xl sm:text-2xl font-semibold text-white">Events</h1>
+            <span className="ml-2 sm:ml-4 text-xs sm:text-sm shadow-md text-white border border-zinc-900 p-1 px-2 rounded-full bg-[#18181B]">
+              {filteredEvents.length}
             </span>
           </div>
           <div className="flex gap-2">
             <button
               aria-label="Refresh events"
               onClick={refreshEvents}
-              className="ml-4 flex items-center justify-center rounded-full bg-blue-500 px-3 py-1 text-sm text-white shadow-sm hover:bg-[#141417] border border-zinc-900"
+              className="flex items-center justify-center rounded-full bg-blue-500 p-2 sm:px-3 sm:py-1 text-sm text-white shadow-sm hover:bg-[#141417] border border-zinc-900"
               disabled={isLoading}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
+                className="h-5 w-5 sm:h-6 sm:w-6"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -252,11 +264,11 @@ export default function EventsPage() {
             </button>
             <button
               onClick={() => router.push('/admin/events/add')}
-              className="flex items-center rounded-full bg-blue-500 px-8 py-2.5 text-[16px] text-white shadow-sm hover:bg-blue-600"
+              className="flex items-center rounded-full bg-blue-500 px-4 sm:px-8 py-2 sm:py-2.5 text-sm sm:text-base text-white shadow-sm hover:bg-blue-600"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="mr-1 h-6 w-6"
+                className="mr-1 h-5 w-5 sm:h-6 sm:w-6"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -268,23 +280,24 @@ export default function EventsPage() {
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              Add Event
+              <span className="hidden sm:inline">Add Event</span>
+              <span className="sm:hidden">Add</span>
             </button>
           </div>
         </div>
 
-        <div className="flex justify-between gap-2 border border-zinc-900 px-2 bg-[#18181B] py-2 rounded-full shadow-md">
-          <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-3 border border-zinc-900 px-2 bg-[#18181B] py-2 rounded-lg sm:rounded-full shadow-md">
+          <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
             {filters.map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
-                className={`rounded-full text-white px-3 py-1 text-sm capitalize ${activeFilter === filter
+                className={`rounded-full text-white px-3 py-1 text-xs sm:text-sm capitalize whitespace-nowrap ${activeFilter === filter
                   ? "bg-blue-500 text-white font-medium"
                   : "bg-[#141417] text-white hover:bg-zinc-800"
                   }`}
               >
-                {filter === "all" ? "All Events" : filter === "registration_open" ? "Registration Open" : filter}
+                {filter === "all" ? "All" : filter === "registration_open" ? "Reg Open" : filter}
               </button>
             ))}
           </div>
@@ -293,7 +306,7 @@ export default function EventsPage() {
             placeholder="Search events..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="rounded-full bg-[#141417] text-white shadow-sm px-4 py-2 border border-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-500"
+            className="rounded-full bg-[#141417] text-white shadow-sm px-4 py-2 text-sm border border-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-500"
           />
         </div>
       </div>
@@ -375,15 +388,15 @@ export default function EventsPage() {
             </div>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {filteredEvents.map((event) => (
               <div
                 onClick={() => router.push(`/admin/events/${event._id}`)}
                 key={event._id}
-                className="group relative overflow-hidden rounded-xl bg-[#18181B] border border-zinc-900 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-zinc-700"
+                className="group relative overflow-hidden rounded-xl bg-[#18181B] border border-zinc-900 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-zinc-700 cursor-pointer"
               >
                 {/* ================= Banner ================= */}
-                <div className="relative h-52 w-full overflow-hidden">
+                <div className="relative h-40 sm:h-52 w-full overflow-hidden">
                   {event.eventBanner?.url ? (
                     <Image
                       src={event.eventBanner.url}
@@ -396,60 +409,60 @@ export default function EventsPage() {
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
-                      <svg className="h-16 w-16 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-12 w-12 sm:h-16 sm:w-16 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
                       </svg>
                     </div>
                   )}
 
                   {/* Status */}
-                  <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${getStatusBadgeColor(event)}`}>
+                  <div className="absolute left-2 sm:left-3 top-2 sm:top-3 flex flex-wrap gap-1 sm:gap-2">
+                    <span className={`rounded-full px-2 sm:px-2.5 py-0.5 sm:py-1 text-xs font-semibold ${getStatusBadgeColor(event)}`}>
                       {event.is_upcoming ? "Upcoming" : "Past"}
                     </span>
                     {event.registration_open && (
-                      <span className="rounded-full bg-green-500/20 px-2.5 py-1 text-xs font-semibold text-green-400">
-                        Reg Open
+                      <span className="rounded-full bg-green-500/20 px-2 sm:px-2.5 py-0.5 sm:py-1 text-xs font-semibold text-green-400">
+                        Open
                       </span>
                     )}
                   </div>
 
                   {/* Category */}
-                  <div className="absolute right-3 top-3">
-                    <span className="rounded-full bg-purple-500/20 px-2.5 py-1 text-xs font-semibold text-purple-400">
+                  <div className="absolute right-2 sm:right-3 top-2 sm:top-3">
+                    <span className="rounded-full bg-purple-500/20 px-2 sm:px-2.5 py-0.5 sm:py-1 text-xs font-semibold text-purple-400">
                       {event.category}
                     </span>
                   </div>
                 </div>
 
                 {/* ================= Content ================= */}
-                <div className="p-5">
+                <div className="p-3 sm:p-5">
                   {/* Title */}
-                  <h3 className="mb-1 line-clamp-2 text-lg font-bold text-white">
+                  <h3 className="mb-1 line-clamp-2 text-base sm:text-lg font-bold text-white">
                     {event.name}
                   </h3>
 
                   {/* Description */}
-                  <p className="mb-4 line-clamp-2 text-sm text-zinc-400">
+                  <p className="mb-3 sm:mb-4 line-clamp-2 text-xs sm:text-sm text-zinc-400">
                     {event.description}
                   </p>
 
                   {/* Meta Info */}
-                  <div className="space-y-2 text-sm text-zinc-400">
+                  <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-zinc-400">
                     {/* Date */}
                     <div className="flex items-start gap-2">
-                      <svg className="mt-0.5 h-4 w-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="mt-0.5 h-3.5 w-3.5 sm:h-4 sm:w-4 text-zinc-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
                       </svg>
-                      <div>
-                        <div className="font-medium text-white">{formatDate(event.eventDate)}</div>
-                        <div className="text-xs text-zinc-500">{formatTime(event.eventTime)}</div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-white truncate">{formatDate(event.eventDate)}</div>
+                        <div className="text-xs text-zinc-500 truncate">{formatTime(event.eventTime)}</div>
                       </div>
                     </div>
 
                     {/* Venue */}
                     <div className="flex items-center gap-2">
-                      <svg className="h-4 w-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-zinc-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       </svg>
                       <span className="truncate text-white">{event.venue}</span>
@@ -457,7 +470,7 @@ export default function EventsPage() {
 
                     {/* Participants */}
                     <div className="flex items-center gap-2">
-                      <svg className="h-4 w-4 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-zinc-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1z" />
                       </svg>
 
@@ -467,9 +480,9 @@ export default function EventsPage() {
                           Loading...
                         </div>
                       ) : (
-                        <div className="text-sm">
+                        <div className="text-xs sm:text-sm">
                           <span className="font-medium text-white">
-                            {participantCounts[event._id] ?? 0} participants
+                            {participantCounts[event._id] ?? 0}
                           </span>
                           {event.registrationFee && (
                             <span className="ml-2 text-xs text-green-400">
@@ -482,7 +495,7 @@ export default function EventsPage() {
                   </div>
 
                   {/* ================= Actions ================= */}
-                  <div className="mt-5 flex flex-col gap-2">
+                  <div className="mt-3 sm:mt-5 flex flex-col gap-2">
                     {/* Primary */}
                     <div className="flex gap-2 justify-baseline items-center">
 
@@ -491,9 +504,10 @@ export default function EventsPage() {
                           e.stopPropagation();
                           router.push(`/admin/events/${event._id}`);
                         }}
-                        className="w-1/2 rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+                        className="w-1/2 rounded-md bg-blue-500 px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white hover:bg-blue-600"
                       >
-                        View Participants
+                        <span className="hidden sm:inline">View Participants</span>
+                        <span className="sm:hidden">View</span>
                       </button>
                       <button
                         onClick={(e) => {
@@ -501,10 +515,10 @@ export default function EventsPage() {
                           handleToggleRegistration(event._id);
                         }}
                         disabled={!!togglingRegIds[event._id]}
-                        className="w-1/2 rounded-md bg-yellow-500 px-3 py-2 text-white hover:bg-yellow-600"
+                        className="w-1/2 rounded-md bg-yellow-500 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-white hover:bg-yellow-600"
                         title="Toggle Registration"
                       >
-                        {event.registration_open ? "Close Registration" : "Open Registration"}
+                        {event.registration_open ? "Close" : "Open"}
                       </button>
                     </div>
 
@@ -516,7 +530,7 @@ export default function EventsPage() {
                           fetchParticipantCount(event._id);
                         }}
                         disabled={loadingParticipants[event._id]}
-                        className="rounded-md bg-green-600 px-3 py-2 text-white hover:bg-green-700"
+                        className="rounded-md bg-green-600 px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base text-white hover:bg-green-700"
                         title="Refresh"
                       >
                         ↻
@@ -527,7 +541,7 @@ export default function EventsPage() {
                           e.stopPropagation();
                           router.push(`/admin/events/edit/${event._id}`);
                         }}
-                        className="rounded-md bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
+                        className="rounded-md bg-blue-600 px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base text-white hover:bg-blue-700"
                         title="Edit"
                       >
                         ✎
@@ -537,7 +551,7 @@ export default function EventsPage() {
                           e.stopPropagation();
                           handleDelete(event._id, event.name);
                         }}
-                        className="rounded-md bg-red-600 px-3 py-2 text-white hover:bg-red-700"
+                        className="rounded-md bg-red-600 px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base text-white hover:bg-red-700"
                         title="Delete"
                       >
                         🗑
