@@ -377,225 +377,164 @@ export default function MembersPage() {
         )}
       </div>
 
-      {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto rounded-lg border border-zinc-900">
-        <table className="min-w-full divide-y divide-zinc-900">
-          <thead className="bg-[#141417]">
-            <tr>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
+      {/* Desktop Card View */}
+      <div className="hidden md:block">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center gap-3 py-20">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+            <span className="text-sm text-white">Loading members</span>
+          </div>
+        ) : error ? (
+          <div className="py-20 text-center text-sm text-red-500">
+            {error}
+          </div>
+        ) : filteredMembers.length === 0 ? (
+          <div className="py-20 text-center text-sm text-white">
+            No members found
+          </div>
+        ) : (
+          <div className="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+            {filteredMembers.map((member) => (
+              <div
+                key={member.uniqueKey || member._id}
+                className="group relative bg-[#18181B] border border-zinc-800 rounded-xl p-6 hover:border-zinc-700 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/5"
               >
-                Profile
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
-              >
-                Name
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
-              >
-                Email
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
-              >
-                Designation
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
-              >
-                Department
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
-              >
-                Status
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-white"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-900 bg-[#18181B]">
-            {/* ================= Loading ================= */}
-            {isLoading ? (
-              <tr>
-                <td colSpan={7} className="px-6 py-12 text-center">
-                  <div className="flex flex-col items-center justify-center gap-3">
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
-                    <span className="text-sm text-white">Loading members</span>
-                  </div>
-                </td>
-              </tr>
-            ) : error ? (
-              /* ================= Error ================= */
-              <tr>
-                <td colSpan={7} className="px-6 py-10 text-center text-sm text-red-500">
-                  {error}
-                </td>
-              </tr>
-            ) : filteredMembers.length === 0 ? (
-              /* ================= Empty ================= */
-              <tr>
-                <td colSpan={7} className="px-6 py-10 text-center text-sm text-white">
-                  No members found
-                </td>
-              </tr>
-            ) : (
-              filteredMembers.map((member) => (
-                <tr
-                  key={member.uniqueKey || member._id}
-                  className="transition-colors hover:bg-[#141417] cursor-pointer"
-                  onClick={() => router.push(`/admin/members/edit/${member._id}`)}
-                >
-                  {/* Avatar */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 flex-shrink-0">
-                        {member.profile_image?.url ? (
-                          <Image
-                            src={member.profile_image.url}
-                            alt={member.name}
-                            width={40}
-                            height={40}
-                            unoptimized
-                            className="h-10 w-10 rounded-full object-cover border border-zinc-900"
-                          />
-                        ) : (
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white">
-                            {member.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
+                {/* Header with Profile */}
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="relative">
+                    {member.profile_image?.url ? (
+                      <Image
+                        src={member.profile_image.url}
+                        alt={member.name}
+                        width={64}
+                        height={64}
+                        unoptimized
+                        className="h-16 w-16 rounded-full object-cover border-2 border-zinc-800 group-hover:border-blue-500/50 transition-colors"
+                      />
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-bold text-white border-2 border-zinc-800 group-hover:border-blue-500/50 transition-colors">
+                        {member.name.charAt(0).toUpperCase()}
                       </div>
-                    </div>
-                  </td>
+                    )}
+                    {/* Status indicator */}
+                    <div className={`absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-[#18181B] ${
+                      member.isActive !== false ? "bg-green-500" : "bg-zinc-600"
+                    }`}></div>
+                  </div>
 
-                  {/* Name */}
-                  <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-white">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-semibold text-white truncate group-hover:text-blue-400 transition-colors">
                       {member.name}
-                    </div>
-                  </td>
-
-                  {/* Email */}
-                  <td className="px-6 py-4">
-                    <div className="max-w-[220px] truncate text-sm text-white">
-                      {member.email_id}
-                    </div>
-                  </td>
-
-                  {/* Designation */}
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${member.designation.toLowerCase().includes("lead")
-                        ? "bg-red-500/20 text-red-400"
-                        : "bg-blue-500/20 text-blue-400"
-                        }`}
-                    >
-                      {member.designation}
-                    </span>
-                  </td>
-
-                  {/* Department */}
-                  <td className="px-6 py-4 text-sm text-white">
-                    {member.department}
-                    <span className="ml-1 text-xs text-zinc-400">
-                      ({member.batch})
-                    </span>
-                  </td>
-
-                  {/* Status */}
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${member.isActive !== false
+                    </h3>
+                    <p className="text-sm text-zinc-400 truncate">{member.email_id}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        member.designation.toLowerCase().includes("lead")
+                          ? "bg-red-500/20 text-red-400"
+                          : "bg-blue-500/20 text-blue-400"
+                      }`}>
+                        {member.designation}
+                      </span>
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${
+                        member.isActive !== false
                           ? "bg-green-500/20 text-green-400"
                           : "bg-zinc-700 text-zinc-300"
-                          }`}
-                      >
+                      }`}>
                         {member.isActive !== false ? "Active" : "Inactive"}
                       </span>
+                    </div>
+                  </div>
+                </div>
 
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); handleToggleActive(member._id); }}
-                        disabled={togglingIds.has(member._id)}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${togglingIds.has(member._id)
-                          ? "opacity-50"
+                {/* Info Section */}
+                <div className="space-y-2 mb-4 pb-4 border-b border-zinc-800">
+                  <div className="flex items-center gap-2 text-sm">
+                    <svg className="w-4 h-4 text-zinc-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span className="text-white">{member.department}</span>
+                    <span className="text-xs text-zinc-500">({member.batch})</span>
+                  </div>
+                  {member.bio && (
+                    <p className="text-xs text-zinc-400 line-clamp-2">{member.bio}</p>
+                  )}
+                </div>
+
+                {/* Social Links */}
+                <div className="flex items-center gap-3 mb-4">
+                  <a
+                    href={member.linkedin_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Image src="/linkedin.svg" width={16} height={16} className="w-4 h-4" alt="LinkedIn" />
+                    <span>LinkedIn</span>
+                  </a>
+                  {member.github_url && member.github_url !== "NA" && (
+                    <a
+                      href={member.github_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs text-white hover:text-zinc-300 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Image src="/github.svg" width={16} height={16} className="w-4 h-4 invert" alt="GitHub" />
+                      <span>GitHub</span>
+                    </a>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-1">
+                    <span className="text-xs text-zinc-400">Status:</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleToggleActive(member._id); }}
+                      disabled={togglingIds.has(member._id)}
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition ${
+                        togglingIds.has(member._id)
+                          ? "opacity-50 cursor-not-allowed"
                           : member.isActive !== false
                             ? "bg-green-600 hover:bg-green-700"
                             : "bg-zinc-600 hover:bg-zinc-500"
-                          }`}
-                      >
-                        <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${member.isActive !== false ? "translate-x-4" : "translate-x-0"
-                            }`}
-                        />
-                      </button>
-                    </div>
-                  </td>
-
-                  {/* Actions */}
-                  <td className="px-6 py-4 text-sm">
-                    <div className="flex gap-2">
-                      <div className="flex items-center gap-3">
-                        <a
-                          href={member.linkedin_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:underline"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Image src="/linkedin.svg" width={20} height={20} className="w-5 h-5" alt="LinkedIn" />
-                        </a>
-                        {member.github_url && member.github_url !== "NA" && (
-                          <a
-                            href={member.github_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-white hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Image src="/github.svg" width={16} height={16} className="w-4 h-4 invert" alt="GitHub" />
-                          </a>
-                        )}
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/admin/members/edit/${member._id}`);
-                          }}
-                          className="text-blue-400 hover:underline"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z" /></svg>
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleDelete(member._id, member.name); }}
-                          className="text-red-400 hover:underline"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M312-144q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480ZM384-288h72v-336h-72v336Zm120 0h72v-336h-72v336ZM312-696v480-480Z" /></svg>
-                        </button>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-
-        </table>
+                      }`}
+                      title={member.isActive !== false ? "Deactivate" : "Activate"}
+                    >
+                      <span
+                        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition ${
+                          member.isActive !== false ? "translate-x-5" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/admin/members/edit/${member._id}`);
+                    }}
+                    className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
+                      <path d="M216-216h51l375-375-51-51-375 375v51Zm-72 72v-153l498-498q11-11 23.84-16 12.83-5 27-5 14.16 0 27.16 5t24 16l51 51q11 11 16 24t5 26.54q0 14.45-5.02 27.54T795-642L297-144H144Zm600-549-51-51 51 51Zm-127.95 76.95L591-642l51 51-25.95-25.05Z" />
+                    </svg>
+                    Edit
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDelete(member._id, member.name); }}
+                    className="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-medium text-white hover:bg-red-700 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor">
+                      <path d="M312-144q-29.7 0-50.85-21.15Q240-186.3 240-216v-480h-48v-72h192v-48h192v48h192v72h-48v479.57Q720-186 698.85-165T648-144H312Zm336-552H312v480h336v-480ZM384-288h72v-336h-72v336Zm120 0h72v-336h-72v336ZM312-696v480-480Z" />
+                    </svg>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Dialog */}
