@@ -113,7 +113,7 @@ export default function RecruitmentDashboard() {
     ];
 
     return (
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
             <PageHeader
                 title="Recruitment"
                 stats={stats}
@@ -197,21 +197,21 @@ export default function RecruitmentDashboard() {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid gap-4">
+                    <div className="grid gap-3 sm:gap-4">
                         {filteredForms.map((form) => (
                             <div
                                 key={form._id}
                                 onClick={() => router.push(`/admin/recruitment/${form._id}`)}
-                                className="group cursor-pointer rounded-lg bg-[#18181B] p-6 shadow-sm transition-all hover:shadow-md border border-zinc-900 hover:border-zinc-700"
+                                className="group cursor-pointer rounded-lg bg-[#18181B] p-4 sm:p-6 shadow-sm transition-all hover:shadow-md border border-zinc-900 hover:border-zinc-700"
                             >
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="flex items-center gap-3">
-                                            <h3 className="text-lg font-semibold text-white group-hover:text-blue-400">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                                            <h3 className="text-base sm:text-lg font-semibold text-white group-hover:text-blue-400 truncate">
                                                 {form.title}
                                             </h3>
                                             <span
-                                                className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${form.isActive
+                                                className={`rounded-full px-2 sm:px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap ${form.isActive
                                                     ? "bg-green-500/20 text-green-400"
                                                     : "bg-zinc-700 text-zinc-300"
                                                     }`}
@@ -219,7 +219,7 @@ export default function RecruitmentDashboard() {
                                                 {form.isActive ? "Active" : "Inactive"}
                                             </span>
                                         </div>
-                                        <p className="mt-1 text-sm text-zinc-400">
+                                        <p className="mt-1 text-xs sm:text-sm text-zinc-400">
                                             Created:{" "}
                                             {new Date(form.createdAt).toLocaleDateString()}
                                             {form.updatedAt && (
@@ -235,14 +235,14 @@ export default function RecruitmentDashboard() {
                                         {/* Toggle Switch */}
                                         <button
                                             onClick={() => handleToggleActive(form._id, form.isActive)}
-                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${form.isActive
+                                            className={`relative inline-flex h-5 w-9 sm:h-6 sm:w-11 items-center rounded-full transition ${form.isActive
                                                 ? "bg-green-600 hover:bg-green-700"
                                                 : "bg-zinc-600 hover:bg-zinc-500"
                                                 }`}
                                             title="Toggle Status"
                                         >
                                             <span
-                                                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition ${form.isActive ? "translate-x-6" : "translate-x-1"
+                                                className={`inline-block h-3.5 w-3.5 sm:h-4 sm:w-4 transform rounded-full bg-white shadow transition ${form.isActive ? "translate-x-5 sm:translate-x-6" : "translate-x-1"
                                                     }`}
                                             />
                                         </button>
@@ -250,7 +250,7 @@ export default function RecruitmentDashboard() {
                                         {/* Edit */}
                                         <button
                                             onClick={() => router.push(`/admin/recruitment/${form._id}/edit`)}
-                                            className="rounded-md bg-blue-500/20 px-3 py-1.5 text-sm font-medium text-blue-400 hover:bg-blue-500/30"
+                                            className="rounded-md bg-blue-500/20 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-blue-400 hover:bg-blue-500/30"
                                         >
                                             Edit
                                         </button>
@@ -258,7 +258,7 @@ export default function RecruitmentDashboard() {
                                         {/* Delete */}
                                         <button
                                             onClick={() => handleDelete(form._id, form.title)}
-                                            className="rounded-md bg-red-500/20 px-3 py-1.5 text-sm font-medium text-red-400 hover:bg-red-500/30"
+                                            className="rounded-md bg-red-500/20 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-red-400 hover:bg-red-500/30"
                                         >
                                             Delete
                                         </button>

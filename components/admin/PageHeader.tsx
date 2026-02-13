@@ -40,18 +40,18 @@ export default function PageHeader({
     const router = useRouter();
 
     return (
-        <div className="mb-6 flex flex-col space-y-4">
+        <div className="mb-4 sm:mb-6 flex flex-col space-y-3 sm:space-y-4">
             {/* Row 1: Title, Stats, Refresh, Add Button */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                    <h1 className="text-2xl font-semibold text-white">{title}</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <h1 className="text-xl sm:text-2xl font-semibold text-white">{title}</h1>
 
                     {stats.length > 0 && (
-                        <div className="ml-4 flex items-center space-x-3 text-sm">
+                        <div className="flex items-center flex-wrap gap-2 text-xs sm:text-sm">
                             {stats.map((stat) => (
                                 <span
                                     key={stat.key}
-                                    className="text-sm shadow-md text-white border border-zinc-900 p-1 px-2 rounded-full bg-[#18181B]"
+                                    className="shadow-md text-white border border-zinc-900 p-1 px-2 rounded-full bg-[#18181B]"
                                 >
                                     {stat.label}: {stat.value}
                                 </span>
@@ -65,12 +65,12 @@ export default function PageHeader({
                         <button
                             aria-label="Refresh"
                             onClick={onRefresh}
-                            className="flex items-center justify-center rounded-full bg-blue-500 px-3 py-1 text-sm text-white shadow-sm hover:bg-[#141417] border border-zinc-900"
+                            className="flex items-center justify-center rounded-full bg-blue-500 p-2 sm:px-3 sm:py-1 text-sm text-white shadow-sm hover:bg-[#141417] border border-zinc-900"
                             disabled={isLoading}
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className={`h-6 w-6 ${isLoading ? "animate-spin" : ""}`}
+                                className={`h-5 w-5 sm:h-6 sm:w-6 ${isLoading ? "animate-spin" : ""}`}
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -88,11 +88,11 @@ export default function PageHeader({
                     {addButtonLabel && addButtonHref && (
                         <button
                             onClick={() => router.push(addButtonHref)}
-                            className="flex items-center rounded-full bg-blue-500 px-8 py-2.5 text-[16px] text-white shadow-sm hover:bg-blue-600"
+                            className="flex items-center rounded-full bg-blue-500 px-4 sm:px-8 py-2 sm:py-2.5 text-sm sm:text-base text-white shadow-sm hover:bg-blue-600"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="mr-1 h-6 w-6"
+                                className="mr-1 h-5 w-5 sm:h-6 sm:w-6"
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"
@@ -104,7 +104,8 @@ export default function PageHeader({
                                     d="M12 4v16m8-8H4"
                                 />
                             </svg>
-                            {addButtonLabel}
+                            <span className="hidden sm:inline">{addButtonLabel}</span>
+                            <span className="sm:hidden">{addButtonLabel.split(' ')[0]}</span>
                         </button>
                     )}
                 </div>
@@ -112,14 +113,14 @@ export default function PageHeader({
 
             {/* Row 2: Filters + Search */}
             {(filters.length > 0 || onSearchChange) && (
-                <div className="flex justify-between gap-2 border border-zinc-900 px-2 bg-[#18181B] py-2 rounded-full shadow-md">
+                <div className="flex flex-col sm:flex-row sm:justify-between gap-3 border border-zinc-900 px-2 bg-[#18181B] py-2 rounded-lg sm:rounded-full shadow-md">
                     {filters.length > 0 && onFilterChange && (
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
                             {filters.map((filter) => (
                                 <button
                                     key={filter.key}
                                     onClick={() => onFilterChange(filter.key)}
-                                    className={`rounded-full text-white px-3 py-1 text-sm capitalize ${activeFilter === filter.key
+                                    className={`rounded-full text-white px-3 py-1 text-xs sm:text-sm capitalize whitespace-nowrap ${activeFilter === filter.key
                                         ? "bg-blue-500 text-white font-medium"
                                         : "bg-[#141417] text-white hover:bg-zinc-800"
                                         }`}
@@ -136,7 +137,7 @@ export default function PageHeader({
                             placeholder={searchPlaceholder}
                             value={searchQuery}
                             onChange={(e) => onSearchChange(e.target.value)}
-                            className="rounded-full bg-[#141417] text-white shadow-sm px-4 py-2 border border-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-500"
+                            className="rounded-full bg-[#141417] text-white shadow-sm px-4 py-2 text-sm border border-zinc-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-zinc-500"
                         />
                     )}
                 </div>

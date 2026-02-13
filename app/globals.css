@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Utility for hiding scrollbars */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 :root {
   /* Default to Dark Mode colors */
   --background: #09090b;

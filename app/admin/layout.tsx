@@ -2,9 +2,10 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+import MobileNav from "@/components/layout/MobileNav";
 
 export default function AdminLayout({
   children,
@@ -13,6 +14,7 @@ export default function AdminLayout({
 }>) {
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Check if user is authenticated and is an admin
@@ -41,10 +43,11 @@ export default function AdminLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-black">
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex flex-col flex-1 min-w-0">
-        <Header />
-        <main className="flex-1 min-h-0 overflow-y-auto">{children}</main>
+        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <main className="flex-1 min-h-0 overflow-y-auto pb-16 lg:pb-0">{children}</main>
+        <MobileNav />
       </div>
     </div>
   );
