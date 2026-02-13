@@ -30,6 +30,7 @@ const departments = [
 
 // Designations aligned to your categorization
 const newDesignations = [
+  "Faculty Co-ordinator",
   "Founder",
   "Organizer",
   "Co-Organizer",

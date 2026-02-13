@@ -33,6 +33,7 @@ const departments = [
 
 // Designations
 const designationEnum = [
+  "Faculty Co-ordinator",
   "Founder",
   "Organizer",
   "Co-Organizer",
