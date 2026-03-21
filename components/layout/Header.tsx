@@ -69,7 +69,29 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
       {/* Mobile Header */}
       <header className="lg:hidden bg-[#141417] border-b border-zinc-900">
-        <div className="flex items-center justify-end px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            type="button"
+            onClick={onMenuClick}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-zinc-800 text-zinc-200 hover:bg-zinc-800"
+            aria-label="Open menu"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="h-5 w-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3.75 6.75h16.5m-16.5 5.25h16.5m-16.5 5.25h16.5"
+              />
+            </svg>
+          </button>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">

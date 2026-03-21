@@ -173,6 +173,10 @@ export const recruitmentApi = {
     return apiClient.get(getApiEndpoint(`${recruitmentBase}/forms`));
   },
 
+  getFormById: (id: string) => {
+    return apiClient.get(getApiEndpoint(`${recruitmentBase}/forms/${id}`));
+  },
+
   updateForm: (id: string, data: any) => {
     return apiClient.put(
       getApiEndpoint(`${recruitmentBase}/forms/${id}`),

@@ -249,10 +249,18 @@ export default function RecruitmentDashboard() {
 
                                         {/* Edit */}
                                         <button
-                                            onClick={() => router.push(`/admin/recruitment/${form._id}/edit`)}
+                                            onClick={() => router.push(`/admin/recruitment/${form._id}`)}
                                             className="rounded-md bg-blue-500/20 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-blue-400 hover:bg-blue-500/30"
                                         >
                                             Edit
+                                        </button>
+
+                                        {/* Participants */}
+                                        <button
+                                            onClick={() => router.push(`/admin/recruitment/${form._id}/participants`)}
+                                            className="rounded-md bg-emerald-500/20 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-emerald-400 hover:bg-emerald-500/30"
+                                        >
+                                            Participants
                                         </button>
 
                                         {/* Delete */}
