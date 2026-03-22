@@ -174,3 +174,41 @@ export type EventParticipantsResponse = {
     __v: number;
   }>;
 };
+
+// Recruitment Form Types
+export type IFormField = {
+  _id?: string;
+  fieldName: string;
+  fieldType: string;
+  required?: boolean;
+  options?: string[];
+  placeholder?: string;
+};
+
+export type IRoleDefinition = {
+  _id?: string;
+  roleName: string;
+  description?: string;
+  fields: IFormField[];
+  whatsappLink?: string;
+};
+
+export type RecruitmentForm = {
+  _id: string;
+  title: string;
+  description?: string;
+  isActive: boolean;
+  roles: IRoleDefinition[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type RecruitmentFormsResponse = {
+  success: boolean;
+  forms: RecruitmentForm[];
+};
+
+export type RecruitmentFormResponse = {
+  success: boolean;
+  form: RecruitmentForm;
+};

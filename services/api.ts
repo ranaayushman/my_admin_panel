@@ -222,6 +222,20 @@ export const recruitmentApi = {
       { params }
     );
   },
+
+  // WhatsApp Links Management
+  updateRoleWhatsappLink: (formId: string, roleName: string, whatsappLink: string) => {
+    return apiClient.patch(
+      getApiEndpoint(`${recruitmentBase}/forms/${formId}/role-whatsapp`),
+      { roleName, whatsappLink }
+    );
+  },
+
+  getRoleWhatsappLink: (formId: string, roleId: string) => {
+    return apiClient.get(
+      getApiEndpoint(`${recruitmentBase}/forms/${formId}/roles/${roleId}`)
+    );
+  },
 };
 
 // -------------------------------------------------------------------
