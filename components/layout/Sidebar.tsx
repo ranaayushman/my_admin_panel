@@ -118,9 +118,10 @@ const navItems = [
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  isCollapsed?: boolean;
 }
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, isCollapsed = false }: SidebarProps) {
   const pathname = usePathname();
   const { logout } = useAuth();
 
@@ -137,12 +138,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside className={`
         fixed lg:static inset-y-0 left-0 z-50
-        w-56 bg-[#141417] text-white border-r border-zinc-900
-        transform transition-transform duration-200 ease-in-out
+        bg-[#141417] text-white border-r border-zinc-900
+        transform transition-all duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        ${isCollapsed ? 'lg:w-20' : 'w-56'}
       `}>
-        <div className="p-4 flex items-center justify-between">
-          <h1 className="text-lg sm:text-xl font-bold text-white">GDG Admin</h1>
+        <div className={`p-4 flex items-center ${isCollapsed ? 'lg:justify-center' : 'justify-between'}`}>
+          {!isCollapsed && <h1 className="text-lg sm:text-xl font-bold text-white">GDG Admin</h1>}
           <button
             onClick={onClose}
             className="lg:hidden p-1 text-white hover:bg-zinc-800 rounded"
@@ -154,28 +156,45 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </button>
         </div>
         <nav className="mt-8">
-          <ul className="space-y-2 px-2">
+          <ul className={`space-y-2 ${isCollapsed ? 'lg:px-0' : 'px-2'}`}>
             {navItems.map((item) => (
-              <li key={item.name}>
+              <li key={item.name} className={isCollapsed ? 'lg:flex lg:justify-center' : ''}>
                 <Link
                   href={item.href}
                   onClick={() => onClose()}
-                  className={`flex items-center rounded-lg px-4 py-2 text-sm ${pathname === item.href
+                  className={`flex items-center rounded-lg transition-all group relative ${
+                    isCollapsed 
+                      ? 'lg:p-3 lg:w-14 lg:h-14 lg:justify-center' 
+                      : 'px-4 py-2'
+                  } text-sm ${pathname === item.href
                     ? "bg-blue-500 text-white"
                     : "text-white hover:bg-[#18181B]"
                     }`}
+                  title={isCollapsed ? item.name : undefined}
                 >
-                  <span className="mr-3">{item.icon}</span>
-                  {item.name}
+                  <span className="flex-shrink-0">{item.icon}</span>
+                  {!isCollapsed && <span className="ml-3">{item.name}</span>}
+                  
+                  {/* Tooltip for collapsed mode */}
+                  {isCollapsed && (
+                    <span className="absolute left-16 top-1/2 -translate-y-1/2 bg-[#27272A] text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                      {item.name}
+                    </span>
+                  )}
                 </Link>
               </li>
             ))}
           </ul>
         </nav>
-        <div className="absolute bottom-0 left-0 w-56 p-4 border-t border-zinc-900">
+        <div className={`absolute bottom-0 left-0 right-0 p-4 border-t border-zinc-900 ${isCollapsed ? 'lg:flex lg:justify-center' : ''}`}>
           <button
             onClick={logout}
-            className="flex w-full items-center rounded-lg px-4 py-2 text-sm text-white hover:bg-[#18181B]"
+            className={`flex items-center rounded-lg transition-all group relative text-sm text-white hover:bg-[#18181B] ${
+              isCollapsed 
+                ? 'lg:p-3 lg:w-14 lg:h-14 lg:justify-center' 
+                : 'w-full px-4 py-2'
+            }`}
+            title={isCollapsed ? 'Logout' : undefined}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -183,7 +202,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="mr-3 h-5 w-5"
+              className="h-5 w-5 flex-shrink-0"
             >
               <path
                 strokeLinecap="round"
@@ -191,7 +210,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
               />
             </svg>
-            Logout
+            {!isCollapsed && <span className="ml-3">Logout</span>}
+            
+            {/* Tooltip for collapsed mode */}
+            {isCollapsed && (
+              <span className="absolute left-16 top-1/2 -translate-y-1/2 bg-[#27272A] text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                Logout
+              </span>
+            )}
           </button>
         </div>
       </aside>

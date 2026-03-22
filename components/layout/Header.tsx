@@ -12,9 +12,10 @@ import {
 
 interface HeaderProps {
   onMenuClick: () => void;
+  onToggleSidebar?: () => void;
 }
 
-export default function Header({ onMenuClick }: HeaderProps) {
+export default function Header({ onMenuClick, onToggleSidebar }: HeaderProps) {
   const { user, logout } = useAuth();
 
   return (
@@ -23,6 +24,27 @@ export default function Header({ onMenuClick }: HeaderProps) {
       <header className="hidden lg:block bg-[#141417] border-b border-zinc-900">
         <div className="flex items-center justify-between px-3 sm:px-6 py-3">
           <div className="flex items-center gap-3">
+            {/* Sidebar Toggle Button */}
+            <button
+              onClick={onToggleSidebar}
+              className="p-2 rounded-lg hover:bg-zinc-800 transition-colors text-gray-400 hover:text-white"
+              title="Toggle sidebar"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                />
+              </svg>
+            </button>
             <h1 className="text-base sm:text-xl font-semibold text-white truncate">
               Welcome, {user?.name || "Admin"}
             </h1>

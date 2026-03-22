@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import { X, Loader } from "lucide-react";
 import { IRoleDefinition } from "@/types";
@@ -69,8 +70,9 @@ export default function WhatsAppLinkModal({
       reset();
       onClose();
       onSuccess();
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message;
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message?: string }>;
+      const message = axiosError.response?.data?.message || axiosError.message;
       toast.error(message || "Failed to update WhatsApp link");
     } finally {
       setIsSubmitting(false);

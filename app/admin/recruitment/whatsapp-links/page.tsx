@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import { RecruitmentForm } from "@/types";
 import { recruitmentApi } from "@/services/api";
@@ -8,6 +9,10 @@ import PageHeader from "@/components/admin/PageHeader";
 import RecruitmentFormsList from "@/components/admin/recruitment/RecruitmentFormsList";
 import WhatsAppLinksManager from "@/components/admin/recruitment/WhatsAppLinksManager";
 import { MessageCircle } from "lucide-react";
+
+interface ApiErrorResponse {
+  message?: string;
+}
 
 export default function WhatsAppLinksPage() {
   const [forms, setForms] = useState<RecruitmentForm[]>([]);
@@ -23,18 +28,14 @@ export default function WhatsAppLinksPage() {
     try {
       const response = await recruitmentApi.getAllForms();
       setForms(response.data.forms || []);
-
-      // Auto-select first form if available
-      if (response.data.forms?.[0]?._id && !selectedFormId) {
-        setSelectedFormId(response.data.forms[0]._id);
-      }
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message;
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      const message = axiosError.response?.data?.message || axiosError.message;
       toast.error(message || "Failed to load recruitment forms");
     } finally {
       setIsLoading(false);
     }
-  }, [selectedFormId]);
+  }, []);
 
   // Load form details when selected
   const loadFormDetails = useCallback(async (formId: string) => {
@@ -45,17 +46,26 @@ export default function WhatsAppLinksPage() {
       setForms((prevForms) =>
         prevForms.map((f) => (f._id === formId ? response.data.form : f))
       );
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message;
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiErrorResponse>;
+      const message = axiosError.response?.data?.message || axiosError.message;
       toast.error(message || "Failed to load form details");
     } finally {
       setIsManagerLoading(false);
     }
   }, []);
 
+  // Load forms on mount
   useEffect(() => {
     loadForms();
-  }, []);
+  }, [loadForms]);
+
+  // Auto-select first form when forms are loaded
+  useEffect(() => {
+    if (forms.length > 0 && !selectedFormId) {
+      setSelectedFormId(forms[0]._id);
+    }
+  }, [forms, selectedFormId]);
 
   const handleFormSelect = (formId: string) => {
     setSelectedFormId(formId);
