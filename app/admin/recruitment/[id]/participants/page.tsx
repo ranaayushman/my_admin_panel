@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { recruitmentApi } from "@/services/api";
 import { Loader2, Filter, X } from "lucide-react";
+import ParticipantDetailsModal from "@/components/admin/recruitment/ParticipantDetailsModal";
 
 const BRANCHES = [
     "CSE", "CSE-DS", "CSE-CS", "CSE-AIML",
@@ -45,6 +46,8 @@ type Application = {
     _id: string;
     createdAt: string;
     status?: string;
+    user?: string;
+    formId?: string;
     generalInfo?: {
         fullName?: string;
         rollNumber?: string;
@@ -54,6 +57,19 @@ type Application = {
         branchYear?: string | number;
         positions?: string[];
     };
+    finalInfo?: {
+        linkedIn?: string;
+        previousClubs?: string;
+    };
+    roleSpecific?: {
+        [key: string]: {
+            [key: string]: string;
+        };
+    };
+    whatsappGroupLinks?: {
+        [key: string]: string;
+    };
+    updatedAt?: string;
 };
 
 export default function RecruitmentParticipantsPage() {
@@ -72,6 +88,8 @@ export default function RecruitmentParticipantsPage() {
 
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(false);
+
+    const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
 
     useEffect(() => {
         if (!id) return;
@@ -158,6 +176,23 @@ export default function RecruitmentParticipantsPage() {
     const handlePositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setPosition(e.target.value);
         setPage(1);
+    };
+
+    const handleStatusUpdate = (participantId: string, newStatus: string) => {
+        // Update the selected participant with new status
+        if (selectedParticipant && selectedParticipant._id === participantId) {
+            setSelectedParticipant({
+                ...selectedParticipant,
+                status: newStatus,
+            });
+        }
+
+        // Update the participant in the applications list
+        setApplications((prevApps) =>
+            prevApps.map((app) =>
+                app._id === participantId ? { ...app, status: newStatus } : app
+            )
+        );
     };
 
     const clearFilters = () => {
@@ -265,7 +300,8 @@ export default function RecruitmentParticipantsPage() {
                                         applications.map((application) => (
                                             <tr
                                                 key={application._id}
-                                                className="hover:bg-indigo-50/30 transition-colors"
+                                                onClick={() => setSelectedParticipant(application)}
+                                                className="hover:bg-indigo-50/30 transition-colors cursor-pointer"
                                             >
                                                 <td className="px-6 py-4 font-medium text-gray-900">
                                                     {application.generalInfo?.fullName || "N/A"}
@@ -361,6 +397,14 @@ export default function RecruitmentParticipantsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Participant Details Modal */}
+            <ParticipantDetailsModal
+                isOpen={selectedParticipant !== null}
+                participant={selectedParticipant}
+                onClose={() => setSelectedParticipant(null)}
+                onStatusUpdate={handleStatusUpdate}
+            />
         </div>
     );
 }
