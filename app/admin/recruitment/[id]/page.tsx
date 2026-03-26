@@ -196,7 +196,7 @@ export default function EditRecruitmentForm() {
     return (
         <div className="mx-auto max-w-4xl p-6">
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-3xl font-bold text-gray-800">
+                <h1 className="text-3xl font-bold text-gray-200">
                     Edit Recruitment Form
                     {formData.isActive && (
                         <span className="ml-3 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
@@ -249,7 +249,7 @@ export default function EditRecruitmentForm() {
                     <button
                         type="button"
                         onClick={() => router.back()}
-                        className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                        className="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-200 hover:bg-gray-50"
                     >
                         Cancel
                     </button>

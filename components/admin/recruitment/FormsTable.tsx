@@ -26,7 +26,7 @@ export default function FormsTable({ forms, onToggleActive, onDelete }: FormsTab
     return (
         <div className="rounded-xl bg-white shadow">
             <div className="border-b px-6 py-4">
-                <h2 className="text-lg font-semibold text-gray-800">
+                <h2 className="text-lg font-semibold text-gray-200">
                     Recruitment Forms
                 </h2>
             </div>

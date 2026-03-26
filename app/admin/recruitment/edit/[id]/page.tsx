@@ -147,7 +147,7 @@ export default function EditRecruitmentForm() {
 
     return (
         <div className="mx-auto max-w-4xl p-6">
-            <h1 className="mb-6 text-3xl font-bold text-gray-800">
+            <h1 className="mb-6 text-3xl font-bold text-gray-200">
                 Edit Recruitment Form
                 {formData.isActive && (
                     <span className="ml-3 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">

@@ -6,6 +6,16 @@ import Link from "next/link";
 import { recruitmentApi } from "@/services/api";
 import { Loader2, Filter, X } from "lucide-react";
 import ParticipantDetailsModal from "@/components/admin/recruitment/ParticipantDetailsModal";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const BRANCHES = [
     "CSE", "CSE-DS", "CSE-CS", "CSE-AIML",
@@ -270,113 +280,101 @@ export default function RecruitmentParticipantsPage() {
                     </div>
                 </div>
 
-                <div className="rounded-xl bg-white shadow overflow-hidden border border-gray-100">
-                    <div className="px-6 py-4 border-b bg-gray-50/50">
-                        <h3 className="text-lg font-medium text-gray-900">Registrations List</h3>
-                    </div>
+                <Card className="border-gray-200">
+                    <CardHeader className="pb-4">
+                        <CardTitle className="text-lg">Registrations List</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        {loading && applications.length === 0 ? (
+                            <div className="flex justify-center py-12">
+                                <Loader2 className="animate-spin text-gray-400 w-8 h-8" />
+                            </div>
+                        ) : applications.length > 0 ? (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Full Name</TableHead>
+                                        <TableHead>Roll No</TableHead>
+                                        <TableHead>Phone</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead>Branch / Year</TableHead>
+                                        <TableHead>Positions</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Applied At</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {applications.map((application) => (
+                                        <TableRow
+                                            key={application._id}
+                                            onClick={() => setSelectedParticipant(application)}
+                                            className="cursor-pointer"
+                                        >
+                                            <TableCell className="font-medium text-gray-900">
+                                                {application.generalInfo?.fullName || "N/A"}
+                                            </TableCell>
 
-                    {loading && applications.length === 0 ? (
-                        <div className="flex justify-center py-12">
-                            <Loader2 className="animate-spin text-gray-400 w-8 h-8" />
-                        </div>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full text-sm text-left">
-                                <thead className="bg-gray-50 text-gray-500 uppercase text-xs font-semibold">
-                                    <tr>
-                                        <th className="px-6 py-3">Full Name</th>
-                                        <th className="px-6 py-3">Roll No</th>
-                                        <th className="px-6 py-3">Phone</th>
-                                        <th className="px-6 py-3">Email</th>
-                                        <th className="px-6 py-3">Branch / Year</th>
-                                        <th className="px-6 py-3">Positions</th>
-                                        <th className="px-6 py-3">Status</th>
-                                        <th className="px-6 py-3">Applied At</th>
-                                    </tr>
-                                </thead>
+                                            <TableCell className="font-mono text-gray-200">
+                                                {application.generalInfo?.rollNumber || "-"}
+                                            </TableCell>
 
-                                <tbody className="divide-y divide-gray-100">
-                                    {applications.length > 0 ? (
-                                        applications.map((application) => (
-                                            <tr
-                                                key={application._id}
-                                                onClick={() => setSelectedParticipant(application)}
-                                                className="hover:bg-indigo-50/30 transition-colors cursor-pointer"
-                                            >
-                                                <td className="px-6 py-4 font-medium text-gray-900">
-                                                    {application.generalInfo?.fullName || "N/A"}
-                                                </td>
+                                            <TableCell className="text-gray-600">
+                                                {application.generalInfo?.phoneNumber || "N/A"}
+                                            </TableCell>
 
-                                                <td className="px-6 py-4 font-mono text-gray-700">
-                                                    {application.generalInfo?.rollNumber || "-"}
-                                                </td>
+                                            <TableCell className="text-gray-600">
+                                                {application.generalInfo?.email || "N/A"}
+                                            </TableCell>
 
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {application.generalInfo?.phoneNumber || "N/A"}
-                                                </td>
-
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {application.generalInfo?.email || "N/A"}
-                                                </td>
-
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-medium text-gray-800">
-                                                            {application.generalInfo?.branch || "N/A"}
-                                                        </span>
-                                                        <span className="text-xs text-gray-500 border border-gray-200 px-1.5 rounded">
-                                                            {application.generalInfo?.branchYear || "-"} Yr
-                                                        </span>
-                                                    </div>
-                                                </td>
-
-                                                <td className="px-6 py-4">
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {application.generalInfo?.positions?.map((positionName) => (
-                                                            <span
-                                                                key={positionName}
-                                                                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100"
-                                                            >
-                                                                {positionName}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                </td>
-
-                                                <td className="px-6 py-4">
-                                                    <span
-                                                        className={`inline-flex px-2.5 py-1 text-xs font-semibold rounded-full capitalize border ${application.status === "accepted"
-                                                            ? "bg-green-100 text-green-800 border-green-200"
-                                                            : application.status === "rejected"
-                                                                ? "bg-red-100 text-red-800 border-red-200"
-                                                                : "bg-yellow-50 text-yellow-800 border-yellow-200"
-                                                            }`}
-                                                    >
-                                                        {application.status || "pending"}
+                                            <TableCell>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-medium text-gray-200">
+                                                        {application.generalInfo?.branch || "N/A"}
                                                     </span>
-                                                </td>
-
-                                                <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
-                                                    {application.createdAt ? new Date(application.createdAt).toLocaleDateString() : "-"}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    ) : (
-                                        <tr>
-                                            <td colSpan={8} className="px-6 py-16 text-center">
-                                                <div className="flex flex-col items-center justify-center text-gray-500">
-                                                    <p className="text-lg font-medium mb-1">No registrations found</p>
-                                                    <p className="text-sm">Try adjusting your filters</p>
+                                                    <Badge variant="outline" className="text-xs">
+                                                        {application.generalInfo?.branchYear || "-"} Yr
+                                                    </Badge>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
+                                            </TableCell>
 
-                    <div className="bg-gray-50 px-6 py-4 border-t flex justify-between items-center">
+                                            <TableCell>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {application.generalInfo?.positions?.map((positionName) => (
+                                                        <Badge key={positionName} variant="default" className="text-xs">
+                                                            {positionName}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            </TableCell>
+
+                                            <TableCell>
+                                                <Badge
+                                                    variant={application.status as "accepted" | "rejected" | "pending"}
+                                                    className="capitalize"
+                                                >
+                                                    {application.status || "pending"}
+                                                </Badge>
+                                            </TableCell>
+
+                                            <TableCell className="text-gray-500 whitespace-nowrap">
+                                                {application.createdAt
+                                                    ? new Date(application.createdAt).toLocaleDateString()
+                                                    : "-"}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        ) : (
+                            <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+                                <p className="text-lg font-medium mb-1">No registrations found</p>
+                                <p className="text-sm">Try adjusting your filters</p>
+                            </div>
+                        )}
+                    </CardContent>
+                    
+                    {/* Pagination Footer */}
+                    <div className="px-6 py-4 border-t bg-gray-50/50 flex justify-between items-center">
                         <button
                             onClick={() => setPage((value) => Math.max(1, value - 1))}
                             disabled={page === 1}
@@ -395,7 +393,7 @@ export default function RecruitmentParticipantsPage() {
                             Next
                         </button>
                     </div>
-                </div>
+                </Card>
             </div>
 
             {/* Participant Details Modal */}
