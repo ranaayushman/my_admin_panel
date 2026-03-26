@@ -46,10 +46,10 @@ const StatsCard = ({ label, count }: { label: string; count: number }) => {
 
 type Application = {
     _id: string;
+    user: string;
+    formId: string;
     createdAt: string;
     status?: string;
-    user?: string;
-    formId?: string;
     generalInfo?: {
         fullName?: string;
         rollNumber?: string;
@@ -71,7 +71,7 @@ type Application = {
     whatsappGroupLinks?: {
         [key: string]: string;
     };
-    updatedAt?: string;
+    updatedAt: string;
 };
 
 export default function RecruitmentParticipantsPage() {
@@ -92,7 +92,7 @@ export default function RecruitmentParticipantsPage() {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(false);
 
-    const [selectedParticipant, setSelectedParticipant] = useState<any>(null);
+    const [selectedParticipant, setSelectedParticipant] = useState<Application | null>(null);
 
     useEffect(() => {
         if (!id) return;
