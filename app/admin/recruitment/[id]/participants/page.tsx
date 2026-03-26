@@ -8,14 +8,6 @@ import { Loader2, Filter, X } from "lucide-react";
 import ParticipantDetailsModal from "@/components/admin/recruitment/ParticipantDetailsModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 const BRANCHES = [
     "CSE", "CSE-DS", "CSE-CS", "CSE-AIML",
@@ -95,6 +87,7 @@ export default function RecruitmentParticipantsPage() {
 
     const [branch, setBranch] = useState("");
     const [position, setPosition] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
 
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(false);
@@ -208,8 +201,19 @@ export default function RecruitmentParticipantsPage() {
     const clearFilters = () => {
         setBranch("");
         setPosition("");
+        setSearchQuery("");
         setPage(1);
     };
+
+    const filteredApplications = applications.filter((app) => {
+        const query = searchQuery.toLowerCase();
+        return (
+            app.generalInfo?.fullName?.toLowerCase().includes(query) ||
+            app.generalInfo?.email?.toLowerCase().includes(query) ||
+            app.generalInfo?.phoneNumber?.includes(query) ||
+            app.generalInfo?.rollNumber?.toLowerCase().includes(query)
+        );
+    });
 
     return (
         <div className="space-y-6 p-6 max-w-7xl mx-auto">
@@ -243,6 +247,16 @@ export default function RecruitmentParticipantsPage() {
                     </div>
 
                     <div className="flex flex-wrap gap-4 items-center">
+                        <div className="relative flex-1 min-w-[200px]">
+                            <input
+                                type="text"
+                                placeholder="Search by name, email, phone, roll #..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5"
+                            />
+                        </div>
+
                         <div className="relative">
                             <select
                                 value={branch}
@@ -269,7 +283,7 @@ export default function RecruitmentParticipantsPage() {
                             </select>
                         </div>
 
-                        {(branch || position) && (
+                        {(branch || position || searchQuery) && (
                             <button
                                 onClick={clearFilters}
                                 className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition"
@@ -289,82 +303,86 @@ export default function RecruitmentParticipantsPage() {
                             <div className="flex justify-center py-12">
                                 <Loader2 className="animate-spin text-gray-400 w-8 h-8" />
                             </div>
-                        ) : applications.length > 0 ? (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Full Name</TableHead>
-                                        <TableHead>Roll No</TableHead>
-                                        <TableHead>Phone</TableHead>
-                                        <TableHead>Email</TableHead>
-                                        <TableHead>Branch / Year</TableHead>
-                                        <TableHead>Positions</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Applied At</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {applications.map((application) => (
-                                        <TableRow
-                                            key={application._id}
-                                            onClick={() => setSelectedParticipant(application)}
-                                            className="cursor-pointer"
-                                        >
-                                            <TableCell className="font-medium text-gray-900">
-                                                {application.generalInfo?.fullName || "N/A"}
-                                            </TableCell>
+                        ) : filteredApplications.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {filteredApplications.map((application) => (
+                                    <div
+                                        key={application._id}
+                                        onClick={() => setSelectedParticipant(application)}
+                                        className="p-4 border border-gray-200 rounded-lg hover:shadow-lg hover:border-indigo-400 transition-all cursor-pointer group"
+                                    >
+                                        {/* Header with Name and Status */}
+                                        <div className="flex items-start justify-between mb-3 gap-2">
+                                            <div className="flex-1">
+                                                <h3 className="font-semibold text-gray-900 group-hover:text-indigo-600 transition">
+                                                    {application.generalInfo?.fullName || "N/A"}
+                                                </h3>
+                                                <p className="text-sm text-gray-500 mt-0.5">
+                                                    {application.generalInfo?.rollNumber || "N/A"}
+                                                </p>
+                                            </div>
+                                            <Badge
+                                                variant={application.status as "accepted" | "rejected" | "pending" | "shortlisted"}
+                                                className="capitalize text-xs"
+                                            >
+                                                {application.status || "pending"}
+                                            </Badge>
+                                        </div>
 
-                                            <TableCell className="font-mono text-gray-200">
-                                                {application.generalInfo?.rollNumber || "-"}
-                                            </TableCell>
+                                        {/* Branch and Year */}
+                                        <div className="mb-3 pb-3 border-b border-gray-100">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-medium text-gray-700">
+                                                    {application.generalInfo?.branch || "N/A"}
+                                                </span>
+                                                <Badge variant="outline" className="text-xs">
+                                                    {application.generalInfo?.branchYear || "-"} Yr
+                                                </Badge>
+                                            </div>
+                                        </div>
 
-                                            <TableCell className="text-gray-600">
-                                                {application.generalInfo?.phoneNumber || "N/A"}
-                                            </TableCell>
+                                        {/* Contact Info */}
+                                        <div className="space-y-2 mb-3 pb-3 border-b border-gray-100">
+                                            <div className="text-sm">
+                                                <p className="text-gray-500 text-xs uppercase tracking-wide">Email</p>
+                                                <p className="text-gray-700 truncate">{application.generalInfo?.email || "N/A"}</p>
+                                            </div>
+                                            <div className="text-sm">
+                                                <p className="text-gray-500 text-xs uppercase tracking-wide">Phone</p>
+                                                <p className="text-gray-700">{application.generalInfo?.phoneNumber || "N/A"}</p>
+                                            </div>
+                                        </div>
 
-                                            <TableCell className="text-gray-600">
-                                                {application.generalInfo?.email || "N/A"}
-                                            </TableCell>
-
-                                            <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-medium text-gray-200">
-                                                        {application.generalInfo?.branch || "N/A"}
-                                                    </span>
-                                                    <Badge variant="outline" className="text-xs">
-                                                        {application.generalInfo?.branchYear || "-"} Yr
-                                                    </Badge>
-                                                </div>
-                                            </TableCell>
-
-                                            <TableCell>
+                                        {/* Positions */}
+                                        {application.generalInfo?.positions && application.generalInfo.positions.length > 0 && (
+                                            <div className="mb-3">
+                                                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                                                    Positions
+                                                </p>
                                                 <div className="flex flex-wrap gap-1">
-                                                    {application.generalInfo?.positions?.map((positionName) => (
+                                                    {application.generalInfo.positions.slice(0, 3).map((positionName) => (
                                                         <Badge key={positionName} variant="default" className="text-xs">
                                                             {positionName}
                                                         </Badge>
                                                     ))}
+                                                    {application.generalInfo.positions.length > 3 && (
+                                                        <Badge variant="secondary" className="text-xs">
+                                                            +{application.generalInfo.positions.length - 3}
+                                                        </Badge>
+                                                    )}
                                                 </div>
-                                            </TableCell>
+                                            </div>
+                                        )}
 
-                                            <TableCell>
-                                                <Badge
-                                                    variant={application.status as "accepted" | "rejected" | "pending"}
-                                                    className="capitalize"
-                                                >
-                                                    {application.status || "pending"}
-                                                </Badge>
-                                            </TableCell>
-
-                                            <TableCell className="text-gray-500 whitespace-nowrap">
-                                                {application.createdAt
-                                                    ? new Date(application.createdAt).toLocaleDateString()
-                                                    : "-"}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                        {/* Applied Date */}
+                                        <div className="pt-2 border-t border-gray-100">
+                                            <p className="text-xs text-gray-500">
+                                                Applied: {application.createdAt ? new Date(application.createdAt).toLocaleDateString() : "-"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         ) : (
                             <div className="flex flex-col items-center justify-center py-12 text-gray-500">
                                 <p className="text-lg font-medium mb-1">No registrations found</p>
