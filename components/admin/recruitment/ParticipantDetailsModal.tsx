@@ -13,7 +13,6 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle as CardTitleComponent,
 } from "@/components/ui/card";
@@ -74,7 +73,7 @@ const isValidUrl = (string: string): boolean => {
   try {
     new URL(string);
     return true;
-  } catch (_) {
+  } catch {
     return false;
   }
 };
@@ -127,83 +126,93 @@ export default function ParticipantDetailsModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader className="pb-2 border-b">
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-2xl">
-                {generalInfo?.fullName || "Participant Details"}
-              </DialogTitle>
-              {updateMessage && (
-                <p
-                  className={`text-sm mt-2 ${
-                    updateMessage.type === "success"
-                      ? "text-green-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {updateMessage.text}
-                </p>
-              )}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-start justify-between">
+              <div>
+                <DialogTitle className="text-2xl">
+                  {generalInfo?.fullName || "Participant Details"}
+                </DialogTitle>
+                {/* Status Dropdown Below Name */}
+                <div className="flex items-center gap-2 mt-3">
+                  <label className="text-sm font-medium text-gray-600">Status:</label>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        disabled={isUpdatingStatus}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 transition ${
+                          selectedStatus === "accepted"
+                            ? "bg-green-100 text-green-800 hover:bg-green-200"
+                            : selectedStatus === "rejected"
+                            ? "bg-red-100 text-red-800 hover:bg-red-200"
+                            : selectedStatus === "shortlisted"
+                            ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                            : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
+                        } ${isUpdatingStatus ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+                      >
+                        <span className="capitalize">{selectedStatus}</span>
+                        {isUpdatingStatus ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem
+                        onClick={() => handleStatusChange("pending")}
+                        disabled={isUpdatingStatus}
+                        className="cursor-pointer flex items-center justify-between"
+                      >
+                        <span>Pending</span>
+                        {selectedStatus === "pending" && <Check className="w-4 h-4 ml-2" />}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleStatusChange("shortlisted")}
+                        disabled={isUpdatingStatus}
+                        className="cursor-pointer flex items-center justify-between"
+                      >
+                        <span>Shortlisted</span>
+                        {selectedStatus === "shortlisted" && <Check className="w-4 h-4 ml-2" />}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleStatusChange("accepted")}
+                        disabled={isUpdatingStatus}
+                        className="cursor-pointer flex items-center justify-between"
+                      >
+                        <span>Accepted</span>
+                        {selectedStatus === "accepted" && <Check className="w-4 h-4 ml-2" />}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleStatusChange("rejected")}
+                        disabled={isUpdatingStatus}
+                        className="cursor-pointer flex items-center justify-between"
+                      >
+                        <span>Rejected</span>
+                        {selectedStatus === "rejected" && <Check className="w-4 h-4 ml-2" />}
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+              {/* Close Button */}
+              <button
+                onClick={onClose}
+                className="hidden"
+              >
+                <span className="text-2xl">×</span>
+              </button>
             </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium">Status:</label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    disabled={isUpdatingStatus}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 transition ${
-                      selectedStatus === "accepted"
-                        ? "bg-green-100 text-green-800 hover:bg-green-200"
-                        : selectedStatus === "rejected"
-                        ? "bg-red-100 text-red-800 hover:bg-red-200"
-                        : selectedStatus === "shortlisted"
-                        ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
-                        : "bg-yellow-100 text-yellow-800 hover:bg-yellow-200"
-                    } ${isUpdatingStatus ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
-                  >
-                    <span className="capitalize">{selectedStatus}</span>
-                    {isUpdatingStatus ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4" />
-                    )}
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange("pending")}
-                    disabled={isUpdatingStatus}
-                    className="cursor-pointer flex items-center justify-between"
-                  >
-                    <span>Pending</span>
-                    {selectedStatus === "pending" && <Check className="w-4 h-4 ml-2" />}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange("shortlisted")}
-                    disabled={isUpdatingStatus}
-                    className="cursor-pointer flex items-center justify-between"
-                  >
-                    <span>Shortlisted</span>
-                    {selectedStatus === "shortlisted" && <Check className="w-4 h-4 ml-2" />}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange("accepted")}
-                    disabled={isUpdatingStatus}
-                    className="cursor-pointer flex items-center justify-between"
-                  >
-                    <span>Accepted</span>
-                    {selectedStatus === "accepted" && <Check className="w-4 h-4 ml-2" />}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleStatusChange("rejected")}
-                    disabled={isUpdatingStatus}
-                    className="cursor-pointer flex items-center justify-between"
-                  >
-                    <span>Rejected</span>
-                    {selectedStatus === "rejected" && <Check className="w-4 h-4 ml-2" />}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            {updateMessage && (
+              <p
+                className={`text-sm ${
+                  updateMessage.type === "success"
+                    ? "text-green-600"
+                    : "text-red-600"
+                }`}
+              >
+                {updateMessage.text}
+              </p>
+            )}
           </div>
         </DialogHeader>
 
