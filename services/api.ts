@@ -173,6 +173,10 @@ export const recruitmentApi = {
     return apiClient.get(getApiEndpoint(`${recruitmentBase}/forms`));
   },
 
+  getFormById: (id: string) => {
+    return apiClient.get(getApiEndpoint(`${recruitmentBase}/forms/${id}`));
+  },
+
   updateForm: (id: string, data: any) => {
     return apiClient.put(
       getApiEndpoint(`${recruitmentBase}/forms/${id}`),
@@ -216,6 +220,20 @@ export const recruitmentApi = {
     return apiClient.get(
       getApiEndpoint(`${recruitmentBase}/getAllRecruitmentData`),
       { params }
+    );
+  },
+
+  // WhatsApp Links Management
+  updateRoleWhatsappLink: (formId: string, roleName: string, whatsappLink: string) => {
+    return apiClient.patch(
+      getApiEndpoint(`${recruitmentBase}/forms/${formId}/role-whatsapp`),
+      { roleName, whatsappLink }
+    );
+  },
+
+  getRoleWhatsappLink: (formId: string, roleId: string) => {
+    return apiClient.get(
+      getApiEndpoint(`${recruitmentBase}/forms/${formId}/roles/${roleId}`)
     );
   },
 };

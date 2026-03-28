@@ -15,6 +15,7 @@ export default function AdminLayout({
   const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     // Check if user is authenticated and is an admin
@@ -43,9 +44,16 @@ export default function AdminLayout({
 
   return (
     <div className="flex h-screen overflow-hidden bg-black">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        onClose={() => setSidebarOpen(false)}
+        isCollapsed={sidebarCollapsed}
+      />
       <div className="flex flex-col flex-1 min-w-0">
-        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <Header 
+          onMenuClick={() => setSidebarOpen(true)}
+          onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
         <main className="flex-1 min-h-0 overflow-y-auto pb-16 lg:pb-0">{children}</main>
         <MobileNav />
       </div>
