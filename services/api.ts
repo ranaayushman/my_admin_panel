@@ -239,6 +239,40 @@ export const recruitmentApi = {
 };
 
 // -------------------------------------------------------------------
+// SUPER ADMIN API
+// -------------------------------------------------------------------
+export const superAdminApi = {
+  // Admin Management
+  getAllAdmins: () => {
+    return apiClient.get(getApiEndpoint('/superadmin/admins'));
+  },
+
+  addAdmin: (data: any) => {
+    return apiClient.post(getApiEndpoint('/superadmin/admins/add'), data);
+  },
+
+  removeAdmin: (adminId: string) => {
+    return apiClient.delete(getApiEndpoint(`/superadmin/admins/${adminId}`));
+  },
+
+  // Activity Logs
+  getActivityLogs: (params?: any) => {
+    return apiClient.get(getApiEndpoint('/superadmin/activity-logs'), { params });
+  },
+
+  getActivityLogsSummary: (params?: any) => {
+    return apiClient.get(getApiEndpoint('/superadmin/activity-logs/summary'), { params });
+  },
+
+  getAdminActivityLogs: (adminId: string, params?: any) => {
+    return apiClient.get(
+      getApiEndpoint(`/superadmin/activity-logs/${adminId}`),
+      { params }
+    );
+  },
+};
+
+// -------------------------------------------------------------------
 // EXPORT CONSOLIDATED API
 // -------------------------------------------------------------------
 export default {
@@ -247,4 +281,5 @@ export default {
   members: membersApi,
   events: eventsApi,
   recruitment: recruitmentApi,
+  superAdmin: superAdminApi,
 };

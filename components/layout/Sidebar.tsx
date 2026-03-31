@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { isSuperAdmin } from "@/utils/roleCheck";
 
 // Navigation items for the sidebar
 const navItems = [
@@ -86,7 +87,6 @@ const navItems = [
       </svg>
     ),
   },
-
   {
     name: "Settings",
     href: "/admin/settings",
@@ -115,6 +115,50 @@ const navItems = [
 
 ];
 
+// Super Admin nav items
+const superAdminNavItems = [
+  {
+    name: "Admin Management",
+    href: "/admin/superadmin/admins",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="h-5 w-5"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M17.982 18.725A7.488 7.488 0 0012 15a7.5 7.5 0 11-5.982 3.725M9 11a3 3 0 11-6 0 3 3 0 016 0z"
+        />
+      </svg>
+    ),
+  },
+  {
+    name: "Activity Logs",
+    href: "/admin/superadmin/activity-logs",
+    icon: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className="h-5 w-5"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3.042.525A9.006 9.006 0 002.25 9m12-7.5h-1.5a1.5 1.5 0 00-1.5 1.5v6.75a1.5 1.5 0 001.5 1.5h1.5m0-9v6m0 0a1.5 1.5 0 001.5 1.5h1.5c1.6 0 3-1.35 3-3V9m-4.5-2.25A2.25 2.25 0 0016.5 5.25"
+        />
+      </svg>
+    ),
+  },
+];
+
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -123,7 +167,8 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen, onClose, isCollapsed = false }: SidebarProps) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const superAdmin = isSuperAdmin(user);
 
   return (
     <>
@@ -184,6 +229,44 @@ export default function Sidebar({ isOpen, onClose, isCollapsed = false }: Sideba
                 </Link>
               </li>
             ))}
+            
+            {/* Super Admin Items */}
+            {superAdmin && (
+              <>
+                {!isCollapsed && (
+                  <li className="px-4 py-3 mt-6">
+                    <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Super Admin</h3>
+                  </li>
+                )}
+                {superAdminNavItems.map((item) => (
+                  <li key={item.name} className={isCollapsed ? 'lg:flex lg:justify-center' : ''}>
+                    <Link
+                      href={item.href}
+                      onClick={() => onClose()}
+                      className={`flex items-center rounded-lg transition-all group relative ${
+                        isCollapsed 
+                          ? 'lg:p-3 lg:w-14 lg:h-14 lg:justify-center' 
+                          : 'px-4 py-2'
+                      } text-sm ${pathname.startsWith(item.href.split('/').slice(0, -1).join('/'))
+                        ? "bg-blue-500 text-white"
+                        : "text-white hover:bg-[#18181B]"
+                        }`}
+                      title={isCollapsed ? item.name : undefined}
+                    >
+                      <span className="flex-shrink-0">{item.icon}</span>
+                      {!isCollapsed && <span className="ml-3">{item.name}</span>}
+                      
+                      {/* Tooltip for collapsed mode */}
+                      {isCollapsed && (
+                        <span className="absolute left-16 top-1/2 -translate-y-1/2 bg-[#27272A] text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          {item.name}
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                ))}
+              </>
+            )}
           </ul>
         </nav>
         <div className={`absolute bottom-0 left-0 right-0 p-4 border-t border-zinc-900 ${isCollapsed ? 'lg:flex lg:justify-center' : ''}`}>
