@@ -30,14 +30,27 @@ const departments = [
 
 // Designations aligned to your categorization
 const newDesignations = [
+  "Faculty Co-ordinator",
   "Founder",
   "Organizer",
-  "PR and Mangement Lead",
+  "Co-Organizer",
+  "Secretary",
+  "Join Secretary",
+  "Treasurer",
+  "Joint Treasurer",
+  "Management Head",
+  "Joint Management Head",
+  "Public Relation Head",
+  "Joint Public Relation Head",
+  "Technical Lead",
+  "Joint Technical Lead",
   "Web Development Lead",
   "App Development Lead",
   "Machine Learning Lead",
   "Content Writer Lead",
+  "Joint Content Writer Lead",
   "Video Editor Lead",
+  "Joint Video Editor Lead",
   "Graphic Designer Lead",
   "Web Developer",
   "App Developer",
@@ -196,7 +209,12 @@ export default function AddMemberPage() {
         toast.error(response.data.message || "Failed to add member");
       }
     } catch (err: unknown) {
-      console.error("Error adding member:", err);
+      console.error("Error adding member - Full Error Object:", err);
+
+      if (err && typeof err === 'object' && 'response' in err) {
+        console.error("Server Response Data:", (err as any).response?.data);
+      }
+
       const errorMessage = err instanceof Error && 'response' in err
         ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
         : "An error occurred while adding the member";
