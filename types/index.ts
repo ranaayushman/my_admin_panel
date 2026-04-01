@@ -4,7 +4,7 @@ export type User = {
   name: string;
   email: string;
   password?: string;
-  role: "admin" | "user";
+  role: "admin" | "super_admin" | "user";
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;
@@ -211,4 +211,81 @@ export type RecruitmentFormsResponse = {
 export type RecruitmentFormResponse = {
   success: boolean;
   form: RecruitmentForm;
+};
+
+// ========== SUPER ADMIN TYPES ==========
+
+// Admin user type (for super admin management)
+export type Admin = {
+  _id: string;
+  name: string;
+  email: string;
+  role: "admin" | "super_admin";
+  isVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// Activity log type
+export type ActivityLog = {
+  _id: string;
+  admin: string | Admin;
+  action: "add_admin" | "remove_admin" | "shortlist" | "reject" | "accept" | "update_status";
+  candidateId?: string;
+  candidateName?: string;
+  candidateEmail?: string;
+  domain?: string;
+  oldStatus?: string;
+  newStatus?: string;
+  targetAdminId?: string;
+  targetAdminEmail?: string;
+  description: string;
+  ipAddress?: string;
+  userAgent?: string;
+  timestamp: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// Add admin request
+export type AddAdminRequest = {
+  name: string;
+  email: string;
+  password?: string;
+};
+
+// Add admin response
+export type AddAdminResponse = {
+  success: boolean;
+  message: string;
+  admin: Admin & { password?: string };
+};
+
+// Get admins response
+export type GetAdminsResponse = {
+  success: boolean;
+  admins: Admin[];
+};
+
+// Activity logs response
+export type ActivityLogsResponse = {
+  success: boolean;
+  logs: ActivityLog[];
+  totalLogs: number;
+  page: number;
+  limit: number;
+};
+
+// Activity logs summary response
+export type ActivityLogsSummaryResponse = {
+  success: boolean;
+  summary: {
+    totalActions: number;
+    adminCount: number;
+    actionCounts: Record<string, number>;
+    timestampRange: {
+      from: string;
+      to: string;
+    };
+  };
 };

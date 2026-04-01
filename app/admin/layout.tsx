@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import MobileNav from "@/components/layout/MobileNav";
+import { isAdmin } from "@/utils/roleCheck";
 
 export default function AdminLayout({
   children,
@@ -18,11 +19,11 @@ export default function AdminLayout({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    // Check if user is authenticated and is an admin
+    // Check if user is authenticated and is an admin or super_admin
     if (!isLoading) {
       if (!isAuthenticated) {
         router.push("/login");
-      } else if (user?.role !== "admin") {
+      } else if (!isAdmin(user)) {
         router.push("/unauthorized");
       }
     }
@@ -38,7 +39,7 @@ export default function AdminLayout({
   }
 
   // Don't render anything if not authenticated or not admin
-  if (!isAuthenticated || user?.role !== "admin") {
+  if (!isAuthenticated || !isAdmin(user)) {
     return null;
   }
 
