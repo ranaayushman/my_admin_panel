@@ -118,27 +118,7 @@ export default function RecruitmentParticipantsPage() {
             }
         };
 
-        const fetchStats = async () => {
-            try {
-                const res = await recruitmentApi.getRecruitmentData({
-                    formId: id,
-                    includeStats: "true",
-                    limit: 1,
-                });
-
-                if (res.data?.success && Array.isArray(res.data?.data?.positionStats)) {
-                    const sortedStats = [...res.data.data.positionStats].sort(
-                        (a: { count: number }, b: { count: number }) => b.count - a.count
-                    );
-                    setPositionStats(sortedStats);
-                }
-            } catch (error) {
-                console.error("Error fetching stats:", error);
-            }
-        };
-
         fetchFormDetails();
-        fetchStats();
     }, [id]);
 
     const fetchApplications = useCallback(async () => {
@@ -152,10 +132,21 @@ export default function RecruitmentParticipantsPage() {
                 limit: 20,
                 branch: branch || undefined,
                 position: position || undefined,
+                q: searchQuery || undefined,
+                includeStats: "true",
             });
 
             if (appsRes.data?.success && appsRes.data?.data) {
                 setApplications(Array.isArray(appsRes.data.data.recruitmentData) ? appsRes.data.data.recruitmentData : []);
+                
+                // Update position stats dynamically
+                if (Array.isArray(appsRes.data.data.positionStats)) {
+                    const sortedStats = [...appsRes.data.data.positionStats].sort(
+                        (a, b) => b.count - a.count
+                    );
+                    setPositionStats(sortedStats);
+                }
+
                 const pagination = appsRes.data.data.pagination;
                 setHasMore(Boolean(pagination?.hasNextPage));
                 setStats({ total: Number(pagination?.totalDocuments || 0) });
@@ -165,10 +156,17 @@ export default function RecruitmentParticipantsPage() {
         } finally {
             setLoading(false);
         }
-    }, [id, page, branch, position]);
+    }, [id, page, branch, position, searchQuery]);
 
     useEffect(() => {
-        fetchApplications();
+        setPage(1);
+    }, [searchQuery]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchApplications();
+        }, 300); // 300ms debounce
+        return () => clearTimeout(timer);
     }, [fetchApplications]);
 
     const handleBranchChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -205,15 +203,7 @@ export default function RecruitmentParticipantsPage() {
         setPage(1);
     };
 
-    const filteredApplications = applications.filter((app) => {
-        const query = searchQuery.toLowerCase();
-        return (
-            app.generalInfo?.fullName?.toLowerCase().includes(query) ||
-            app.generalInfo?.email?.toLowerCase().includes(query) ||
-            app.generalInfo?.phoneNumber?.includes(query) ||
-            app.generalInfo?.rollNumber?.toLowerCase().includes(query)
-        );
-    });
+    const filteredApplications = applications;
 
     return (
         <div className="space-y-6 p-6 max-w-7xl mx-auto">

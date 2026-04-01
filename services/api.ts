@@ -11,6 +11,8 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
+  // Avoid infinite "Creating..." when API is down, wrong URL, or CORS/network hangs
+  timeout: 45_000,
 });
 
 // Attach auth token
@@ -249,6 +251,10 @@ export const superAdminApi = {
 
   addAdmin: (data: any) => {
     return apiClient.post(getApiEndpoint('/superadmin/admins/add'), data);
+  },
+
+  updateAdminRole: (data: { adminId: string; role: string; assignedDomains?: string[] }) => {
+    return apiClient.post(getApiEndpoint('/superadmin/admins/update-role'), data);
   },
 
   removeAdmin: (adminId: string) => {
