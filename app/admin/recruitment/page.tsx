@@ -6,6 +6,19 @@ import { recruitmentApi } from "@/services/api";
 import toast from "react-hot-toast";
 import PageHeader from "@/components/admin/PageHeader";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { 
+    Users, 
+    Edit, 
+    Trash2, 
+    Calendar, 
+    CheckCircle2, 
+    XCircle,
+    ArrowRight,
+    Clock,
+    Briefcase,
+    FileText as FileTextIcon,
+    ArrowUpRight
+} from "lucide-react";
 
 interface RecruitmentForm {
     _id: string;
@@ -13,12 +26,15 @@ interface RecruitmentForm {
     isActive: boolean;
     updatedAt?: string;
     createdAt: string;
-    [key: string]: unknown;
+    applicantCount?: number;
+    roles?: { roleName: string }[];
+    generalInstructions?: string;
 }
 
 export default function RecruitmentDashboard() {
     const router = useRouter();
     const [forms, setForms] = useState<RecruitmentForm[]>([]);
+    const [globalStats, setGlobalStats] = useState({ totalApplications: 0, activeForms: 0 });
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
@@ -27,11 +43,23 @@ export default function RecruitmentDashboard() {
     const fetchData = useCallback(async () => {
         setIsLoading(true);
         try {
-            const formsRes = await recruitmentApi.getAllForms();
-            setForms(formsRes.data.forms || []);
+            const [formsRes, statsRes] = await Promise.all([
+                recruitmentApi.getAllForms(),
+                recruitmentApi.getStats()
+            ]);
+            
+            const formsData = formsRes.data.forms || [];
+            setForms(formsData);
+
+            if (statsRes.data?.success) {
+                setGlobalStats({
+                    totalApplications: statsRes.data.stats.totalApplications || 0,
+                    activeForms: formsData.filter((f: RecruitmentForm) => f.isActive).length
+                });
+            }
         } catch (error) {
             console.error("Error fetching data:", error);
-            toast.error("Failed to load recruitment forms");
+            toast.error("Failed to load recruitment data");
         } finally {
             setIsLoading(false);
         }
@@ -101,9 +129,9 @@ export default function RecruitmentDashboard() {
     const inactiveForms = forms.filter((f) => !f.isActive).length;
 
     const stats = [
-        { key: "total", label: "Total", value: totalForms },
-        { key: "active", label: "Active", value: activeForms },
-        { key: "inactive", label: "Inactive", value: inactiveForms },
+        { key: "forms", label: "Forms", value: forms.length },
+        { key: "active", label: "Active Forms", value: forms.filter((f) => f.isActive).length },
+        { key: "registrations", label: "Total Registrations", value: globalStats.totalApplications },
     ];
 
     const filters = [
@@ -216,79 +244,116 @@ export default function RecruitmentDashboard() {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid gap-3 sm:gap-4">
+                    <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
                         {filteredForms.map((form) => (
                             <div
                                 key={form._id}
-                                onClick={() => router.push(`/admin/recruitment/${form._id}`)}
-                                className="group cursor-pointer rounded-lg bg-[#18181B] p-4 sm:p-6 shadow-sm transition-all hover:shadow-md border border-zinc-900 hover:border-zinc-700"
+                                onClick={() => router.push(`/admin/recruitment/${form._id}/participants`)}
+                                className="group relative flex flex-col justify-between cursor-pointer rounded-[24px] bg-[#121214] p-6 shadow-2xl transition-all hover:shadow-indigo-500/20 border border-zinc-800/80 hover:border-indigo-500/60"
                             >
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                                            <h3 className="text-base sm:text-lg font-semibold text-white group-hover:text-blue-400 truncate">
+                                {/* Activity Background Gradient */}
+                                <div className={`absolute -right-20 -top-20 h-48 w-48 rounded-full blur-[100px] transition-opacity duration-700 ${
+                                    form.isActive ? "bg-green-500/10 opacity-70 group-hover:opacity-100" : "bg-zinc-500/5 opacity-30"
+                                }`} />
+
+                                <div className="relative space-y-6">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`h-2.5 w-2.5 rounded-full ${form.isActive ? "bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-zinc-600"}`} />
+                                                <span className={`text-[10px] font-black uppercase tracking-[0.1em] ${form.isActive ? "text-green-400" : "text-zinc-500"}`}>
+                                                    {form.isActive ? "Recruitment Live" : "Draft Mode"}
+                                                </span>
+                                            </div>
+                                            <h3 className="mt-2 text-2xl font-black text-white leading-tight tracking-tight group-hover:text-indigo-400 transition-colors">
                                                 {form.title}
                                             </h3>
-                                            <span
-                                                className={`rounded-full px-2 sm:px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap ${form.isActive
-                                                    ? "bg-green-500/20 text-green-400"
-                                                    : "bg-zinc-700 text-zinc-300"
-                                                    }`}
-                                            >
-                                                {form.isActive ? "Active" : "Inactive"}
-                                            </span>
                                         </div>
-                                        <p className="mt-1 text-xs sm:text-sm text-zinc-400">
-                                            Created:{" "}
-                                            {new Date(form.createdAt).toLocaleDateString()}
-                                            {form.updatedAt && (
-                                                <span className="ml-2">
-                                                    • Updated:{" "}
-                                                    {new Date(form.updatedAt).toLocaleDateString()}
-                                                </span>
-                                            )}
-                                        </p>
+                                        <div className="flex -space-x-2">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white backdrop-blur-xl">
+                                                <ArrowUpRight size={18} className="text-indigo-500" />
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                                        {/* Toggle Switch */}
-                                        <button
-                                            onClick={() => handleToggleActive(form._id, form.isActive)}
-                                            className={`relative inline-flex h-5 w-9 sm:h-6 sm:w-11 items-center rounded-full transition ${form.isActive
-                                                ? "bg-green-600 hover:bg-green-700"
-                                                : "bg-zinc-600 hover:bg-zinc-500"
-                                                }`}
-                                            title="Toggle Status"
-                                        >
-                                            <span
-                                                className={`inline-block h-3.5 w-3.5 sm:h-4 sm:w-4 transform rounded-full bg-white shadow transition ${form.isActive ? "translate-x-5 sm:translate-x-6" : "translate-x-1"
-                                                    }`}
-                                            />
-                                        </button>
+                                    {/* Stats Grid */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="rounded-2xl bg-zinc-900/50 p-4 border border-zinc-800/50 group-hover:bg-zinc-800/50 transition-all flex flex-col items-center justify-center text-center">
+                                            <Users size={20} className="text-indigo-500 mb-2" />
+                                            <span className="text-xl font-black text-white">{form.applicantCount || 0}</span>
+                                            <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-500 mt-1">Total Registrations</span>
+                                        </div>
+                                        <div className="rounded-2xl bg-zinc-900/50 p-4 border border-zinc-800/50 group-hover:bg-zinc-800/50 transition-all flex flex-col items-center justify-center text-center">
+                                            <Briefcase size={20} className="text-purple-500 mb-2" />
+                                            <span className="text-xl font-black text-white">{Array.isArray(form.roles) ? form.roles.length : 0}</span>
+                                            <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-500 mt-1">Available Domains</span>
+                                        </div>
+                                    </div>
 
-                                        {/* Edit */}
-                                        <button
-                                            onClick={() => router.push(`/admin/recruitment/${form._id}`)}
-                                            className="rounded-md bg-blue-500/20 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-blue-400 hover:bg-blue-500/30"
-                                        >
-                                            Edit
-                                        </button>
+                                    <div className="flex flex-wrap gap-2">
+                                        <div className="flex items-center gap-1.5 rounded-lg bg-zinc-900/80 px-3 py-1.5 text-[11px] font-medium text-zinc-400 border border-zinc-800/50">
+                                            <Clock size={12} />
+                                            Created {new Date(form.createdAt).toLocaleDateString()}
+                                        </div>
+                                        {form.generalInstructions && (
+                                            <div className="flex items-center gap-1.5 rounded-lg bg-indigo-500/10 px-3 py-1.5 text-[11px] font-medium text-indigo-400 border border-indigo-500/20">
+                                                <FileTextIcon size={12} />
+                                                Doc Set
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
 
-                                        {/* Participants */}
-                                        <button
-                                            onClick={() => router.push(`/admin/recruitment/${form._id}/participants`)}
-                                            className="rounded-md bg-emerald-500/20 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-emerald-400 hover:bg-emerald-500/30"
-                                        >
-                                            Participants
-                                        </button>
+                                <div className="relative mt-8 flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex flex-col items-center gap-1.5">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    router.push(`/admin/recruitment/${form._id}`);
+                                                }}
+                                                className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition-all hover:scale-105 active:scale-95"
+                                                title="Edit Controls"
+                                            >
+                                                <Edit size={18} />
+                                            </button>
+                                            <span className="text-[9px] font-bold uppercase text-zinc-500 tracking-tighter">Edit</span>
+                                        </div>
 
-                                        {/* Delete */}
-                                        <button
-                                            onClick={() => handleDelete(form._id, form.title)}
-                                            className="rounded-md bg-red-500/20 px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium text-red-400 hover:bg-red-500/30"
-                                        >
-                                            Delete
-                                        </button>
+                                        <div className="flex flex-col items-center gap-1.5">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleToggleActive(form._id, form.isActive);
+                                                }}
+                                                className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-800 text-zinc-400 hover:bg-zinc-700 transition-all active:scale-95 border border-zinc-700/50"
+                                                title={form.isActive ? "Pause Form" : "Resume Form"}
+                                            >
+                                                <CheckCircle2 size={18} className={form.isActive ? "text-green-500" : ""} />
+                                            </button>
+                                            <span className="text-[9px] font-bold uppercase text-zinc-500 tracking-tighter">{form.isActive ? "Live" : "Pause"}</span>
+                                        </div>
+
+                                        <div className="flex flex-col items-center gap-1.5">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(form._id, form.title);
+                                                }}
+                                                className="flex h-11 w-11 items-center justify-center rounded-2xl bg-zinc-800 text-zinc-400 hover:bg-red-600 hover:text-white transition-all active:scale-95 border border-zinc-700/50"
+                                                title="Permanently Delete"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                            <span className="text-[9px] font-bold uppercase text-zinc-500 tracking-tighter">Delete</span>
+                                        </div>
+                                    </div>
+
+                                    <div 
+                                        className="hidden sm:flex items-center gap-2 text-xs font-black text-indigo-400 uppercase tracking-widest group-hover:gap-3 transition-all"
+                                    >
+                                        Open View
+                                        <ArrowRight size={16} />
                                     </div>
                                 </div>
                             </div>

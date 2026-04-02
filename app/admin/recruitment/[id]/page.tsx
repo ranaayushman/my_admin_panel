@@ -10,6 +10,16 @@ import { DEFAULT_ROLES_DATA } from "@/constants/recruitmentDefaults";
 import BasicDetails from "@/components/admin/recruitment/create/BasicDetails";
 import DefaultRolesSelector from "@/components/admin/recruitment/create/DefaultRolesSelector";
 import RolesList, { Role } from "@/components/admin/recruitment/create/RolesList";
+import { 
+    ChevronLeft, 
+    Settings, 
+    Users, 
+    Plus, 
+    Save, 
+    Layout,
+    ArrowLeft,
+    CheckCircle
+} from "lucide-react";
 
 export default function EditRecruitmentForm() {
     const router = useRouter();
@@ -195,22 +205,41 @@ export default function EditRecruitmentForm() {
 
     return (
         <div className="mx-auto max-w-4xl p-6">
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <h1 className="text-3xl font-bold text-gray-200">
-                    Edit Recruitment Form
-                    {formData.isActive && (
-                        <span className="ml-3 rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                            Active
-                        </span>
-                    )}
-                </h1>
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-zinc-800 pb-6">
+                <div className="space-y-1">
+                    <button 
+                        onClick={() => router.push("/admin/recruitment")}
+                        className="flex items-center gap-1.5 text-xs font-medium text-zinc-500 hover:text-indigo-400 transition-colors mb-2"
+                    >
+                        <ArrowLeft size={14} />
+                        Back to Recruitment
+                    </button>
+                    <div className="flex items-center gap-3">
+                        <div className="rounded-xl bg-indigo-500/10 p-2.5 text-indigo-400 border border-indigo-500/10">
+                            <Settings size={22} />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-100 flex items-center gap-2">
+                                Edit Form
+                                {formData.isActive && (
+                                    <span className="flex items-center gap-1 rounded-full bg-green-500/10 px-2.5 py-0.5 text-[10px] font-bold text-green-400 border border-green-500/20">
+                                        <CheckCircle size={10} />
+                                        LIVE
+                                    </span>
+                                )}
+                            </h1>
+                            <p className="text-sm text-zinc-500">{formData.title || "Untitled Recruitment"}</p>
+                        </div>
+                    </div>
+                </div>
 
                 {id && (
                     <Link
                         href={`/admin/recruitment/${id}/participants`}
-                        className="inline-flex items-center justify-center rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-800 px-5 py-2.5 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-700 border border-zinc-700 shadow-sm"
                     >
-                        View Registered Participants
+                        <Users size={18} />
+                        View Registrations
                     </Link>
                 )}
             </div>

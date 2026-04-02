@@ -4,10 +4,18 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { recruitmentApi } from "@/services/api";
-import { Loader2, Filter, X } from "lucide-react";
+import { Loader2, Filter, X, Download, ChevronDown, FileSpreadsheet, FileText, Users, Edit } from "lucide-react";
 import ParticipantDetailsModal from "@/components/admin/recruitment/ParticipantDetailsModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import toast from "react-hot-toast";
+import { 
+    DropdownMenu, 
+    DropdownMenuContent, 
+    DropdownMenuItem, 
+    DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import * as XLSX from 'xlsx';
 
 const BRANCHES = [
     "CSE", "CSE-DS", "CSE-CS", "CSE-AIML",
@@ -203,22 +211,126 @@ export default function RecruitmentParticipantsPage() {
         setPage(1);
     };
 
+    const handleExport = async (format: "csv" | "xlsx") => {
+        try {
+            setLoading(true);
+            const toastId = toast.loading(`Preparing ${format.toUpperCase()} export...`);
+            
+            // Fetch data with current filters but high limit to get all
+            const res = await recruitmentApi.getRecruitmentData({
+                formId: id,
+                limit: 5000, 
+                branch: branch || undefined,
+                position: position || undefined,
+                q: searchQuery || undefined,
+            });
+
+            if (res.data?.success && res.data?.data?.recruitmentData) {
+                const allData = res.data.data.recruitmentData;
+                
+                if (allData.length === 0) {
+                    toast.error("No data found to export", { id: toastId });
+                    return;
+                }
+
+                // Prepare data for XLSX
+                const rows = allData.map((app: any) => ({
+                    "Full Name": app.generalInfo?.fullName || "N/A",
+                    "Email": app.generalInfo?.email || "N/A",
+                    "Phone": app.generalInfo?.phoneNumber || "N/A",
+                    "Roll Number": app.generalInfo?.rollNumber || "N/A",
+                    "Branch": app.generalInfo?.branch || "N/A",
+                    "Year": app.generalInfo?.branchYear || "N/A",
+                    "Positions": (app.generalInfo?.positions || []).join(", "),
+                    "Status": app.status || "pending",
+                    "Applied Date": app.createdAt ? new Date(app.createdAt).toLocaleString() : "N/A",
+                    "LinkedIn": app.finalInfo?.linkedIn || "N/A",
+                    "Previous Clubs": app.finalInfo?.previousClubs || "N/A"
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(rows);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Participants");
+                
+                const filename = `recruitment-${title.replace(/[\s/]+/g, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}`;
+
+                if (format === "csv") {
+                    const csvContent = XLSX.utils.sheet_to_csv(worksheet);
+                    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.body.appendChild(document.createElement("a"));
+                    link.href = url;
+                    link.download = `${filename}.csv`;
+                    link.click();
+                    link.remove();
+                } else {
+                    XLSX.writeFile(workbook, `${filename}.xlsx`);
+                }
+                
+                toast.success(`Exported ${allData.length} records as ${format.toUpperCase()}`, { id: toastId });
+            } else {
+                toast.error("Failed to fetch data for export", { id: toastId });
+            }
+        } catch (error) {
+            console.error("Export failed:", error);
+            toast.error("An error occurred during export");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const filteredApplications = applications;
 
     return (
         <div className="space-y-6 p-6 max-w-7xl mx-auto">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b pb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-                    <p className="text-sm text-gray-500 mt-1">Form ID: {id}</p>
+                    <div className="flex items-center gap-2 text-xs font-semibold text-indigo-400 uppercase tracking-wider mb-1">
+                        <Users size={14} />
+                        Recruitment Data
+                    </div>
+                    <h1 className="text-3xl font-extrabold text-gray-100 tracking-tight">{title}</h1>
+                    <p className="text-xs text-zinc-500 mt-1 font-mono uppercase">ID: {id}</p>
                 </div>
 
-                <Link
-                    href={`/admin/recruitment/${id}`}
-                    className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo-700 transition"
-                >
-                    Back To Form
-                </Link>
+                <div className="flex items-center gap-3">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button
+                                disabled={loading}
+                                className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-900/20 hover:bg-emerald-500 transition-all gap-2 disabled:opacity-50 border border-emerald-400/20"
+                            >
+                                <Download size={18} />
+                                Export Data
+                                <ChevronDown size={14} className="opacity-60" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-[180px] bg-[#18181B] border-zinc-800">
+                            <DropdownMenuItem 
+                                onClick={() => handleExport("csv")}
+                                className="cursor-pointer gap-2 text-zinc-300 hover:bg-zinc-800"
+                            >
+                                <FileText size={16} />
+                                Export as CSV
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                                onClick={() => handleExport("xlsx")}
+                                className="cursor-pointer gap-2 text-zinc-300 hover:bg-zinc-800"
+                            >
+                                <FileSpreadsheet size={16} />
+                                Export as Excel
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <Link
+                        href={`/admin/recruitment/${id}`}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-zinc-800 px-5 py-2.5 text-sm font-semibold text-zinc-300 transition hover:bg-zinc-700 border border-zinc-700 shadow-sm"
+                    >
+                        <Edit size={16} />
+                        Edit Form
+                    </Link>
+                </div>
             </div>
 
             <div className="flex flex-wrap gap-2 pb-2">
