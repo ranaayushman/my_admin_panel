@@ -214,6 +214,47 @@ export type RecruitmentFormResponse = {
   form: RecruitmentForm;
 };
 
+export type RecruitmentStatus = "pending" | "shortlisted" | "rejected" | "accepted";
+
+export type DomainStatus = {
+  domain: string;
+  status: RecruitmentStatus;
+  updatedBy?: string;
+  updatedAt?: string;
+  remarks?: string;
+};
+
+export type RecruitmentApplication = {
+  _id: string;
+  user: string;
+  formId: string;
+  createdAt: string;
+  updatedAt: string;
+  status?: RecruitmentStatus | string;
+  domainStatuses?: DomainStatus[] | null;
+  generalInfo?: {
+    fullName?: string;
+    rollNumber?: string;
+    phoneNumber?: string;
+    email?: string;
+    branch?: string;
+    branchYear?: string | number;
+    positions?: string[];
+  };
+  finalInfo?: {
+    linkedIn?: string;
+    previousClubs?: string;
+  };
+  roleSpecific?: {
+    [key: string]: {
+      [key: string]: string;
+    };
+  };
+  whatsappGroupLinks?: {
+    [key: string]: string;
+  };
+};
+
 // ========== SUPER ADMIN TYPES ==========
 
 // Admin user type (for super admin management)
