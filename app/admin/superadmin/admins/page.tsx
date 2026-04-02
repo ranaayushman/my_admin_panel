@@ -232,7 +232,7 @@ export default function AdminManagementPage() {
         setSelectedAdmin(admin);
         setEditData({
             role: admin.role,
-            assignedDomains: (admin as any).assignedDomains || []
+            assignedDomains: admin.assignedDomains || []
         });
         setShowEditModal(true);
     };
@@ -576,9 +576,9 @@ export default function AdminManagementPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            {((admin as any).assignedDomains?.length > 0) ? (
+                                            {(admin.assignedDomains?.length ?? 0) > 0 ? (
                                                 <div className="flex flex-wrap gap-1">
-                                                    {(admin as any).assignedDomains.map((d: string) => (
+                                                    {admin.assignedDomains?.map((d: string) => (
                                                         <span key={d} className="px-2 py-0.5 bg-zinc-800 text-zinc-400 rounded text-[10px]">{d}</span>
                                                     ))}
                                                 </div>

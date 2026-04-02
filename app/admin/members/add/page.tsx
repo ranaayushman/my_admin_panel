@@ -212,7 +212,10 @@ export default function AddMemberPage() {
       console.error("Error adding member - Full Error Object:", err);
 
       if (err && typeof err === 'object' && 'response' in err) {
-        console.error("Server Response Data:", (err as any).response?.data);
+        console.error(
+          "Server Response Data:",
+          (err as { response?: { data?: unknown } }).response?.data
+        );
       }
 
       const errorMessage = err instanceof Error && 'response' in err

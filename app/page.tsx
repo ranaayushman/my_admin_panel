@@ -13,7 +13,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoading) {
-      if (isAuthenticated && user?.role === "admin") {
+      if (isAuthenticated && (user?.role === "super_admin" || user?.role === "domain_lead")) {
         router.push("/admin/members");
       } else if (isAuthenticated) {
         router.push("/unauthorized");

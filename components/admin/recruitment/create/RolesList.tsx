@@ -145,7 +145,7 @@ function RoleCard({
                                     Quick Tip
                                 </h5>
                                 <p className="text-[11px] text-zinc-500 leading-relaxed">
-                                    Adding clear descriptions helps applicants understand if they're a good fit for the role.
+                                    Adding clear descriptions helps applicants understand if they&apos;re a good fit for the role.
                                 </p>
                             </div>
                         </div>

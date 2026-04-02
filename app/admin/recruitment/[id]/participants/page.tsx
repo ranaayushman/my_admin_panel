@@ -234,7 +234,7 @@ export default function RecruitmentParticipantsPage() {
                 }
 
                 // Prepare data for XLSX
-                const rows = allData.map((app: any) => ({
+                const rows = allData.map((app: Application) => ({
                     "Full Name": app.generalInfo?.fullName || "N/A",
                     "Email": app.generalInfo?.email || "N/A",
                     "Phone": app.generalInfo?.phoneNumber || "N/A",

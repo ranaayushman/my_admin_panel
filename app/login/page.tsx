@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { LoginCredentials } from "@/types";
 import { authApi } from "@/services/api";
+import { AxiosError } from "axios";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -46,11 +47,12 @@ export default function LoginPage() {
       } else {
         toast.error("Invalid credentials");
       }
-    } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message ||
-        "Login failed. Please try again."
-      );
+    } catch (error: unknown) {
+      const message =
+        error instanceof AxiosError
+          ? (error.response?.data as { message?: string } | undefined)?.message
+          : undefined;
+      toast.error(message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
