@@ -65,9 +65,9 @@ export default function ParticipantDetailsModal({
     text: string;
   } | null>(null);
 
-  const selectedDomains = participant?.generalInfo?.positions || [];
+  const selectedDomains = useMemo(() => participant?.generalInfo?.positions || [], [participant]);
   const isDomainLead = user?.role === "domain_lead";
-  const assignedDomains = user?.assignedDomains || [];
+  const assignedDomains = useMemo(() => user?.assignedDomains || [], [user]);
 
   const permittedDomains = useMemo(() => {
     if (!isDomainLead) return selectedDomains;

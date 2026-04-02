@@ -25,6 +25,7 @@ const BRANCHES = [
 ];
 
 const RECRUITMENT_STATUSES: RecruitmentStatus[] = ["pending", "shortlisted", "accepted", "rejected"];
+// Changelog: Added domain-wise status filters/rendering while preserving overall status behavior.
 
 const bgColors = [
     "#E0F2FE",
