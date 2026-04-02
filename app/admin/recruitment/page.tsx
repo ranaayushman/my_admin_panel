@@ -122,7 +122,7 @@ export default function RecruitmentDashboard() {
         }
         return matchesSearch;
     });
-
+ 
     // Stats
     const totalForms = forms.length;
     const activeForms = forms.filter((f) => f.isActive).length;

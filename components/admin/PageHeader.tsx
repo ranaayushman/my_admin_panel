@@ -10,6 +10,7 @@ interface StatItem {
 
 interface PageHeaderProps {
     title: string;
+    subtitle?: string;
     stats?: StatItem[];
     addButtonLabel?: string;
     addButtonHref?: string;
@@ -25,6 +26,7 @@ interface PageHeaderProps {
 
 export default function PageHeader({
     title,
+    subtitle,
     stats = [],
     addButtonLabel,
     addButtonHref,
@@ -43,8 +45,11 @@ export default function PageHeader({
         <div className="mb-4 sm:mb-6 flex flex-col space-y-3 sm:space-y-4">
             {/* Row 1: Title, Stats, Refresh, Add Button */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <h1 className="text-xl sm:text-2xl font-semibold text-white">{title}</h1>
+                <div className="flex flex-col sm:flex-row sm:items-baseline gap-3">
+                    <div className="flex flex-col">
+                        <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{title}</h1>
+                        {subtitle && <p className="text-sm text-zinc-400 font-medium mt-0.5">{subtitle}</p>}
+                    </div>
 
                     {stats.length > 0 && (
                         <div className="flex items-center flex-wrap gap-2 text-xs sm:text-sm">
