@@ -11,11 +11,18 @@ export function hasRole(user: User | null, role: string): boolean {
   return user?.role === role;
 }
 
+/** Roles that may use the admin panel (recruitment RBAC + legacy admin) */
+const ADMIN_PANEL_ROLES = new Set([
+  'super_admin',
+  'super_domain_admin',
+  'domain_lead',
+]);
+
 /**
- * Check if user is admin or super_admin
+ * Check if user may access the admin panel (legacy admin/super_admin + recruitment roles)
  */
 export function isAdmin(user: User | null): boolean {
-  return user?.role === 'admin' || user?.role === 'super_admin';
+  return !!user?.role && ADMIN_PANEL_ROLES.has(user.role);
 }
 
 /**
@@ -40,7 +47,7 @@ export function canViewActivityLogs(user: User | null): boolean {
 }
 
 /**
- * Check if user can access admin panel (admin or super_admin)
+ * Check if user can access admin panel
  */
 export function canAccessAdminPanel(user: User | null): boolean {
   return isAdmin(user);
@@ -49,8 +56,10 @@ export function canAccessAdminPanel(user: User | null): boolean {
 /**
  * Get user access level
  */
-export function getUserAccessLevel(user: User | null): 'none' | 'admin' | 'super_admin' {
+export function getUserAccessLevel(
+  user: User | null
+): 'none' | 'staff' | 'super_admin' {
   if (isSuperAdmin(user)) return 'super_admin';
-  if (hasRole(user, 'admin')) return 'admin';
+  if (isAdmin(user)) return 'staff';
   return 'none';
 }

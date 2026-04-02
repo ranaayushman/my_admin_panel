@@ -4,7 +4,8 @@ export type User = {
   name: string;
   email: string;
   password?: string;
-  role: "admin" | "super_admin" | "user";
+  role: "super_admin" | "user" | "domain_lead" | "super_domain_admin";
+  assignedDomains?: string[];
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;
@@ -220,7 +221,8 @@ export type Admin = {
   _id: string;
   name: string;
   email: string;
-  role: "admin" | "super_admin";
+  role: "super_admin" | "domain_lead" | "super_domain_admin";
+  assignedDomains?: string[];
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;
