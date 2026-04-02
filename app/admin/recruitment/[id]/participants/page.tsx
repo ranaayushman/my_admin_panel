@@ -9,6 +9,7 @@ import ParticipantDetailsModal from "@/components/admin/recruitment/ParticipantD
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import toast from "react-hot-toast";
+import { DomainStatus, RecruitmentApplication, RecruitmentStatus } from "@/types";
 import { 
     DropdownMenu, 
     DropdownMenuContent, 
@@ -22,6 +23,9 @@ const BRANCHES = [
     "ECE", "EE", "CHE", "AEIE", "ME",
     "IT", "BT", "AE", "FT", "Other",
 ];
+
+const RECRUITMENT_STATUSES: RecruitmentStatus[] = ["pending", "shortlisted", "accepted", "rejected"];
+// Changelog: Added domain-wise status filters/rendering while preserving overall status behavior.
 
 const bgColors = [
     "#E0F2FE",
@@ -52,36 +56,6 @@ const StatsCard = ({ label, count }: { label: string; count: number }) => {
     );
 };
 
-type Application = {
-    _id: string;
-    user: string;
-    formId: string;
-    createdAt: string;
-    status?: string;
-    generalInfo?: {
-        fullName?: string;
-        rollNumber?: string;
-        phoneNumber?: string;
-        email?: string;
-        branch?: string;
-        branchYear?: string | number;
-        positions?: string[];
-    };
-    finalInfo?: {
-        linkedIn?: string;
-        previousClubs?: string;
-    };
-    roleSpecific?: {
-        [key: string]: {
-            [key: string]: string;
-        };
-    };
-    whatsappGroupLinks?: {
-        [key: string]: string;
-    };
-    updatedAt: string;
-};
-
 export default function RecruitmentParticipantsPage() {
     const params = useParams();
     const id = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -90,17 +64,41 @@ export default function RecruitmentParticipantsPage() {
     const [roleOptions, setRoleOptions] = useState<string[]>([]);
     const [stats, setStats] = useState<{ total: number } | null>(null);
     const [positionStats, setPositionStats] = useState<{ _id: string; count: number }[]>([]);
-    const [applications, setApplications] = useState<Application[]>([]);
+    const [applications, setApplications] = useState<RecruitmentApplication[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [branch, setBranch] = useState("");
     const [position, setPosition] = useState("");
+    const [overallStatus, setOverallStatus] = useState("");
+    const [domainStatusFilter, setDomainStatusFilter] = useState("");
     const [searchQuery, setSearchQuery] = useState("");
 
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(false);
 
-    const [selectedParticipant, setSelectedParticipant] = useState<Application | null>(null);
+    const [selectedParticipant, setSelectedParticipant] = useState<RecruitmentApplication | null>(null);
+
+    const normalizeDomainStatuses = useCallback((application: RecruitmentApplication): DomainStatus[] => {
+        const selectedDomains = application.generalInfo?.positions || [];
+        const existingStatuses = application.domainStatuses || [];
+        const statusMap = new Map(existingStatuses.map((entry) => [entry.domain, entry]));
+
+        return selectedDomains.map((domain) => {
+            const existing = statusMap.get(domain);
+            return {
+                domain,
+                status: existing?.status || "pending",
+                updatedAt: existing?.updatedAt,
+                updatedBy: existing?.updatedBy,
+                remarks: existing?.remarks,
+            };
+        });
+    }, []);
+
+    const getStatusVariant = (status?: string): "pending" | "shortlisted" | "accepted" | "rejected" => {
+        if (status === "shortlisted" || status === "accepted" || status === "rejected") return status;
+        return "pending";
+    };
 
     useEffect(() => {
         if (!id) return;
@@ -140,6 +138,8 @@ export default function RecruitmentParticipantsPage() {
                 limit: 20,
                 branch: branch || undefined,
                 position: position || undefined,
+                status: overallStatus || undefined,
+                domainStatus: (position && domainStatusFilter) ? domainStatusFilter : undefined,
                 q: searchQuery || undefined,
                 includeStats: "true",
             });
@@ -164,7 +164,7 @@ export default function RecruitmentParticipantsPage() {
         } finally {
             setLoading(false);
         }
-    }, [id, page, branch, position, searchQuery]);
+    }, [id, page, branch, position, overallStatus, domainStatusFilter, searchQuery]);
 
     useEffect(() => {
         setPage(1);
@@ -184,29 +184,59 @@ export default function RecruitmentParticipantsPage() {
 
     const handlePositionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setPosition(e.target.value);
+        if (!e.target.value) {
+            setDomainStatusFilter("");
+        }
         setPage(1);
     };
 
-    const handleStatusUpdate = (participantId: string, newStatus: string) => {
-        // Update the selected participant with new status
+    const handleOverallStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setOverallStatus(e.target.value);
+        setPage(1);
+    };
+
+    const handleDomainStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setDomainStatusFilter(e.target.value);
+        setPage(1);
+    };
+
+    const handleStatusUpdate = (
+        participantId: string,
+        update: { domain: string; status: RecruitmentStatus; remarks?: string; updatedAt?: string }
+    ) => {
+        const patchApplication = (app: RecruitmentApplication): RecruitmentApplication => {
+            if (app._id !== participantId) return app;
+
+            const existingStatuses = app.domainStatuses || [];
+            const otherStatuses = existingStatuses.filter((entry) => entry.domain !== update.domain);
+            const nextDomainStatuses: DomainStatus[] = [
+                ...otherStatuses,
+                {
+                    domain: update.domain,
+                    status: update.status,
+                    remarks: update.remarks,
+                    updatedAt: update.updatedAt || new Date().toISOString(),
+                },
+            ];
+
+            return {
+                ...app,
+                domainStatuses: nextDomainStatuses,
+            };
+        };
+
         if (selectedParticipant && selectedParticipant._id === participantId) {
-            setSelectedParticipant({
-                ...selectedParticipant,
-                status: newStatus,
-            });
+            setSelectedParticipant((prev) => (prev ? patchApplication(prev) : prev));
         }
 
-        // Update the participant in the applications list
-        setApplications((prevApps) =>
-            prevApps.map((app) =>
-                app._id === participantId ? { ...app, status: newStatus } : app
-            )
-        );
+        setApplications((prevApps) => prevApps.map((app) => patchApplication(app)));
     };
 
     const clearFilters = () => {
         setBranch("");
         setPosition("");
+        setOverallStatus("");
+        setDomainStatusFilter("");
         setSearchQuery("");
         setPage(1);
     };
@@ -222,6 +252,8 @@ export default function RecruitmentParticipantsPage() {
                 limit: 5000, 
                 branch: branch || undefined,
                 position: position || undefined,
+                status: overallStatus || undefined,
+                domainStatus: (position && domainStatusFilter) ? domainStatusFilter : undefined,
                 q: searchQuery || undefined,
             });
 
@@ -234,7 +266,7 @@ export default function RecruitmentParticipantsPage() {
                 }
 
                 // Prepare data for XLSX
-                const rows = allData.map((app: any) => ({
+                const rows = allData.map((app: RecruitmentApplication) => ({
                     "Full Name": app.generalInfo?.fullName || "N/A",
                     "Email": app.generalInfo?.email || "N/A",
                     "Phone": app.generalInfo?.phoneNumber || "N/A",
@@ -279,7 +311,25 @@ export default function RecruitmentParticipantsPage() {
         }
     };
 
-    const filteredApplications = applications;
+    const filteredApplications = applications.filter((application) => {
+        if (overallStatus && (application.status || "pending") !== overallStatus) {
+            return false;
+        }
+
+        if (position && !(application.generalInfo?.positions || []).includes(position)) {
+            return false;
+        }
+
+        if (position && domainStatusFilter) {
+            const normalized = normalizeDomainStatuses(application);
+            const selectedDomainStatus = normalized.find((entry) => entry.domain === position)?.status || "pending";
+            if (selectedDomainStatus !== domainStatusFilter) {
+                return false;
+            }
+        }
+
+        return true;
+    });
 
     return (
         <div className="space-y-6 p-6 max-w-7xl mx-auto">
@@ -385,7 +435,34 @@ export default function RecruitmentParticipantsPage() {
                             </select>
                         </div>
 
-                        {(branch || position || searchQuery) && (
+                        <div className="relative">
+                            <select
+                                value={overallStatus}
+                                onChange={handleOverallStatusChange}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 min-w-[160px]"
+                            >
+                                <option value="">Overall Status</option>
+                                {RECRUITMENT_STATUSES.map((statusOption) => (
+                                    <option key={statusOption} value={statusOption}>{statusOption}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="relative">
+                            <select
+                                value={domainStatusFilter}
+                                onChange={handleDomainStatusFilterChange}
+                                disabled={!position}
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5 min-w-[170px] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <option value="">Domain Status</option>
+                                {RECRUITMENT_STATUSES.map((statusOption) => (
+                                    <option key={statusOption} value={statusOption}>{statusOption}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {(branch || position || overallStatus || domainStatusFilter || searchQuery) && (
                             <button
                                 onClick={clearFilters}
                                 className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition"
@@ -424,7 +501,7 @@ export default function RecruitmentParticipantsPage() {
                                                 </p>
                                             </div>
                                             <Badge
-                                                variant={application.status as "accepted" | "rejected" | "pending" | "shortlisted"}
+                                                variant={getStatusVariant(application.status)}
                                                 className="capitalize text-xs"
                                             >
                                                 {application.status || "pending"}
@@ -475,6 +552,28 @@ export default function RecruitmentParticipantsPage() {
                                                 </div>
                                             </div>
                                         )}
+
+                                        <div className="mb-3 border-t border-gray-100 pt-3">
+                                            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+                                                Domain Statuses
+                                            </p>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {normalizeDomainStatuses(application).length > 0 ? (
+                                                    normalizeDomainStatuses(application).map((entry) => (
+                                                        <Badge
+                                                            key={`${application._id}-${entry.domain}`}
+                                                            variant={getStatusVariant(entry.status)}
+                                                            className="text-[10px]"
+                                                            title={entry.updatedAt ? `Last updated: ${new Date(entry.updatedAt).toLocaleString()}` : "No updates yet"}
+                                                        >
+                                                            {entry.domain}: {entry.status}
+                                                        </Badge>
+                                                    ))
+                                                ) : (
+                                                    <Badge variant="pending" className="text-[10px]">No domain selected</Badge>
+                                                )}
+                                            </div>
+                                        </div>
 
                                         {/* Applied Date */}
                                         <div className="pt-2 border-t border-gray-100">

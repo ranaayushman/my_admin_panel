@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { getApiEndpoint } from '@/utils/api';
 import Cookies from 'js-cookie';
-import { AuthResponse, LoginCredentials, EventParticipantsResponse } from '@/types';
+import { AuthResponse, LoginCredentials, EventParticipantsResponse, RecruitmentStatus } from '@/types';
 
 // -------------------------------------------------------------------
 // Axios instance
@@ -166,6 +166,12 @@ export const eventsApi = {
 // -------------------------------------------------------------------
 const recruitmentBase = '/recruitment';
 
+type UpdateDomainStatusPayload = {
+  domain: string;
+  status: RecruitmentStatus;
+  remarks?: string;
+};
+
 export const recruitmentApi = {
   createForm: (data: any) => {
     return apiClient.post(getApiEndpoint(`${recruitmentBase}/forms`), data);
@@ -211,10 +217,14 @@ export const recruitmentApi = {
     );
   },
 
-  updateApplicationStatus: (id: string, status: string) => {
+  updateApplicationStatus: (id: string, payload: UpdateDomainStatusPayload) => {
     return apiClient.put(
       getApiEndpoint(`${recruitmentBase}/applications/${id}`),
-      { status }
+      {
+        domain: payload.domain,
+        status: payload.status,
+        remarks: payload.remarks,
+      }
     );
   },
 

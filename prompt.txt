@@ -1,0 +1,122 @@
+You are a senior frontend engineer. Update my existing Admin Panel to support domain-wise candidate evaluation for recruitment applications, while keeping backward compatibility with the existing overall status field.
+
+Context:
+- Backend now supports per-domain statuses in addition to overall status.
+- PUT /api/v1/recruitment/applications/:id now requires domain-specific payload.
+- Candidate can apply to multiple domains, and each domain can have different evaluation outcomes.
+
+Goals:
+1. Show and manage domain-wise status for each candidate.
+2. Keep overall status visible for summary views.
+3. Prevent domain leads from updating statuses outside their domain workflow.
+4. Avoid breaking existing admin panel functionality.
+
+Backend contract to use:
+1) Update candidate domain status
+- Method: PUT
+- URL: /api/v1/recruitment/applications/:id
+- Body:
+  {
+    "domain": "Web Development",
+    "status": "shortlisted",
+    "remarks": "Strong in frontend round"
+  }
+- status allowed values: pending, shortlisted, rejected, accepted
+
+2) Recruitment application object (important fields)
+- status: overall status (string)
+- domainStatuses: array of objects
+  - domain: string
+  - status: pending | shortlisted | rejected | accepted
+  - updatedBy?: user id
+  - updatedAt?: date
+  - remarks?: string
+- generalInfo.positions: selected domains/roles by candidate
+
+Required Admin Panel changes:
+A. Candidate list page
+1. Keep existing overall status column.
+2. Add new column/chip group: Domain Statuses.
+3. Render each selected domain with its own status badge.
+4. Add filters:
+   - overall status filter (existing behavior)
+   - domain filter (position/domain)
+   - domain-specific status filter (if both domain and status selected, query accordingly)
+
+B. Candidate details drawer/modal/page
+1. Show candidate selected domains from generalInfo.positions.
+2. Show current domainStatuses mapped by domain.
+3. If a domain has no explicit domainStatuses entry, treat as pending in UI.
+4. Provide per-domain action controls:
+   - select domain
+   - select status
+   - optional remarks input
+   - update button
+5. On update, call PUT endpoint with { domain, status, remarks }.
+6. After success, refetch candidate data or optimistically update local state.
+
+C. Role-based behavior (frontend)
+1. For domain_lead users:
+   - Require domain selection before enabling update action.
+   - Optionally preselect domain from current context if your app already tracks assigned domain.
+2. For super_domain_admin and super_admin:
+   - Allow updating any domain.
+3. If API responds with domain authorization errors, show clear toast message.
+
+D. API service layer updates
+1. Update existing updateApplicationStatus function signature.
+- Old: updateApplicationStatus(id, status)
+- New: updateApplicationStatus(id, { domain, status, remarks })
+2. Ensure request body always includes domain for this endpoint.
+3. Add TypeScript interfaces:
+   - DomainStatus
+   - RecruitmentStatus
+   - RecruitmentApplication with domainStatuses
+
+E. UI/UX requirements
+1. Status badges color convention:
+   - pending: gray/neutral
+   - shortlisted: blue
+   - accepted: green
+   - rejected: red
+2. Show per-domain last updated timestamp tooltip if available.
+3. Show remarks in details view (if present).
+4. Keep current loading/error/empty states consistent with existing panel design.
+
+F. Migration-safe behavior
+1. Handle old records where domainStatuses might be missing:
+   - derive temporary UI state from generalInfo.positions as pending
+2. Do not crash if domainStatuses is undefined/null.
+3. Keep using overall status where old components still depend on it.
+
+G. Validation and edge cases
+1. Disable update button when:
+   - no domain selected
+   - no status selected
+2. If selected domain is not in candidate generalInfo.positions, block submit on UI.
+3. Debounce repeated update clicks and prevent duplicate requests.
+4. Preserve pagination, sorting, and search behavior.
+
+H. Testing checklist (must pass)
+1. Candidate with single domain can be updated successfully.
+2. Candidate with multiple domains can have different statuses per domain.
+3. Updating one domain does not overwrite another domain status.
+4. Overall status still displays in list page.
+5. Existing list and search screens still work without runtime errors.
+6. Domain lead flow works with domain requirement.
+7. Super domain admin can update any domain.
+8. No TypeScript errors after changes.
+
+Deliverables:
+1. Updated API service methods.
+2. Updated candidate list UI with domain status display.
+3. Updated candidate detail UI with per-domain status update controls.
+4. Updated types/interfaces.
+5. Any necessary state management updates (Redux/Context/hooks/etc).
+6. A concise changelog in code comments or PR description (no markdown file needed).
+
+Implementation style:
+- Keep current project architecture and naming conventions.
+- Avoid large refactors unrelated to this feature.
+- Reuse existing components where possible.
+- Keep code clean, typed, and production-ready.
